@@ -27,8 +27,11 @@ app.config['MAIL_USE_TLS'] = True
 db = SQLAlchemy(app)
 
 # Initialize database on startup
-with app.app_context():
-    db.create_all()
+try:
+    with app.app_context():
+        db.create_all()
+except Exception as e:
+    print(f"Database initialization will happen on first request: {e}")
 
 # Models
 class User(db.Model): 
