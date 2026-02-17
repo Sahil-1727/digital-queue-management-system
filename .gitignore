@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+venv/
+env/
+ENV/
+*.egg-info/
+
+# Flask
+instance/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.template
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Documentation (exclude all except README.md)
+*.md
+!README.md
+
+# Deployment Scripts
+deploy_*.sh
+verify_config.py
+
+# Build files
+build/
+dist/
+*.egg

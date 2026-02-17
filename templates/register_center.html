@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Service Center - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        body { background: #0F172A; position: relative; overflow-x: hidden; }
+        .bg-pattern { position: fixed; inset: 0; z-index: 0; }
+        .bg-pattern::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(45, 212, 191, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(45, 212, 191, 0.1) 0%, transparent 50%); }
+        .bg-pattern::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(45, 212, 191, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent); }
+        .content-wrapper { position: relative; z-index: 1; }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-bottom: 2px solid #2DD4BF;">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: white;">
+                <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm">← Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card slide-up" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(45, 212, 191, 0.2); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-5">
+                            <div class="auth-icon mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); box-shadow: 0 8px 30px rgba(45, 212, 191, 0.4);">🏢</div>
+                            <h2 class="gradient-text mb-2">Register Your Service Center</h2>
+                            <p class="text-muted">Join QueueFlow and modernize your queue management</p>
+                        </div>
+
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" id="registerForm">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Service Center Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="center_name" placeholder="e.g., Apollo Clinic" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Type of Organization <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="organization_type" required>
+                                        <option value="">Select type...</option>
+                                        <option value="Clinic">Clinic / Diagnostic Center</option>
+                                        <option value="Mobile Service">Mobile / Electronics Service Center</option>
+                                        <option value="Bank">Bank / Financial Office</option>
+                                        <option value="Government">Government Service Office</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Years in Business <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="years_in_business" placeholder="e.g., 5" min="0" max="100" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Owner / Manager Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="owner_name" placeholder="Full name" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" name="email" placeholder="your@email.com" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" name="phone" placeholder="10-digit mobile" pattern="[0-9]{10}" maxlength="10" required>
+                                    <small class="text-muted">Use this to login later</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Alternate Phone</label>
+                                    <input type="tel" class="form-control" name="alternate_phone" placeholder="10-digit mobile" pattern="[0-9]{10}" maxlength="10">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                    <div class="position-relative">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Create password" minlength="6" required>
+                                        <span class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePassword('password', this)">
+                                            <svg width="20" height="20" fill="currentColor" class="eye-icon">
+                                                <use href="#eye-off"/>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Min 6 characters</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">GST Number</label>
+                                    <input type="text" class="form-control" name="gst_number" placeholder="e.g., 27XXXXX1234X1ZX" maxlength="15">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Complete Address <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="address" rows="2" placeholder="Street address, area, landmark" required></textarea>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="city" placeholder="e.g., Nagpur" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="state" placeholder="e.g., Maharashtra" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Pincode <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="pincode" placeholder="6-digit" pattern="[0-9]{6}" maxlength="6" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Business Hours</label>
+                                    <input type="text" class="form-control" name="business_hours" placeholder="e.g., Mon-Sat 9AM-6PM">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Website</label>
+                                    <input type="url" class="form-control" name="website" placeholder="https://yourwebsite.com">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Number of Counters</label>
+                                    <input type="number" class="form-control" name="counters" placeholder="e.g., 2" min="1" max="20">
+                                    <small class="text-muted">How many service counters?</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Expected Daily Customers</label>
+                                    <input type="number" class="form-control" name="daily_customers" placeholder="e.g., 50">
+                                    <small class="text-muted">Approximate number per day</small>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Additional Information</label>
+                                    <textarea class="form-control" name="additional_info" rows="3" placeholder="Any specific requirements or questions..."></textarea>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                        <label class="form-check-label" for="terms">
+                                            I agree to the platform terms and conditions <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 mt-4">
+                                    <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none; box-shadow: 0 4px 20px rgba(45, 212, 191, 0.3);">
+                                        Proceed to Payment →
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="alert alert-info mt-4" style="border-radius: 12px; border: none;">
+                            <h6 class="fw-bold mb-2">📋 What Happens Next?</h6>
+                            <ul class="mb-0 text-sm">
+                                <li>Login anytime with your phone & password to track status</li>
+                                <li>Our team will review your application within 24-48 hours</li>
+                                <li>You'll receive approval notification via email</li>
+                                <li>Start managing queues immediately after approval</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <svg style="display: none;">
+        <symbol id="eye-off" viewBox="0 0 24 24">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+        </symbol>
+        <symbol id="eye" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </symbol>
+    </svg>
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            const use = icon.querySelector('use');
+            if (input.type === 'password') {
+                input.type = 'text';
+                use.setAttribute('href', '#eye');
+            } else {
+                input.type = 'password';
+                use.setAttribute('href', '#eye-off');
+            }
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,1154 @@
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+import os
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Email configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USE_TLS'] = True
+
+db = SQLAlchemy(app)
+
+# Models
+class User(db.Model): 
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    mobile = db.Column(db.String(10), unique=True, nullable=False)
+    email = db.Column(db.String(100), nullable=True)
+    password = db.Column(db.String(200), nullable=False)
+    no_show_count = db.Column(db.Integer, default=0)
+    reset_token = db.Column(db.String(100), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    tokens = db.relationship('Token', backref='user', lazy=True)
+
+class ServiceCenter(db.Model):
+    __tablename__ = 'service_centers'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    avg_service_time = db.Column(db.Integer, default=15)  # minutes per token
+    tokens = db.relationship('Token', backref='service_center', lazy=True)
+    admins = db.relationship('Admin', backref='service_center', lazy=True)
+
+class Admin(db.Model):
+    __tablename__ = 'admins'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), nullable=True)
+    password = db.Column(db.String(200), nullable=False)
+    reset_token = db.Column(db.String(100), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    service_center_id = db.Column(db.Integer, db.ForeignKey('service_centers.id'), nullable=False)
+
+class Token(db.Model):
+    __tablename__ = 'tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    service_center_id = db.Column(db.Integer, db.ForeignKey('service_centers.id'), nullable=False)
+    token_number = db.Column(db.String(10), nullable=False)
+    status = db.Column(db.String(20), default='PendingPayment')  # PendingPayment, Active, Serving, Completed, Expired
+    created_time = db.Column(db.DateTime, default=datetime.now)
+    no_show_reason = db.Column(db.String(500), nullable=True)
+    no_show_time = db.Column(db.DateTime, nullable=True)
+    is_walkin = db.Column(db.Boolean, default=False)
+
+class SuperAdmin(db.Model):
+    __tablename__ = 'super_admins'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(100), nullable=True)
+
+class ServiceCenterRegistration(db.Model):
+    __tablename__ = 'service_center_registrations'
+    id = db.Column(db.Integer, primary_key=True)
+    center_name = db.Column(db.String(100), nullable=False)
+    organization_type = db.Column(db.String(50), nullable=False)
+    owner_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(10), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    alternate_phone = db.Column(db.String(10), nullable=True)
+    city = db.Column(db.String(50), nullable=False)
+    state = db.Column(db.String(50), nullable=False)
+    pincode = db.Column(db.String(6), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    business_hours = db.Column(db.String(100), nullable=True)
+    counters = db.Column(db.Integer, nullable=True)
+    daily_customers = db.Column(db.Integer, nullable=True)
+    years_in_business = db.Column(db.Integer, nullable=True)
+    gst_number = db.Column(db.String(15), nullable=True)
+    website = db.Column(db.String(100), nullable=True)
+    additional_info = db.Column(db.String(500), nullable=True)
+    registration_fee = db.Column(db.Integer, default=500)
+    payment_status = db.Column(db.String(20), default='Pending')
+    payment_id = db.Column(db.String(50), nullable=True)
+    admin_username = db.Column(db.String(50), nullable=True)
+    admin_password = db.Column(db.String(50), nullable=True)
+    status = db.Column(db.String(20), default='Pending')  # Pending, Approved, Rejected
+    submitted_time = db.Column(db.DateTime, default=datetime.now)
+    reviewed_time = db.Column(db.DateTime, nullable=True)
+
+# Initialize database and sample data
+def init_db():
+    with app.app_context():
+        db.create_all()
+        
+        # Add service centers from approved registrations
+        approved_registrations = ServiceCenterRegistration.query.filter_by(status='Approved').all()
+        for reg in approved_registrations:
+            # Check if service center already exists
+            existing = ServiceCenter.query.filter_by(name=reg.center_name, location=f"{reg.city}, {reg.state}").first()
+            if not existing:
+                new_center = ServiceCenter(
+                    name=reg.center_name,
+                    category=reg.organization_type,
+                    location=f"{reg.city}, {reg.state}",
+                    avg_service_time=15
+                )
+                db.session.add(new_center)
+                db.session.commit()
+                
+                # Create admin for this center if credentials exist
+                if reg.admin_username and reg.admin_password:
+                    admin_exists = Admin.query.filter_by(username=reg.admin_username).first()
+                    if not admin_exists:
+                        new_admin = Admin(
+                            username=reg.admin_username,
+                            email=reg.email,
+                            password=reg.admin_password,  # Already hashed during approval
+                            service_center_id=new_center.id
+                        )
+                        db.session.add(new_admin)
+                        db.session.commit()
+        
+        # Add default service centers only if none exist
+        if ServiceCenter.query.count() == 0:
+            centers = [
+                # Medical Clinics
+                ServiceCenter(name='APOLLO CLINIC', category='Multi-speciality Clinic', location='Civil Lines, Nagpur', avg_service_time=20),
+                ServiceCenter(name='The Nagpur Clinic', category='Medical Clinic', location='Dharampeth, Nagpur', avg_service_time=18),
+                ServiceCenter(name='Nagpur Clinic', category='Local Clinic', location='Sitabuldi, Nagpur', avg_service_time=15),
+                ServiceCenter(name='MOTHER INDIA FETAL MEDICINE CENTRE', category='Pregnancy Care', location='Ramdaspeth, Nagpur', avg_service_time=25),
+                ServiceCenter(name='Ashvatam Clinic', category='Medical Clinic', location='Sadar, Nagpur', avg_service_time=18),
+                ServiceCenter(name='Apna Clinic', category='Neighborhood Clinic', location='Gandhibagh, Nagpur', avg_service_time=15),
+                ServiceCenter(name='Dr.Agrawal Multispeciality Clinic', category='Multispeciality Clinic', location='Wardha Road, Nagpur', avg_service_time=22),
+                ServiceCenter(name='Shree Clinic', category='General Clinic', location='Manish Nagar, Nagpur', avg_service_time=15),
+                ServiceCenter(name='Sai Clinic', category='Medical Clinic', location='Pratap Nagar, Nagpur', avg_service_time=18),
+                ServiceCenter(name='Suyash Clinic', category='Neighborhood Clinic', location='Laxmi Nagar, Nagpur', avg_service_time=15),
+                ServiceCenter(name='INC CLINIC NAGPUR', category='Naturopathic Practitioner', location='Dhantoli, Nagpur', avg_service_time=20),
+                # Mobile Service Centers
+                ServiceCenter(name='Apple Service - NGRT Systems', category='Apple Authorized', location='Civil Lines, Nagpur', avg_service_time=30),
+                ServiceCenter(name='Samsung Service - The Mobile Magic', category='Samsung Authorized', location='Sitabuldi, Nagpur', avg_service_time=25),
+                ServiceCenter(name='Samsung Service - Spectrum Marketing', category='Samsung Authorized', location='Dharampeth, Nagpur', avg_service_time=25),
+                ServiceCenter(name='Samsung Service - Karuna Management', category='Samsung Authorized', location='Rambagh Layout, Nagpur', avg_service_time=25),
+                ServiceCenter(name='Samsung CE - Akshay Refrigeration', category='Samsung Authorized', location='Somalwada, Nagpur', avg_service_time=28),
+                ServiceCenter(name='vivo India Service Center', category='vivo Authorized', location='Sadar, Nagpur', avg_service_time=22),
+                ServiceCenter(name='vivo & iQOO Service Center', category='vivo/iQOO Authorized', location='Medical Chowk, Nagpur', avg_service_time=22),
+                ServiceCenter(name='OPPO Service Center', category='OPPO Authorized', location='Sitabuldi, Nagpur', avg_service_time=22),
+            ]
+            db.session.add_all(centers)
+            db.session.commit()
+        
+        # Add admins
+        if Admin.query.count() == 0:
+            admins = [
+                Admin(username='apollo@admin.com', password=generate_password_hash('admin123'), service_center_id=1),
+                Admin(username='nagpurclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=2),
+                Admin(username='localclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=3),
+                Admin(username='motherindia@admin.com', password=generate_password_hash('admin123'), service_center_id=4),
+                Admin(username='ashvatam@admin.com', password=generate_password_hash('admin123'), service_center_id=5),
+                Admin(username='apna@admin.com', password=generate_password_hash('admin123'), service_center_id=6),
+                Admin(username='agrawal@admin.com', password=generate_password_hash('admin123'), service_center_id=7),
+                Admin(username='shree@admin.com', password=generate_password_hash('admin123'), service_center_id=8),
+                Admin(username='sai@admin.com', password=generate_password_hash('admin123'), service_center_id=9),
+                Admin(username='suyash@admin.com', password=generate_password_hash('admin123'), service_center_id=10),
+                Admin(username='inc@admin.com', password=generate_password_hash('admin123'), service_center_id=11),
+                Admin(username='apple@admin.com', password=generate_password_hash('admin123'), service_center_id=12),
+                Admin(username='samsung1@admin.com', password=generate_password_hash('admin123'), service_center_id=13),
+                Admin(username='samsung2@admin.com', password=generate_password_hash('admin123'), service_center_id=14),
+                Admin(username='samsung3@admin.com', password=generate_password_hash('admin123'), service_center_id=15),
+                Admin(username='samsung4@admin.com', password=generate_password_hash('admin123'), service_center_id=16),
+                Admin(username='vivo@admin.com', password=generate_password_hash('admin123'), service_center_id=17),
+                Admin(username='vivoiqoo@admin.com', password=generate_password_hash('admin123'), service_center_id=18),
+                Admin(username='oppo@admin.com', password=generate_password_hash('admin123'), service_center_id=19),
+            ]
+            db.session.add_all(admins)
+            db.session.commit()
+        
+        # Add demo users
+        if User.query.count() == 0:
+            demo_users = [
+                User(name='Rahul Sharma', mobile='9876543210', password=generate_password_hash('demo123')),
+                User(name='Priya Patel', mobile='9876543211', password=generate_password_hash('demo123')),
+                User(name='Amit Kumar', mobile='9876543212', password=generate_password_hash('demo123')),
+                User(name='Sneha Deshmukh', mobile='9876543213', password=generate_password_hash('demo123')),
+                User(name='Vikram Singh', mobile='9876543214', password=generate_password_hash('demo123')),
+            ]
+            db.session.add_all(demo_users)
+            db.session.commit()
+        
+        # Add super admin
+        if SuperAdmin.query.count() == 0:
+            super_admin = SuperAdmin(
+                username='superadmin@queueflow.com',
+                password=generate_password_hash('superadmin123'),
+                email='superadmin@queueflow.com'
+            )
+            db.session.add(super_admin)
+            db.session.commit()
+
+# Helper functions
+def get_active_token_for_user(user_id):
+    return Token.query.filter_by(user_id=user_id).filter(
+        Token.status.in_(['PendingPayment', 'Active', 'Serving'])
+    ).first()
+
+def get_queue_count(center_id):
+    return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=False).count()
+
+def get_serving_token(center_id):
+    return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=False).first()
+
+def get_walkin_queue_count(center_id):
+    return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=True).count()
+
+def get_walkin_serving_token(center_id):
+    return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=True).first()
+
+def generate_token_number(center_id):
+    today = datetime.now().date()
+    count = Token.query.filter(
+        Token.service_center_id == center_id,
+        db.func.date(Token.created_time) == today
+    ).count()
+    return f"T{count + 1:03d}"
+
+def calculate_wait_time(center_id, token_position):
+    center = ServiceCenter.query.get(center_id)
+    return token_position * center.avg_service_time
+
+def expire_old_tokens():
+    expiry_time = datetime.now() - timedelta(hours=2)
+    expired_tokens = Token.query.filter(
+        Token.status == 'PendingPayment',
+        Token.created_time < expiry_time
+    ).all()
+    for token in expired_tokens:
+        token.status = 'Expired'
+    db.session.commit()
+
+def send_reset_email(email, reset_link, user_type="User"):
+    """Send password reset email"""
+    if app.config['MAIL_USERNAME'] == 'your-email@gmail.com' or app.config['MAIL_PASSWORD'] == 'your-app-password':
+        print("⚠️  Email not configured. Please update MAIL_USERNAME and MAIL_PASSWORD in app.py")
+        return False
+    
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = 'QueueFlow - Password Reset Request'
+        msg['From'] = app.config['MAIL_USERNAME']
+        msg['To'] = email
+        
+        html = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #4B6CB7;">Password Reset Request</h2>
+              <p>Hello,</p>
+              <p>You requested to reset your password for your QueueFlow {user_type} account.</p>
+              <p>Click the button below to reset your password:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_link}" style="background-color: #4B6CB7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+              </div>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #666;">{reset_link}</p>
+              <p><strong>This link will expire in 1 hour.</strong></p>
+              <p>If you didn't request this, please ignore this email.</p>
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+              <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
+            </div>
+          </body>
+        </html>
+        """
+        
+        part = MIMEText(html, 'html')
+        msg.attach(part)
+        
+        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
+            server.starttls()
+            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            server.send_message(msg)
+        
+        print(f"✅ Email sent successfully to {email}")
+        return True
+    except smtplib.SMTPAuthenticationError:
+        print("❌ SMTP Authentication Error: Check your email and app password")
+        return False
+    except Exception as e:
+        print(f"❌ Email error: {e}")
+        return False
+
+def send_timing_alert(email, user_name, token_number, center_name, leave_time, reach_time):
+    """Send timing alert email when token is confirmed"""
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'QueueFlow - Token {token_number} Timing Alert'
+        msg['From'] = app.config['MAIL_USERNAME']
+        msg['To'] = email
+        
+        html = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #10B981;">✅ Token Confirmed!</h2>
+              <p>Hello {user_name},</p>
+              <p>Your token has been confirmed at <strong>{center_name}</strong>.</p>
+              
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #4B6CB7; margin-top: 0;">Token Details</h3>
+                <p style="font-size: 24px; font-weight: bold; color: #333; margin: 10px 0;">Token: {token_number}</p>
+                <p style="margin: 5px 0;"><strong>Service Center:</strong> {center_name}</p>
+              </div>
+              
+              <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                <h3 style="color: #856404; margin-top: 0;">⏰ Important Timings</h3>
+                <p style="margin: 8px 0;"><strong>🏠 Leave Home By:</strong> {leave_time.strftime('%I:%M %p')}</p>
+                <p style="margin: 8px 0;"><strong>🏥 Reach Counter By:</strong> {reach_time.strftime('%I:%M %p')}</p>
+              </div>
+              
+              <p style="color: #666; font-size: 14px;">💡 <em>Tip: Leave 10 minutes before your estimated time to avoid delays.</em></p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="http://127.0.0.1:9000/track" style="background-color: #4B6CB7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Track Your Token</a>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+              <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
+            </div>
+          </body>
+        </html>
+        """
+        
+        part = MIMEText(html, 'html')
+        msg.attach(part)
+        
+        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
+            server.starttls()
+            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            server.send_message(msg)
+        
+        print(f"✅ Timing alert sent to {email}")
+        return True
+    except Exception as e:
+        print(f"❌ Email error: {e}")
+        return False
+
+# Routes - User Module
+@app.route('/')
+def index():
+    return render_template('home.html')
+
+@app.route('/register-center', methods=['GET', 'POST'])
+def register_center():
+    if request.method == 'POST':
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        
+        if ServiceCenterRegistration.query.filter_by(phone=phone).first():
+            flash('Phone number already registered!', 'danger')
+            return redirect(url_for('register_center'))
+        
+        registration = ServiceCenterRegistration(
+            center_name=request.form.get('center_name'),
+            organization_type=request.form.get('organization_type'),
+            owner_name=request.form.get('owner_name'),
+            email=request.form.get('email'),
+            phone=phone,
+            password=generate_password_hash(password),
+            alternate_phone=request.form.get('alternate_phone'),
+            city=request.form.get('city'),
+            state=request.form.get('state'),
+            pincode=request.form.get('pincode'),
+            address=request.form.get('address'),
+            business_hours=request.form.get('business_hours'),
+            counters=request.form.get('counters') or None,
+            daily_customers=request.form.get('daily_customers') or None,
+            years_in_business=request.form.get('years_in_business') or None,
+            gst_number=request.form.get('gst_number'),
+            website=request.form.get('website'),
+            additional_info=request.form.get('additional_info'),
+            status='Pending',
+            payment_status='Pending'
+        )
+        db.session.add(registration)
+        db.session.commit()
+        
+        return redirect(url_for('registration_payment', reg_id=registration.id))
+    
+    return render_template('register_center.html')
+
+@app.route('/registration-payment/<int:reg_id>', methods=['GET', 'POST'])
+def registration_payment(reg_id):
+    registration = ServiceCenterRegistration.query.get_or_404(reg_id)
+    
+    if registration.payment_status == 'Completed':
+        flash('Payment already completed!', 'info')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        payment_id = f"PAY{registration.id}{int(datetime.now().timestamp())}"
+        registration.payment_status = 'Completed'
+        registration.payment_id = payment_id
+        db.session.commit()
+        
+        flash('Registration fee paid successfully! You can now login to track status.', 'success')
+        return render_template('register_center_success.html', 
+                             email=registration.email, 
+                             phone=registration.phone,
+                             payment_id=payment_id)
+    
+    return render_template('registration_payment.html', registration=registration)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name']
+        mobile = request.form['mobile']
+        email = request.form.get('email')
+        password = request.form['password']
+        
+        if User.query.filter_by(mobile=mobile).first():
+            flash('Mobile number already registered!', 'danger')
+            return redirect(url_for('register'))
+        
+        user = User(name=name, mobile=mobile, email=email, password=generate_password_hash(password))
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful! Please login.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        mobile = request.form['mobile']
+        password = request.form['password']
+        
+        # Check if service center owner
+        owner = ServiceCenterRegistration.query.filter_by(phone=mobile).first()
+        if owner and check_password_hash(owner.password, password):
+            session['owner_id'] = owner.id
+            session['owner_name'] = owner.owner_name
+            return redirect(url_for('owner_dashboard'))
+        
+        # Check if regular user
+        user = User.query.filter_by(mobile=mobile).first()
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['user_name'] = user.name
+            return redirect(url_for('services'))
+        
+        flash('Invalid credentials!', 'danger')
+    
+    return render_template('login.html')
+
+@app.route('/services')
+def services():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    expire_old_tokens()
+    centers = ServiceCenter.query.all()
+    active_token = get_active_token_for_user(session['user_id'])
+    
+    center_data = []
+    for center in centers:
+        queue_count = get_queue_count(center.id)
+        # Check if center was created in last 7 days (newly approved)
+        is_new = (datetime.now() - center.id).days < 7 if hasattr(center, 'created_at') else False
+        center_data.append({
+            'center': center,
+            'queue_count': queue_count,
+            'can_request': queue_count < 15,
+            'is_new': center.id > 19  # Centers with ID > 19 are newly approved
+        })
+    
+    return render_template('services.html', centers=center_data, active_token=active_token)
+
+@app.route('/request_token/<int:center_id>')
+def request_token(center_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Check if user already has active token
+    if get_active_token_for_user(session['user_id']):
+        flash('You already have an active token!', 'warning')
+        return redirect(url_for('services'))
+    
+    # Check queue limit
+    if get_queue_count(center_id) >= 15:
+        flash('Queue is full! Please try later.', 'warning')
+        return redirect(url_for('services'))
+    
+    # Create token
+    token_number = generate_token_number(center_id)
+    token = Token(
+        user_id=session['user_id'],
+        service_center_id=center_id,
+        token_number=token_number,
+        status='PendingPayment'
+    )
+    db.session.add(token)
+    db.session.commit()
+    
+    return redirect(url_for('payment', token_id=token.id))
+
+@app.route('/payment/<int:token_id>', methods=['GET', 'POST'])
+def payment(token_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    token = Token.query.get_or_404(token_id)
+    if token.user_id != session['user_id']:
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('services'))
+    
+    if request.method == 'POST':
+        token.status = 'Active'
+        db.session.commit()
+        
+        # Send timing alert email
+        user = User.query.get(session['user_id'])
+        if user.email:
+            center = ServiceCenter.query.get(token.service_center_id)
+            serving_token = get_serving_token(center.id)
+            
+            position = Token.query.filter(
+                Token.service_center_id == center.id,
+                Token.status == 'Active',
+                Token.is_walkin == False,
+                Token.id < token.id
+            ).count() + 1
+            if serving_token:
+                position += 1
+            
+            wait_time = calculate_wait_time(center.id, position)
+            leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
+            reach_time = datetime.now() + timedelta(minutes=wait_time)
+            
+            send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
+        
+        flash('Payment successful! Your token is confirmed.', 'success')
+        return redirect(url_for('queue_status', token_id=token.id))
+    
+    return render_template('payment.html', token=token)
+
+@app.route('/queue_status/<int:token_id>')
+def queue_status(token_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    token = Token.query.get_or_404(token_id)
+    if token.user_id != session['user_id']:
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('services'))
+    
+    serving_token = get_serving_token(token.service_center_id)
+    
+    position = 0
+    if token.status == 'Active':
+        position = Token.query.filter(
+            Token.service_center_id == token.service_center_id,
+            Token.status == 'Active',
+            Token.is_walkin == False,
+            Token.id < token.id
+        ).count() + 1
+        if serving_token:
+            position += 1
+    
+    wait_time = calculate_wait_time(token.service_center_id, position)
+    leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
+    reach_counter_time = datetime.now() + timedelta(minutes=wait_time)
+    
+    return render_template('queue_status.html', 
+                         token=token, 
+                         serving_token=serving_token,
+                         position=position,
+                         wait_time=wait_time,
+                         leave_time=leave_time,
+                         reach_counter_time=reach_counter_time)
+
+@app.route('/cancel_token/<int:token_id>')
+def cancel_token(token_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    token = Token.query.get_or_404(token_id)
+    if token.user_id != session['user_id']:
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('services'))
+    
+    if token.status == 'PendingPayment':
+        token.status = 'Expired'
+        db.session.commit()
+        flash('Token cancelled successfully.', 'info')
+    
+    return redirect(url_for('services'))
+
+@app.route('/history')
+def user_history():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    tokens = Token.query.filter_by(user_id=session['user_id']).filter(
+        Token.status.in_(['Completed', 'Expired'])
+    ).order_by(Token.created_time.desc()).all()
+    
+    return render_template('user_history.html', tokens=tokens, datetime=datetime)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+# Password Reset Routes
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        mobile = request.form.get('mobile')
+        email = request.form.get('email')
+        
+        user = User.query.filter_by(mobile=mobile).first()
+        if user and user.email == email:
+            # Generate reset token
+            reset_token = secrets.token_urlsafe(32)
+            user.reset_token = reset_token
+            user.reset_token_expiry = datetime.now() + timedelta(hours=1)
+            db.session.commit()
+            
+            # Send email
+            reset_link = url_for('reset_password', token=reset_token, _external=True)
+            if send_reset_email(email, reset_link, "User"):
+                flash('Password reset link sent to your email!', 'success')
+            else:
+                flash('Email configured incorrectly. Contact support.', 'warning')
+            return redirect(url_for('login'))
+        else:
+            flash('Invalid mobile number or email!', 'danger')
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+    
+    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.now():
+        flash('Invalid or expired reset link!', 'danger')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        user.password = generate_password_hash(new_password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+        db.session.commit()
+        
+        flash('Password reset successful! Please login.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html', token=token)
+
+@app.route('/admin/forgot-password', methods=['GET', 'POST'])
+def admin_forgot_password():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        
+        admin = Admin.query.filter_by(username=username).first()
+        if admin and admin.email == email:
+            # Generate reset token
+            reset_token = secrets.token_urlsafe(32)
+            admin.reset_token = reset_token
+            admin.reset_token_expiry = datetime.now() + timedelta(hours=1)
+            db.session.commit()
+            
+            # Send email
+            reset_link = url_for('admin_reset_password', token=reset_token, _external=True)
+            if send_reset_email(email, reset_link, "Admin"):
+                flash('Password reset link sent to your email!', 'success')
+            else:
+                flash('Email not configured. Contact super admin.', 'warning')
+            return redirect(url_for('admin_login'))
+        else:
+            flash('Invalid username or email!', 'danger')
+    
+    return render_template('admin_forgot_password.html')
+
+@app.route('/admin/reset-password/<token>', methods=['GET', 'POST'])
+def admin_reset_password(token):
+    admin = Admin.query.filter_by(reset_token=token).first()
+    
+    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < datetime.now():
+        flash('Invalid or expired reset link!', 'danger')
+        return redirect(url_for('admin_login'))
+    
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        admin.password = generate_password_hash(new_password)
+        admin.reset_token = None
+        admin.reset_token_expiry = None
+        db.session.commit()
+        
+        flash('Password reset successful! Please login.', 'success')
+        return redirect(url_for('admin_login'))
+    
+    return render_template('admin_reset_password.html', token=token)
+
+# Service Center Owner Dashboard
+@app.route('/owner/dashboard')
+def owner_dashboard():
+    if 'owner_id' not in session:
+        return redirect(url_for('login'))
+    
+    owner = ServiceCenterRegistration.query.get(session['owner_id'])
+    return render_template('owner_dashboard.html', registration=owner)
+
+# Routes - Admin Module
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        admin = Admin.query.filter_by(username=username).first()
+        if admin and check_password_hash(admin.password, password):
+            session['admin_id'] = admin.id
+            session['admin_center_id'] = admin.service_center_id
+            return redirect(url_for('admin_dashboard'))
+        
+        flash('Invalid credentials!', 'danger')
+    
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
+    # Online Queue (Counter 1)
+    serving_token = get_serving_token(center_id)
+    waiting_tokens = Token.query.filter_by(
+        service_center_id=center_id, 
+        status='Active',
+        is_walkin=False
+    ).order_by(Token.id).all()
+    
+    # Walk-in Queue (Counter 2)
+    walkin_serving_token = get_walkin_serving_token(center_id)
+    walkin_waiting_tokens = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=True
+    ).order_by(Token.id).all()
+    
+    # Calculate when next token can be called (Online)
+    can_call_next = True
+    next_call_time = None
+    
+    next_token = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=False
+    ).order_by(Token.id).first()
+    
+    if next_token:
+        position = Token.query.filter(
+            Token.service_center_id == center_id,
+            Token.status == 'Active',
+            Token.is_walkin == False,
+            Token.id < next_token.id
+        ).count() + 1
+        
+        wait_time = position * center.avg_service_time
+        expected_arrival = next_token.created_time + timedelta(minutes=wait_time)
+        
+        if datetime.now() < expected_arrival:
+            can_call_next = False
+            next_call_time = expected_arrival
+    
+    return render_template('admin_dashboard.html', 
+                         center=center,
+                         serving_token=serving_token,
+                         waiting_tokens=waiting_tokens,
+                         walkin_serving_token=walkin_serving_token,
+                         walkin_waiting_tokens=walkin_waiting_tokens,
+                         can_call_next=can_call_next,
+                         next_call_time=next_call_time,
+                         datetime=datetime)
+
+@app.route('/admin/history')
+def admin_history():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    tokens = Token.query.filter_by(service_center_id=center_id).filter(
+        Token.status.in_(['Completed', 'Expired'])
+    ).order_by(Token.created_time.desc()).limit(100).all()
+    
+    return render_template('admin_history.html', center=center, tokens=tokens)
+
+@app.route('/admin/call_next')
+def call_next():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
+    serving_token = get_serving_token(center_id)
+    if serving_token:
+        serving_token.status = 'Completed'
+    
+    next_token = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=False
+    ).order_by(Token.id).first()
+    
+    if next_token:
+        position = Token.query.filter(
+            Token.service_center_id == center_id,
+            Token.status == 'Active',
+            Token.is_walkin == False,
+            Token.id < next_token.id
+        ).count() + 1
+        
+        wait_time = position * center.avg_service_time
+        expected_arrival = next_token.created_time + timedelta(minutes=wait_time)
+        
+        if datetime.now() < expected_arrival:
+            minutes_left = int((expected_arrival - datetime.now()).total_seconds() / 60)
+            flash(f'Please wait {minutes_left} more minutes. User needs time to arrive at counter.', 'warning')
+            return redirect(url_for('admin_dashboard'))
+        
+        next_token.status = 'Serving'
+        db.session.commit()
+        flash(f'Token {next_token.token_number} is now being served.', 'success')
+    else:
+        db.session.commit()
+        flash('No tokens in queue.', 'info')
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/call_next_walkin')
+def call_next_walkin():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    
+    walkin_serving_token = get_walkin_serving_token(center_id)
+    if walkin_serving_token:
+        walkin_serving_token.status = 'Completed'
+    
+    next_token = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=True
+    ).order_by(Token.id).first()
+    
+    if next_token:
+        next_token.status = 'Serving'
+        db.session.commit()
+        flash(f'Walk-in token {next_token.token_number} is now being served.', 'success')
+    else:
+        db.session.commit()
+        flash('No walk-in tokens in queue.', 'info')
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/complete/<int:token_id>')
+def complete_token(token_id):
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    token = Token.query.get_or_404(token_id)
+    token.status = 'Completed'
+    db.session.commit()
+    flash('Token marked as completed.', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/no_show/<int:token_id>', methods=['GET', 'POST'])
+def no_show(token_id):
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    token = Token.query.get_or_404(token_id)
+    
+    if request.method == 'POST':
+        reason = request.form.get('reason', '').strip()
+        notes = request.form.get('notes', '').strip()
+        
+        if not reason:
+            flash('Please provide a reason for marking as no-show.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+        
+        full_reason = reason
+        if notes:
+            full_reason += f" - {notes}"
+        
+        token.status = 'Expired'
+        token.no_show_reason = full_reason
+        token.no_show_time = datetime.now()
+        
+        user = User.query.get(token.user_id)
+        user.no_show_count += 1
+        
+        db.session.commit()
+        flash('Token marked as no-show with reason recorded.', 'warning')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('no_show_form.html', token=token)
+
+@app.route('/admin/add_walkin', methods=['GET', 'POST'])
+def add_walkin():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
+    if request.method == 'POST':
+        name = request.form.get('name', 'Walk-in Customer').strip()
+        mobile = request.form.get('mobile', '').strip()
+        
+        if get_walkin_queue_count(center_id) >= 15:
+            flash('Walk-in queue is full!', 'warning')
+            return redirect(url_for('admin_dashboard'))
+        
+        # Create or get user
+        if mobile and len(mobile) == 10:
+            user = User.query.filter_by(mobile=mobile).first()
+            if not user:
+                user = User(name=name, mobile=mobile, password=generate_password_hash('walkin123'))
+                db.session.add(user)
+                db.session.commit()
+        else:
+            # Anonymous walk-in
+            user = User(name=name, mobile=f'W{int(datetime.now().timestamp())}', password=generate_password_hash('walkin123'))
+            db.session.add(user)
+            db.session.commit()
+        
+        # Generate token with W prefix
+        today = datetime.now().date()
+        count = Token.query.filter(
+            Token.service_center_id == center_id,
+            db.func.date(Token.created_time) == today
+        ).count()
+        token_number = f"W{count + 1:03d}"
+        
+        token = Token(
+            user_id=user.id,
+            service_center_id=center_id,
+            token_number=token_number,
+            status='Active',
+            is_walkin=True
+        )
+        db.session.add(token)
+        db.session.commit()
+        
+        flash(f'Walk-in token {token_number} created successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('add_walkin.html', center=center)
+
+@app.route('/track', methods=['GET', 'POST'])
+def track_token():
+    if request.method == 'POST':
+        token_number = request.form.get('token_number', '').strip().upper()
+        
+        token = Token.query.filter_by(token_number=token_number).first()
+        if not token:
+            flash('Token not found!', 'danger')
+            return redirect(url_for('track_token'))
+        
+        if token.status not in ['Active', 'Serving']:
+            flash('Token is no longer active.', 'warning')
+            return redirect(url_for('track_token'))
+        
+        return redirect(url_for('track_status', token_number=token_number))
+    
+    return render_template('track_token.html')
+
+@app.route('/track/<token_number>')
+def track_status(token_number):
+    token = Token.query.filter_by(token_number=token_number).first_or_404()
+    
+    if token.is_walkin:
+        serving_token = get_walkin_serving_token(token.service_center_id)
+        position = 0
+        if token.status == 'Active':
+            position = Token.query.filter(
+                Token.service_center_id == token.service_center_id,
+                Token.status == 'Active',
+                Token.is_walkin == True,
+                Token.id < token.id
+            ).count() + 1
+            if serving_token:
+                position += 1
+    else:
+        serving_token = get_serving_token(token.service_center_id)
+        position = 0
+        if token.status == 'Active':
+            position = Token.query.filter(
+                Token.service_center_id == token.service_center_id,
+                Token.status == 'Active',
+                Token.is_walkin == False,
+                Token.id < token.id
+            ).count() + 1
+            if serving_token:
+                position += 1
+    
+    wait_time = calculate_wait_time(token.service_center_id, position)
+    reach_counter_time = datetime.now() + timedelta(minutes=wait_time)
+    
+    return render_template('track_status.html',
+                         token=token,
+                         serving_token=serving_token,
+                         position=position,
+                         wait_time=wait_time,
+                         reach_counter_time=reach_counter_time)
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.clear()
+    return redirect(url_for('admin_login'))
+
+# Super Admin Routes
+@app.route('/superadmin/login', methods=['GET', 'POST'])
+def superadmin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        super_admin = SuperAdmin.query.filter_by(username=username).first()
+        if super_admin and check_password_hash(super_admin.password, password):
+            session['superadmin_id'] = super_admin.id
+            session['superadmin_username'] = super_admin.username
+            return redirect(url_for('superadmin_dashboard'))
+        
+        flash('Invalid credentials!', 'danger')
+    
+    return render_template('superadmin_login.html')
+
+@app.route('/superadmin/dashboard')
+def superadmin_dashboard():
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    pending = ServiceCenterRegistration.query.filter_by(status='Pending').order_by(ServiceCenterRegistration.submitted_time.desc()).all()
+    approved = ServiceCenterRegistration.query.filter_by(status='Approved').order_by(ServiceCenterRegistration.reviewed_time.desc()).limit(10).all()
+    rejected = ServiceCenterRegistration.query.filter_by(status='Rejected').order_by(ServiceCenterRegistration.reviewed_time.desc()).limit(10).all()
+    
+    stats = {
+        'pending': ServiceCenterRegistration.query.filter_by(status='Pending').count(),
+        'approved': ServiceCenterRegistration.query.filter_by(status='Approved').count(),
+        'rejected': ServiceCenterRegistration.query.filter_by(status='Rejected').count(),
+        'total': ServiceCenterRegistration.query.count()
+    }
+    
+    return render_template('superadmin_dashboard.html', 
+                         pending=pending, 
+                         approved=approved, 
+                         rejected=rejected,
+                         stats=stats)
+
+@app.route('/superadmin/registration/<int:reg_id>/approve', methods=['POST'])
+def approve_registration(reg_id):
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    registration = ServiceCenterRegistration.query.get_or_404(reg_id)
+    registration.status = 'Approved'
+    registration.reviewed_time = datetime.now()
+    
+    # Create ServiceCenter entry
+    service_center = ServiceCenter(
+        name=registration.center_name,
+        category=registration.organization_type,
+        location=f"{registration.city}, {registration.state}",
+        avg_service_time=20  # Default service time
+    )
+    db.session.add(service_center)
+    db.session.flush()  # Get the service_center.id
+    
+    # Generate admin credentials
+    admin_username = registration.email.split('@')[0] + '@admin.com'
+    admin_password = f"admin{registration.phone[-4:]}"  # admin + last 4 digits of phone
+    
+    # Create Admin account
+    admin = Admin(
+        username=admin_username,
+        email=registration.email,
+        password=generate_password_hash(admin_password),
+        service_center_id=service_center.id
+    )
+    db.session.add(admin)
+    
+    # Store credentials in registration for owner to see
+    registration.admin_username = admin_username
+    registration.admin_password = admin_password  # Store plain text for display only
+    
+    db.session.commit()
+    
+    flash(f'Registration approved! Service center "{registration.center_name}" is now live. Admin login: {admin_username} / {admin_password}', 'success')
+    return redirect(url_for('superadmin_dashboard'))
+
+@app.route('/superadmin/registration/<int:reg_id>/reject', methods=['POST'])
+def reject_registration(reg_id):
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    registration = ServiceCenterRegistration.query.get_or_404(reg_id)
+    registration.status = 'Rejected'
+    registration.reviewed_time = datetime.now()
+    db.session.commit()
+    
+    flash(f'Registration for {registration.center_name} rejected.', 'warning')
+    return redirect(url_for('superadmin_dashboard'))
+
+@app.route('/superadmin/logout')
+def superadmin_logout():
+    session.clear()
+    return redirect(url_for('superadmin_login'))
+
+if __name__ == '__main__':
+    init_db()
+    port = int(os.environ.get('PORT', 9000))
+    app.run(host='0.0.0.0', port=port, debug=True)

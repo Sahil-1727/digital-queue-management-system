@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta http-equiv="refresh" content="15">
+    <style>
+        body { background: #F8FAFC; }
+        .admin-header { 
+            background: #0F172A; 
+            color: white; 
+            padding: 1.5rem 0; 
+            border-bottom: 2px solid #2DD4BF;
+        }
+        .counter-card { border-left: 4px solid #2DD4BF; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
+        .counter-card.walkin { border-left-color: #2DD4BF; }
+        .token-display { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">🛠️ {{ center.name }}</h4>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('add_walkin') }}" class="btn btn-light btn-sm">🚶 Add Walk-In</a>
+                    <a href="{{ url_for('admin_history') }}" class="btn btn-outline-light btn-sm">History</a>
+                    <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            <!-- Counter 1: Online Queue -->
+            <div class="col-lg-6">
+                <div class="card counter-card mb-3">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">💻 Counter 1: Online Queue</h5>
+                        {% if serving_token %}
+                            <div class="text-center mb-3">
+                                <div class="token-display">{{ serving_token.token_number }}</div>
+                                <h6 class="mt-2 fw-semibold">{{ serving_token.user.name }}</h6>
+                                <p class="text-muted text-sm mb-3">📱 {{ serving_token.user.mobile }}</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('complete_token', token_id=serving_token.id) }}" class="btn btn-success">✓ Complete</a>
+                                    <a href="{{ url_for('no_show', token_id=serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <div style="font-size: 3rem; opacity: 0.3;">🚫</div>
+                                <p class="mb-0">No Token Serving</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if can_call_next %}
+                    <a href="{{ url_for('call_next') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next (Online)</a>
+                {% else %}
+                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 14px; font-size: 1.1rem;">⏳ Wait {{ ((next_call_time - datetime.now()).total_seconds() / 60)|int }} min</button>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-semibold">📋 Waiting ({{ waiting_tokens|length }})</h6>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                        {% if waiting_tokens %}
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Token</th>
+                                        <th>Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for token in waiting_tokens %}
+                                    <tr>
+                                        <td><span class="fw-bold text-primary">{{ token.token_number }}</span></td>
+                                        <td class="fw-semibold">{{ token.user.name }}</td>
+                                        <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="text-center py-4 text-muted"><p class="mb-0">No tokens waiting</p></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Counter 2: Walk-In Queue -->
+            <div class="col-lg-6">
+                <div class="card counter-card walkin mb-3">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3 text-success">🚶 Counter 2: Walk-In Queue</h5>
+                        {% if walkin_serving_token %}
+                            <div class="text-center mb-3">
+                                <div class="token-display" style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ walkin_serving_token.token_number }}</div>
+                                <h6 class="mt-2 fw-semibold">{{ walkin_serving_token.user.name }}</h6>
+                                <p class="text-muted text-sm mb-3">📱 {{ walkin_serving_token.user.mobile }}</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('complete_token', token_id=walkin_serving_token.id) }}" class="btn btn-success">✓ Complete</a>
+                                    <a href="{{ url_for('no_show', token_id=walkin_serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <div style="font-size: 3rem; opacity: 0.3;">🚫</div>
+                                <p class="mb-0">No Token Serving</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <a href="{{ url_for('call_next_walkin') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next (Walk-In)</a>
+
+                <div class="card">
+                    <div class="card-header" style="background: #0F172A; color: white; border-radius: 16px 16px 0 0;">
+                        <h6 class="mb-0 fw-semibold">📋 Waiting ({{ walkin_waiting_tokens|length }})</h6>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                        {% if walkin_waiting_tokens %}
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Token</th>
+                                        <th>Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for token in walkin_waiting_tokens %}
+                                    <tr>
+                                        <td><span class="fw-bold text-success">{{ token.token_number }}</span></td>
+                                        <td class="fw-semibold">{{ token.user.name }}</td>
+                                        <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="text-center py-4 text-muted"><p class="mb-0">No walk-in tokens waiting</p></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">⏱️ Page auto-refreshes every 15 seconds</small>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

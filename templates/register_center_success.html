@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body style="background: #F8FAFC;">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-md-6">
+                <div class="card text-center slide-up" style="border: none; border-radius: 20px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);">
+                    <div class="card-body p-5">
+                        <div class="mb-4">
+                            <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 3rem; box-shadow: 0 8px 30px rgba(45, 212, 191, 0.4);">
+                                ✓
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-3">Registration Successful!</h2>
+                        <p class="text-muted mb-4">Your payment has been received and registration is under review.</p>
+                        
+                        <div class="card mb-4" style="background: rgba(45, 212, 191, 0.1); border: 1px solid rgba(45, 212, 191, 0.3); border-radius: 12px;">
+                            <div class="card-body text-center">
+                                <small class="text-muted d-block mb-1">Payment ID</small>
+                                <h5 class="fw-bold mb-0" style="color: #0F172A;">{{ payment_id }}</h5>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-success text-start" style="border-radius: 12px; border: none;">
+                            <h6 class="fw-bold mb-3">📧 What's Next?</h6>
+                            <ul class="mb-0">
+                                <li class="mb-2">✅ Payment of <strong>₹500</strong> received (Refundable)</li>
+                                <li class="mb-2"><strong>Login anytime</strong> with your phone ({{ phone }}) to track status</li>
+                                <li class="mb-2">Our team will review within <strong>24-48 hours</strong></li>
+                                <li class="mb-2">Approval notification sent to <strong>{{ email }}</strong></li>
+                                <li>Refund processed if rejected or after 30 days of service</li>
+                            </ul>
+                        </div>
+
+                        <div class="alert alert-info text-start" style="border-radius: 12px; border: none;">
+                            <h6 class="fw-bold mb-2">📞 Need Help?</h6>
+                            <p class="mb-0 text-sm">Contact us at <strong>support@queueflow.com</strong></p>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="{{ url_for('login') }}" class="btn" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; border: none;">Login to Track Status</a>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Back to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

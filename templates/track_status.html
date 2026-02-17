@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Status - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <meta http-equiv="refresh" content="30">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card slide-up">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold">{{ token.service_center.name }}</h4>
+                            <p class="text-muted">📍 {{ token.service_center.location }}</p>
+                        </div>
+                        
+                        <div class="text-center p-5 mb-4" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 20px;">
+                            <p class="text-muted text-sm mb-2">Your Token Number</p>
+                            <h1 class="display-1 fw-bold gradient-text mb-0">{{ token.token_number }}</h1>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card text-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;">
+                                    <div class="card-body py-4">
+                                        <h2 class="display-5 fw-bold mb-2">
+                                            {% if serving_token %}{{ serving_token.token_number }}{% else %}--{% endif %}
+                                        </h2>
+                                        <small class="fw-semibold">Currently Serving</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none;">
+                                    <div class="card-body py-4">
+                                        <h2 class="display-5 fw-bold mb-2">{{ position }}</h2>
+                                        <small class="fw-semibold">People Ahead</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+                                    <div class="card-body py-4">
+                                        <h2 class="display-5 fw-bold mb-2">~{{ wait_time }}</h2>
+                                        <small class="fw-semibold">Minutes Wait</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if token.status == 'Active' and position > 0 %}
+                            <div class="alert alert-info" style="border-radius: 16px; border: none; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                                <h6 class="text-center fw-bold text-dark mb-2">⏰ Approx. Time to Reach Counter</h6>
+                                <h3 class="text-center mb-0 fw-bold text-dark">{{ reach_counter_time.strftime('%I:%M %p') }}</h3>
+                            </div>
+                        {% elif token.status == 'Serving' %}
+                            <div class="alert alert-success" style="border-radius: 16px; border: none;">
+                                <h5 class="text-center mb-0 fw-bold">🎉 Your turn! Please proceed to the counter</h5>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('track_token') }}" class="btn btn-primary">Track Another Token</a>
+                        </div>
+                        
+                        <p class="text-center text-muted mt-4 mb-0">
+                            <small>🔄 Page auto-refreshes every 30 seconds</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

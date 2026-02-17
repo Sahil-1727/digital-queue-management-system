@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Status - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        .status-badge-large {
+            font-size: 1.25rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+        }
+        .info-row {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand gradient-text fw-bold" href="{{ url_for('index') }}">QueueFlow</a>
+            <div class="d-flex gap-2">
+                <span class="navbar-text me-3">👤 {{ registration.owner_name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card slide-up">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <div class="auth-icon mb-3" style="background: linear-gradient(135deg, #4B6CB7 0%, #3A8DFF 100%)">🏢</div>
+                            <h2 class="mb-2">Service Center Registration</h2>
+                            <p class="text-muted">Track your application status</p>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="text-center mb-5">
+                            {% if registration.status == 'Pending' %}
+                                <span class="badge bg-warning status-badge-large">⏳ Pending Review</span>
+                                <p class="text-muted mt-3">Your application is under review. We'll notify you within 24-48 hours.</p>
+                            {% elif registration.status == 'Approved' %}
+                                <span class="badge bg-success status-badge-large">✅ Approved</span>
+                                <p class="text-success mt-3 fw-semibold">Congratulations! Your service center has been approved.</p>
+                                <div class="alert alert-success mt-3">
+                                    <h6 class="fw-bold mb-3">🎉 Your Service Center is Now Live!</h6>
+                                    <p class="mb-2">Your service center is now visible to all users on the platform.</p>
+                                    <hr>
+                                    <h6 class="fw-bold mb-2">🔑 Admin Login Credentials:</h6>
+                                    <div class="bg-white p-3 rounded mb-2">
+                                        <div class="mb-2"><strong>Admin Portal:</strong> <a href="{{ url_for('admin_login') }}" target="_blank">{{ request.host_url }}admin/login</a></div>
+                                        <div class="mb-2"><strong>Username:</strong> <code class="bg-light p-2 rounded">{{ registration.admin_username }}</code></div>
+                                        <div class="mb-2"><strong>Password:</strong> <code class="bg-light p-2 rounded">{{ registration.admin_password }}</code></div>
+                                    </div>
+                                    <p class="mb-0 small text-muted">⚠️ Save these credentials securely. Use them to login to the admin portal and manage your queue.</p>
+                                </div>
+                            {% elif registration.status == 'Rejected' %}
+                                <span class="badge bg-danger status-badge-large">❌ Rejected</span>
+                                <p class="text-danger mt-3">Unfortunately, your application was not approved at this time.</p>
+                                <div class="alert alert-danger mt-3">
+                                    Please contact us at support@queueflow.com for more information.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Registration Details -->
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4">📋 Registration Details</h5>
+                                
+                                <div class="info-row">
+                                    <div class="info-label">Service Center Name</div>
+                                    <div class="info-value">{{ registration.center_name }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Organization Type</div>
+                                    <div class="info-value">{{ registration.organization_type }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Owner Name</div>
+                                    <div class="info-value">{{ registration.owner_name }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Contact Email</div>
+                                    <div class="info-value">{{ registration.email }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Phone Number</div>
+                                    <div class="info-value">{{ registration.phone }}</div>
+                                </div>
+
+                                {% if registration.alternate_phone %}
+                                <div class="info-row">
+                                    <div class="info-label">Alternate Phone</div>
+                                    <div class="info-value">{{ registration.alternate_phone }}</div>
+                                </div>
+                                {% endif %}
+
+                                <div class="info-row">
+                                    <div class="info-label">Location</div>
+                                    <div class="info-value">{{ registration.address }}, {{ registration.city }}, {{ registration.state }} - {{ registration.pincode }}</div>
+                                </div>
+
+                                {% if registration.business_hours %}
+                                <div class="info-row">
+                                    <div class="info-label">Business Hours</div>
+                                    <div class="info-value">{{ registration.business_hours }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.gst_number %}
+                                <div class="info-row">
+                                    <div class="info-label">GST Number</div>
+                                    <div class="info-value">{{ registration.gst_number }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.website %}
+                                <div class="info-row">
+                                    <div class="info-label">Website</div>
+                                    <div class="info-value"><a href="{{ registration.website }}" target="_blank">{{ registration.website }}</a></div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.years_in_business %}
+                                <div class="info-row">
+                                    <div class="info-label">Years in Business</div>
+                                    <div class="info-value">{{ registration.years_in_business }} years</div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.counters %}
+                                <div class="info-row">
+                                    <div class="info-label">Number of Counters</div>
+                                    <div class="info-value">{{ registration.counters }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.daily_customers %}
+                                <div class="info-row">
+                                    <div class="info-label">Expected Daily Customers</div>
+                                    <div class="info-value">{{ registration.daily_customers }}</div>
+                                </div>
+                                {% endif %}
+
+                                <div class="info-row">
+                                    <div class="info-label">Submitted On</div>
+                                    <div class="info-value">{{ registration.submitted_time.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Payment Status</div>
+                                    <div class="info-value">
+                                        {% if registration.payment_status == 'Completed' %}
+                                            <span class="badge bg-success">✓ Paid ₹{{ registration.registration_fee }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% if registration.payment_id %}
+                                <div class="info-row">
+                                    <div class="info-label">Payment ID</div>
+                                    <div class="info-value">{{ registration.payment_id }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if registration.reviewed_time %}
+                                <div class="info-row">
+                                    <div class="info-label">Reviewed On</div>
+                                    <div class="info-value">{{ registration.reviewed_time.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Help Section -->
+                        <div class="alert alert-info" style="border-radius: 12px; border: none;">
+                            <h6 class="fw-bold mb-2">💬 Need Help?</h6>
+                            <p class="mb-2">If you have any questions about your registration:</p>
+                            <ul class="mb-0">
+                                <li>Email: <strong>support@queueflow.com</strong></li>
+                                <li>Phone: <strong>+91 {{ registration.phone }}</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">← Back to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

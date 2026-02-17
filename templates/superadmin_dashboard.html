@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        body { background: #F8FAFC; }
+        .superadmin-header { 
+            background: #0F172A; 
+            color: white; 
+            padding: 1.5rem 0; 
+            border-bottom: 2px solid #2DD4BF;
+        }
+        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
+        .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="superadmin-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">👑 Super Admin Dashboard</h4>
+                <div class="d-flex gap-2">
+                    <span class="text-white">{{ session.superadmin_username }}</span>
+                    <a href="{{ url_for('superadmin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(45, 212, 191, 0.3);">
+                    <div class="card-body py-4">
+                        <h2 class="display-4 fw-bold mb-2">{{ stats.pending }}</h2>
+                        <p class="mb-0 fw-semibold">Pending Requests</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center" style="background: #0F172A; color: white; border: 2px solid #2DD4BF;">
+                    <div class="card-body py-4">
+                        <h2 class="display-4 fw-bold mb-2" style="color: #2DD4BF;">{{ stats.approved }}</h2>
+                        <p class="mb-0 fw-semibold">Approved</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center" style="background: rgba(45, 212, 191, 0.1); color: #0F172A; border: 2px solid #2DD4BF;">
+                    <div class="card-body py-4">
+                        <h2 class="display-4 fw-bold mb-2" style="color: #0F172A;">{{ stats.rejected }}</h2>
+                        <p class="mb-0 fw-semibold">Rejected</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center" style="background: white; color: #0F172A; border: 2px solid #E2E8F0;">
+                    <div class="card-body py-4">
+                        <h2 class="display-4 fw-bold mb-2" style="color: #2DD4BF;">{{ stats.total }}</h2>
+                        <p class="mb-0 fw-semibold">Total Requests</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Registrations -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A;">
+                <h5 class="mb-0 fw-semibold">⏳ Pending Registrations ({{ pending|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if pending %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Service Center</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Contact</th>
+                                    <th>Location</th>
+                                    <th>Payment</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in pending %}
+                                <tr>
+                                    <td class="fw-bold">{{ reg.center_name }}</td>
+                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td>{{ reg.owner_name }}</td>
+                                    <td>
+                                        <small>{{ reg.email }}</small><br>
+                                        <small>{{ reg.phone }}</small>
+                                    </td>
+                                    <td>{{ reg.city }}, {{ reg.state }}</td>
+                                    <td>
+                                        {% if reg.payment_status == 'Completed' %}
+                                            <span class="badge bg-success">✓ ₹{{ reg.registration_fee }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}</small></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#viewModal{{ reg.id }}">View Details</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- View Modal -->
+                                <div class="modal fade" id="viewModal{{ reg.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">{{ reg.center_name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Payment Info Alert -->
+                                                <div class="alert alert-{{ 'success' if reg.payment_status == 'Completed' else 'warning' }} mb-4">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong>💳 Payment Status:</strong> 
+                                                            <span class="badge bg-{{ 'success' if reg.payment_status == 'Completed' else 'warning' }} ms-2">
+                                                                {{ reg.payment_status }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <strong>₹{{ reg.registration_fee }}</strong>
+                                                            {% if reg.payment_id %}
+                                                                <br><small>ID: {{ reg.payment_id }}</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="fw-bold mb-3 text-primary">🏛️ Business Information</h6>
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-6">
+                                                        <strong>Organization Type:</strong><br>{{ reg.organization_type }}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <strong>Years in Business:</strong><br>{{ reg.years_in_business or 'Not specified' }} years
+                                                    </div>
+                                                    {% if reg.gst_number %}
+                                                    <div class="col-md-6">
+                                                        <strong>GST Number:</strong><br>{{ reg.gst_number }}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if reg.website %}
+                                                    <div class="col-md-6">
+                                                        <strong>Website:</strong><br><a href="{{ reg.website }}" target="_blank">{{ reg.website }}</a>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if reg.business_hours %}
+                                                    <div class="col-md-12">
+                                                        <strong>Business Hours:</strong><br>{{ reg.business_hours }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+
+                                                <h6 class="fw-bold mb-3 text-primary">👤 Owner Information</h6>
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-6">
+                                                        <strong>Owner/Manager:</strong><br>{{ reg.owner_name }}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <strong>Email:</strong><br>{{ reg.email }}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <strong>Phone:</strong><br>{{ reg.phone }}
+                                                    </div>
+                                                    {% if reg.alternate_phone %}
+                                                    <div class="col-md-6">
+                                                        <strong>Alternate Phone:</strong><br>{{ reg.alternate_phone }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+
+                                                <h6 class="fw-bold mb-3 text-primary">📍 Location Details</h6>
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-12">
+                                                        <strong>Address:</strong><br>{{ reg.address }}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <strong>City:</strong><br>{{ reg.city }}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <strong>State:</strong><br>{{ reg.state }}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <strong>Pincode:</strong><br>{{ reg.pincode }}
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="fw-bold mb-3 text-primary">📊 Operational Details</h6>
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-md-6">
+                                                        <strong>Number of Counters:</strong><br>{{ reg.counters or 'Not specified' }}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <strong>Expected Daily Customers:</strong><br>{{ reg.daily_customers or 'Not specified' }}
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <strong>Submitted On:</strong><br>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}
+                                                    </div>
+                                                </div>
+
+                                                {% if reg.additional_info %}
+                                                <h6 class="fw-bold mb-3 text-primary">📝 Additional Information</h6>
+                                                <div class="alert alert-light">
+                                                    {{ reg.additional_info }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form method="POST" action="{{ url_for('reject_registration', reg_id=reg.id) }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this registration?')">Reject</button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('approve_registration', reg_id=reg.id) }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this registration?')">Approve</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <p class="mb-0">No pending registrations</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Approved Registrations -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: #0F172A; color: white; border-bottom: 2px solid #2DD4BF;">
+                <h5 class="mb-0 fw-semibold">✅ Recently Approved (Last 10)</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if approved %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Service Center</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Contact</th>
+                                    <th>Approved On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in approved %}
+                                <tr>
+                                    <td class="fw-bold">{{ reg.center_name }}</td>
+                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td>{{ reg.owner_name }}</td>
+                                    <td><small>{{ reg.email }}</small></td>
+                                    <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">No approved registrations yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Rejected Registrations -->
+        <div class="card">
+            <div class="card-header" style="background: rgba(45, 212, 191, 0.1); color: #0F172A; border-bottom: 2px solid #2DD4BF;">
+                <h5 class="mb-0 fw-semibold">❌ Recently Rejected (Last 10)</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if rejected %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Service Center</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Contact</th>
+                                    <th>Rejected On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in rejected %}
+                                <tr>
+                                    <td class="fw-bold">{{ reg.center_name }}</td>
+                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td>{{ reg.owner_name }}</td>
+                                    <td><small>{{ reg.email }}</small></td>
+                                    <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">No rejected registrations</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>
