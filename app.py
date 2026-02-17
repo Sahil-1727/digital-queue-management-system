@@ -6,6 +6,7 @@ import os
 import secrets
 import smtplib
 import socket
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -272,63 +273,57 @@ def expire_old_tokens():
     db.session.commit()
 
 def send_reset_email(email, reset_link, user_type="User"):
-    """Send password reset email"""
-    # Check if email is configured
-    print(f"🔍 Checking email config: username={app.config['MAIL_USERNAME'][:5]}..., password_len={len(app.config['MAIL_PASSWORD'])}")
+    """Send password reset email using Mailgun API (HTTP-based, works on Render)"""
+    print(f"🔍 Attempting to send email to {email}")
     
-    if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD'] or \
-       app.config['MAIL_USERNAME'] == 'your-email@gmail.com' or \
-       app.config['MAIL_PASSWORD'] == 'your-app-password':
-        print("⚠️  Email not configured. Please update MAIL_USERNAME and MAIL_PASSWORD")
-        return False
+    # Try Mailgun API first (HTTP-based, no SMTP blocking)
+    mailgun_api_key = os.getenv('MAILGUN_API_KEY', '')
+    mailgun_domain = os.getenv('MAILGUN_DOMAIN', '')
     
-    try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = 'QueueFlow - Password Reset Request'
-        msg['From'] = app.config['MAIL_USERNAME']
-        msg['To'] = email
-        
-        html = f"""
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #4B6CB7;">Password Reset Request</h2>
-              <p>Hello,</p>
-              <p>You requested to reset your password for your QueueFlow {user_type} account.</p>
-              <p>Click the button below to reset your password:</p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{reset_link}" style="background-color: #4B6CB7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
-              </div>
-              <p>Or copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; color: #666;">{reset_link}</p>
-              <p><strong>This link will expire in 1 hour.</strong></p>
-              <p>If you didn't request this, please ignore this email.</p>
-              <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-              <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
-            </div>
-          </body>
-        </html>
-        """
-        
-        part = MIMEText(html, 'html')
-        msg.attach(part)
-        
-        # Use SSL on port 465 (more reliable than TLS on 587 for cloud servers)
-        with smtplib.SMTP_SSL(app.config['MAIL_SERVER'], app.config['MAIL_PORT'], timeout=10) as server:
-            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-            server.send_message(msg)
-        
-        print(f"✅ Email sent successfully to {email}")
-        return True
-    except smtplib.SMTPAuthenticationError as e:
-        print(f"❌ SMTP Authentication Error: {e}")
-        return False
-    except socket.timeout:
-        print("❌ Email timeout: SMTP server not responding")
-        return False
-    except Exception as e:
-        print(f"❌ Email error: {e}")
-        return False
+    if mailgun_api_key and mailgun_domain:
+        try:
+            response = requests.post(
+                f"https://api.mailgun.net/v3/{mailgun_domain}/messages",
+                auth=("api", mailgun_api_key),
+                data={
+                    "from": f"QueueFlow <mailgun@{mailgun_domain}>",
+                    "to": email,
+                    "subject": "QueueFlow - Password Reset Request",
+                    "html": f"""
+                    <html>
+                      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                          <h2 style="color: #2DD4BF;">Password Reset Request</h2>
+                          <p>Hello,</p>
+                          <p>You requested to reset your password for your QueueFlow {user_type} account.</p>
+                          <p>Click the button below to reset your password:</p>
+                          <div style="text-align: center; margin: 30px 0;">
+                            <a href="{reset_link}" style="background-color: #2DD4BF; color: #0F172A; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Reset Password</a>
+                          </div>
+                          <p>Or copy and paste this link into your browser:</p>
+                          <p style="word-break: break-all; color: #666;">{reset_link}</p>
+                          <p><strong>This link will expire in 1 hour.</strong></p>
+                          <p>If you didn't request this, please ignore this email.</p>
+                          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                          <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
+                        </div>
+                      </body>
+                    </html>
+                    """
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                print(f"✅ Email sent via Mailgun to {email}")
+                return True
+            else:
+                print(f"❌ Mailgun error: {response.status_code} - {response.text}")
+        except Exception as e:
+            print(f"❌ Mailgun failed: {e}")
+    
+    # Fallback: Show reset link in console (for development/testing)
+    print(f"⚠️ Email service not configured. Reset link: {reset_link}")
+    return False
 
 def send_timing_alert(email, user_name, token_number, center_name, leave_time, reach_time):
     """Send timing alert email when token is confirmed"""
