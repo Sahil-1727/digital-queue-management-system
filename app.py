@@ -668,26 +668,44 @@ def logout():
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        mobile = request.form.get('mobile')
-        email = request.form.get('email')
+        mobile = request.form.get('mobile', '').strip()
+        email = request.form.get('email', '').strip()
+        
+        if not mobile:
+            flash('Mobile number is required!', 'danger')
+            return render_template('forgot_password.html')
         
         user = User.query.filter_by(mobile=mobile).first()
-        if user and user.email == email:
-            # Generate reset token
-            reset_token = secrets.token_urlsafe(32)
-            user.reset_token = reset_token
-            user.reset_token_expiry = datetime.now() + timedelta(hours=1)
-            db.session.commit()
-            
-            # Send email
-            reset_link = url_for('reset_password', token=reset_token, _external=True)
-            if send_reset_email(email, reset_link, "User"):
-                flash('Password reset link sent to your email!', 'success')
-            else:
-                flash('Email configured incorrectly. Contact support.', 'warning')
-            return redirect(url_for('login'))
+        if not user:
+            flash('Mobile number not registered!', 'danger')
+            return render_template('forgot_password.html')
+        
+        # Check if user has email
+        if not user.email:
+            flash('No email associated with this account. Please contact support.', 'warning')
+            return render_template('forgot_password.html')
+        
+        # Verify email matches
+        if email and user.email != email:
+            flash('Email does not match our records!', 'danger')
+            return render_template('forgot_password.html')
+        
+        # Generate reset token
+        reset_token = secrets.token_urlsafe(32)
+        user.reset_token = reset_token
+        user.reset_token_expiry = datetime.now() + timedelta(hours=1)
+        db.session.commit()
+        
+        # Send email
+        reset_link = url_for('reset_password', token=reset_token, _external=True)
+        print(f"🔐 Attempting to send reset email to {user.email}")
+        
+        if send_reset_email(user.email, reset_link, "User"):
+            flash('Password reset link sent to your email!', 'success')
         else:
-            flash('Invalid mobile number or email!', 'danger')
+            flash('Failed to send email. Please try again later.', 'warning')
+        
+        return redirect(url_for('login'))
     
     return render_template('forgot_password.html')
 
@@ -1200,7 +1218,7 @@ def test_send_email():
         result = send_reset_email('queueflowqms@gmail.com', test_link, 'Test')
         return f"<h2>Email Send Test</h2><p>Result: {'SUCCESS ✅' if result else 'FAILED ❌'}</p><p>Check Render logs for details</p>"
     except Exception as e:
-        return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p>"
+        return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
 
 if __name__ == '__main__':
     init_db()
