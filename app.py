@@ -1192,6 +1192,16 @@ def test_email_config():
     }
     return f"<pre>{config_status}</pre><br><p>Password configured: {bool(app.config.get('MAIL_PASSWORD'))}</p>"
 
+@app.route('/test-send-email')
+def test_send_email():
+    """Test endpoint to actually send an email"""
+    try:
+        test_link = "https://digital-queue-management-system-1.onrender.com/"
+        result = send_reset_email('queueflowqms@gmail.com', test_link, 'Test')
+        return f"<h2>Email Send Test</h2><p>Result: {'SUCCESS ✅' if result else 'FAILED ❌'}</p><p>Check Render logs for details</p>"
+    except Exception as e:
+        return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p>"
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
