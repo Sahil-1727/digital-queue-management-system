@@ -263,8 +263,11 @@ def expire_old_tokens():
 
 def send_reset_email(email, reset_link, user_type="User"):
     """Send password reset email"""
-    if app.config['MAIL_USERNAME'] == 'your-email@gmail.com' or app.config['MAIL_PASSWORD'] == 'your-app-password':
-        print("⚠️  Email not configured. Please update MAIL_USERNAME and MAIL_PASSWORD in app.py")
+    # Check if email is configured
+    if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD'] or \
+       app.config['MAIL_USERNAME'] == 'your-email@gmail.com' or \
+       app.config['MAIL_PASSWORD'] == 'your-app-password':
+        print("⚠️  Email not configured. Please update MAIL_USERNAME and MAIL_PASSWORD")
         return False
     
     try:
