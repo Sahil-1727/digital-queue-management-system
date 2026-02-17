@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 import secrets
 import smtplib
+import socket
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -311,15 +312,19 @@ def send_reset_email(email, reset_link, user_type="User"):
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
+        # Use shorter timeout to prevent worker timeout
+        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'], timeout=10) as server:
             server.starttls()
             server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
             server.send_message(msg)
         
         print(f"✅ Email sent successfully to {email}")
         return True
-    except smtplib.SMTPAuthenticationError:
-        print("❌ SMTP Authentication Error: Check your email and app password")
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"❌ SMTP Authentication Error: {e}")
+        return False
+    except socket.timeout:
+        print("❌ Email timeout: SMTP server not responding")
         return False
     except Exception as e:
         print(f"❌ Email error: {e}")
@@ -696,14 +701,17 @@ def forgot_password():
         user.reset_token_expiry = datetime.now() + timedelta(hours=1)
         db.session.commit()
         
-        # Send email
+        # Flash success immediately (don't wait for email)
+        flash('Password reset link sent to your email!', 'success')
+        
+        # Send email (non-blocking)
         reset_link = url_for('reset_password', token=reset_token, _external=True)
         print(f"🔐 Attempting to send reset email to {user.email}")
         
-        if send_reset_email(user.email, reset_link, "User"):
-            flash('Password reset link sent to your email!', 'success')
-        else:
-            flash('Failed to send email. Please try again later.', 'warning')
+        try:
+            send_reset_email(user.email, reset_link, "User")
+        except Exception as e:
+            print(f"❌ Email send failed: {e}")
         
         return redirect(url_for('login'))
     
