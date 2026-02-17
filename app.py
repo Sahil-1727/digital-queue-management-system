@@ -20,11 +20,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Email configuration
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', '')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '')
 app.config['MAIL_USE_TLS'] = True
 
 db = SQLAlchemy(app)
+
+# Initialize database on startup
+with app.app_context():
+    db.create_all()
 
 # Models
 class User(db.Model): 
@@ -362,6 +366,17 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
     except Exception as e:
         print(f"❌ Email error: {e}")
         return False
+
+# Ensure database is initialized before first request
+@app.before_request
+def initialize_database():
+    if not hasattr(app, 'db_initialized'):
+        with app.app_context():
+            db.create_all()
+            # Add default data only if tables are empty
+            if ServiceCenter.query.count() == 0:
+                init_db()
+            app.db_initialized = True
 
 # Routes - User Module
 @app.route('/')
@@ -1150,5 +1165,6 @@ def superadmin_logout():
 
 if __name__ == '__main__':
     init_db()
-    port = int(os.environ.get('PORT', 9000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.getenv('FLASK_ENV', 'production') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
