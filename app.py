@@ -24,6 +24,11 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', '')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '')
 app.config['MAIL_USE_TLS'] = True
 
+# Debug email config (remove in production)
+print(f"📧 Email Config: Server={app.config['MAIL_SERVER']}, Port={app.config['MAIL_PORT']}")
+print(f"📧 Username configured: {bool(app.config['MAIL_USERNAME'])}")
+print(f"📧 Password configured: {bool(app.config['MAIL_PASSWORD'])}")
+
 db = SQLAlchemy(app)
 
 # Initialize database on startup
@@ -267,6 +272,8 @@ def expire_old_tokens():
 def send_reset_email(email, reset_link, user_type="User"):
     """Send password reset email"""
     # Check if email is configured
+    print(f"🔍 Checking email config: username={app.config['MAIL_USERNAME'][:5]}..., password_len={len(app.config['MAIL_PASSWORD'])}")
+    
     if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD'] or \
        app.config['MAIL_USERNAME'] == 'your-email@gmail.com' or \
        app.config['MAIL_PASSWORD'] == 'your-app-password':
@@ -559,28 +566,32 @@ def payment(token_id):
         token.status = 'Active'
         db.session.commit()
         
-        # Send timing alert email
-        user = User.query.get(session['user_id'])
-        if user.email:
-            center = ServiceCenter.query.get(token.service_center_id)
-            serving_token = get_serving_token(center.id)
-            
-            position = Token.query.filter(
-                Token.service_center_id == center.id,
-                Token.status == 'Active',
-                Token.is_walkin == False,
-                Token.id < token.id
-            ).count() + 1
-            if serving_token:
-                position += 1
-            
-            wait_time = calculate_wait_time(center.id, position)
-            leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
-            reach_time = datetime.now() + timedelta(minutes=wait_time)
-            
-            send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
-        
         flash('Payment successful! Your token is confirmed.', 'success')
+        
+        # Send timing alert email (non-blocking)
+        try:
+            user = User.query.get(session['user_id'])
+            if user.email:
+                center = ServiceCenter.query.get(token.service_center_id)
+                serving_token = get_serving_token(center.id)
+                
+                position = Token.query.filter(
+                    Token.service_center_id == center.id,
+                    Token.status == 'Active',
+                    Token.is_walkin == False,
+                    Token.id < token.id
+                ).count() + 1
+                if serving_token:
+                    position += 1
+                
+                wait_time = calculate_wait_time(center.id, position)
+                leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
+                reach_time = datetime.now() + timedelta(minutes=wait_time)
+                
+                send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
+        except Exception as e:
+            print(f"Email sending failed: {e}")
+        
         return redirect(url_for('queue_status', token_id=token.id))
     
     return render_template('payment.html', token=token)
@@ -1168,6 +1179,18 @@ def reject_registration(reg_id):
 def superadmin_logout():
     session.clear()
     return redirect(url_for('superadmin_login'))
+
+@app.route('/test-email-config')
+def test_email_config():
+    """Test endpoint to verify email configuration"""
+    config_status = {
+        'MAIL_SERVER': app.config.get('MAIL_SERVER', 'NOT SET'),
+        'MAIL_PORT': app.config.get('MAIL_PORT', 'NOT SET'),
+        'MAIL_USERNAME': app.config.get('MAIL_USERNAME', 'NOT SET'),
+        'MAIL_PASSWORD_LENGTH': len(app.config.get('MAIL_PASSWORD', '')),
+        'MAIL_USE_TLS': app.config.get('MAIL_USE_TLS', 'NOT SET'),
+    }
+    return f"<pre>{config_status}</pre><br><p>Password configured: {bool(app.config.get('MAIL_PASSWORD'))}</p>"
 
 if __name__ == '__main__':
     init_db()
