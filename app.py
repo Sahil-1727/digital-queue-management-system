@@ -20,10 +20,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 465))
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', '')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '')
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 # Debug email config (remove in production)
 print(f"📧 Email Config: Server={app.config['MAIL_SERVER']}, Port={app.config['MAIL_PORT']}")
@@ -312,9 +313,8 @@ def send_reset_email(email, reset_link, user_type="User"):
         part = MIMEText(html, 'html')
         msg.attach(part)
         
-        # Use shorter timeout to prevent worker timeout
-        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'], timeout=10) as server:
-            server.starttls()
+        # Use SSL on port 465 (more reliable than TLS on 587 for cloud servers)
+        with smtplib.SMTP_SSL(app.config['MAIL_SERVER'], app.config['MAIL_PORT'], timeout=10) as server:
             server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
             server.send_message(msg)
         
