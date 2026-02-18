@@ -19,7 +19,13 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+
+# Fix DATABASE_URL for PostgreSQL (Render uses postgres:// but SQLAlchemy needs postgresql://)
+database_url = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
@@ -566,23 +572,38 @@ def register():
             email = request.form.get('email', '').strip()
             password = request.form.get('password', '')
             
+            print(f"📝 Registration attempt: name={name}, mobile={mobile}, email={email}")
+            
             if not all([name, mobile, password]):
                 flash('All fields are required!', 'danger')
                 return redirect(url_for('register'))
             
-            if User.query.filter_by(mobile=mobile).first():
+            # Check if mobile already exists
+            existing_user = User.query.filter_by(mobile=mobile).first()
+            if existing_user:
                 flash('Mobile number already registered!', 'danger')
                 return redirect(url_for('register'))
             
-            user = User(name=name, mobile=mobile, email=email if email else None, password=generate_password_hash(password))
+            # Create new user
+            user = User(
+                name=name, 
+                mobile=mobile, 
+                email=email if email else None, 
+                password=generate_password_hash(password)
+            )
             db.session.add(user)
             db.session.commit()
+            
+            print(f"✅ User registered successfully: {mobile}")
             flash('Registration successful! Please login.', 'success')
             return redirect(url_for('login'))
+            
         except Exception as e:
             db.session.rollback()
-            print(f"❌ Registration error: {e}")
-            flash('Registration failed. Please try again.', 'danger')
+            print(f"❌ Registration error: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            flash(f'Registration failed: {str(e)}', 'danger')
             return redirect(url_for('register'))
     
     return render_template('register.html')

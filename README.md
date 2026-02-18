@@ -2,6 +2,10 @@
 
 A web-based queue management system for service centers in Nagpur.
 
+
+## Deployment
+Live Demo: https://digital-queue-management-system-1.onrender.com
+
 ## Features
 
 ### User Module
