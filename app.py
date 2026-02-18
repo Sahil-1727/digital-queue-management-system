@@ -788,18 +788,19 @@ def queue_status(token_id):
     # Calculate wait time based on queue position
     wait_time = calculate_wait_time(token.service_center_id, position)
     
-    # Service will start at = booking time + wait time
-    service_start_time = token.created_time + timedelta(minutes=wait_time)
-    
-    # Reach counter = service start time (arrive when service starts)
-    reach_counter_time = service_start_time
-    
-    # Leave time = reach counter - travel - 5 min buffer
-    leave_time = reach_counter_time - timedelta(minutes=travel_time + 5)
-    
-    # If leave time is in past, leave now
-    if leave_time < datetime.now():
-        leave_time = datetime.now()
+    # For 1st person: immediate service
+    if position <= 1:
+        leave_time = datetime.now() + timedelta(minutes=10)
+        reach_counter_time = leave_time + timedelta(minutes=travel_time)
+    else:
+        # For others: service starts after wait time
+        service_start_time = token.created_time + timedelta(minutes=wait_time)
+        reach_counter_time = service_start_time
+        leave_time = reach_counter_time - timedelta(minutes=travel_time + 5)
+        
+        # If leave time is in past, leave now
+        if leave_time < datetime.now():
+            leave_time = datetime.now()
     
     return render_template('queue_status.html', 
                          token=token, 
