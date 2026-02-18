@@ -127,20 +127,23 @@ class ServiceCenterRegistration(db.Model):
 # Initialize database and sample data
 def init_db():
     with app.app_context():
-        db.create_all()
-        
-        # Migration: Add avg_service_time column if it doesn't exist
         try:
-            from sqlalchemy import inspect
-            inspector = inspect(db.engine)
-            columns = [col['name'] for col in inspector.get_columns('service_center_registrations')]
-            if 'avg_service_time' not in columns:
-                with db.engine.connect() as conn:
-                    conn.execute(db.text('ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20'))
-                    conn.commit()
-                print("✅ Added avg_service_time column to service_center_registrations")
+            db.create_all()
+            
+            # Migration: Add avg_service_time column if it doesn't exist
+            try:
+                from sqlalchemy import inspect
+                inspector = inspect(db.engine)
+                columns = [col['name'] for col in inspector.get_columns('service_center_registrations')]
+                if 'avg_service_time' not in columns:
+                    with db.engine.connect() as conn:
+                        conn.execute(db.text('ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20'))
+                        conn.commit()
+                    print("✅ Added avg_service_time column")
+            except Exception as e:
+                print(f"⚠️ Migration skipped: {e}")
         except Exception as e:
-            print(f"⚠️ Migration warning: {e}")
+            print(f"❌ Database init error: {e}")
         
         # Add service centers from approved registrations
         approved_registrations = ServiceCenterRegistration.query.filter_by(status='Approved').all()
@@ -438,6 +441,12 @@ def register_center():
             flash('Phone number already registered!', 'danger')
             return redirect(url_for('register_center'))
         
+        # Get avg_service_time safely
+        try:
+            avg_service_time = int(request.form.get('avg_service_time', 20))
+        except (ValueError, TypeError):
+            avg_service_time = 20
+        
         registration = ServiceCenterRegistration(
             center_name=request.form.get('center_name'),
             organization_type=request.form.get('organization_type'),
@@ -454,7 +463,7 @@ def register_center():
             counters=request.form.get('counters') or None,
             daily_customers=request.form.get('daily_customers') or None,
             years_in_business=request.form.get('years_in_business') or None,
-            avg_service_time=int(request.form.get('avg_service_time', 20)),
+            avg_service_time=avg_service_time,
             gst_number=request.form.get('gst_number'),
             website=request.form.get('website'),
             additional_info=request.form.get('additional_info'),
@@ -1199,11 +1208,16 @@ def approve_registration(reg_id):
     registration.reviewed_time = datetime.now()
     
     # Create ServiceCenter entry
+    try:
+        avg_time = registration.avg_service_time if hasattr(registration, 'avg_service_time') and registration.avg_service_time else 20
+    except:
+        avg_time = 20
+    
     service_center = ServiceCenter(
         name=registration.center_name,
         category=registration.organization_type,
         location=f"{registration.address}, {registration.city}, {registration.state} - {registration.pincode}",
-        avg_service_time=registration.avg_service_time or 20
+        avg_service_time=avg_time
     )
     db.session.add(service_center)
     db.session.flush()  # Get the service_center.id
