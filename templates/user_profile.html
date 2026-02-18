@@ -7,8 +7,27 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <style>
         body { background: #F8FAFC; }
-        .profile-header { background: #0F172A; color: white; padding: 1.5rem 0; border-bottom: 2px solid #2DD4BF; }
-        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
+        .profile-header { 
+            background: #0F172A; 
+            color: white; 
+            padding: 1.5rem 0; 
+            border-bottom: 2px solid #2DD4BF;
+        }
+        .card { 
+            border: none; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); 
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
+            color: #0F172A;
+            font-weight: 700;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+            color: #0F172A;
+        }
     </style>
 </head>
 <body>
@@ -25,7 +44,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" style="border-radius: 15px;">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -34,6 +53,9 @@
         {% endwith %}
 
         <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
+                <h5 class="mb-0 fw-semibold">📝 Edit Profile</h5>
+            </div>
             <div class="card-body p-4">
                 <form method="POST">
                     <div class="row g-3">
@@ -44,10 +66,11 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Mobile</label>
                             <input type="text" class="form-control" value="{{ user.mobile }}" disabled>
+                            <small class="text-muted">Cannot be changed</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Email</label>
-                            <input type="email" class="form-control" name="email" value="{{ user.email or '' }}">
+                            <input type="email" class="form-control" name="email" value="{{ user.email or '' }}" placeholder="your@email.com">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Address</label>
@@ -55,16 +78,38 @@
                         </div>
                         <div class="col-12">
                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="getLocation()">📍 Get My Location</button>
-                            <small class="text-muted ms-2">This helps calculate accurate travel time</small>
+                            <small class="text-muted ms-2">This helps calculate accurate travel time to service centers</small>
                             <input type="hidden" name="latitude" id="latitude" value="{{ user.latitude or '' }}">
                             <input type="hidden" name="longitude" id="longitude" value="{{ user.longitude or '' }}">
                             <div id="location-status" class="mt-2"></div>
                         </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; border: none;">Save Profile</button>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">Save Profile</button>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header" style="background: #0F172A; color: white; border-radius: 16px 16px 0 0;">
+                <h5 class="mb-0 fw-semibold">📊 Account Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-3">
+                    <div class="col-6">
+                        <div class="p-3" style="background: rgba(45, 212, 191, 0.1); border-radius: 12px;">
+                            <h3 class="mb-1" style="color: #2DD4BF;">{{ user.tokens|length }}</h3>
+                            <small class="text-muted">Total Tokens</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3" style="background: rgba(45, 212, 191, 0.1); border-radius: 12px;">
+                            <h3 class="mb-1" style="color: #2DD4BF;">{{ user.no_show_count }}</h3>
+                            <small class="text-muted">No-Shows</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -79,14 +124,14 @@
                     function(position) {
                         document.getElementById('latitude').value = position.coords.latitude;
                         document.getElementById('longitude').value = position.coords.longitude;
-                        statusDiv.innerHTML = '<small class="text-success">✓ Location captured</small>';
+                        statusDiv.innerHTML = '<small class="text-success">✓ Location captured successfully</small>';
                     },
                     function(error) {
-                        statusDiv.innerHTML = '<small class="text-danger">✗ Location access denied</small>';
+                        statusDiv.innerHTML = '<small class="text-danger">✗ Location access denied. Enable location in browser settings.</small>';
                     }
                 );
             } else {
-                statusDiv.innerHTML = '<small class="text-danger">✗ Geolocation not supported</small>';
+                statusDiv.innerHTML = '<small class="text-danger">✗ Geolocation not supported by your browser</small>';
             }
         }
     </script>
