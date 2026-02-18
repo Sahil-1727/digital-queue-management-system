@@ -1359,50 +1359,47 @@ def admin_analytics():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
-    try:
-        center_id = session['admin_center_id']
-        center = ServiceCenter.query.get(center_id)
-        
-        today = datetime.now().date()
-        
-        # Daily customers
-        daily_customers = Token.query.filter(
-            Token.service_center_id == center_id,
-            db.func.date(Token.created_time) == today
-        ).count()
-        
-        # Last 7 days
-        last_7_days = []
-        for i in range(6, -1, -1):
-            date = today - timedelta(days=i)
-            count = Token.query.filter(
-                Token.service_center_id == center_id,
-                db.func.date(Token.created_time) == date
-            ).count()
-            last_7_days.append({'date': date.strftime('%a'), 'count': count})
-        
-        # Peak hours - simplified
-        peak_hours = []
-        
-        # Online vs Walk-in
-        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
-        walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
-        online_tokens = total_tokens - walkin_tokens
-        
-        analytics = {
-            'daily_customers': daily_customers,
-            'last_7_days': last_7_days,
-            'peak_hours': peak_hours,
-            'online_tokens': online_tokens,
-            'walkin_tokens': walkin_tokens,
-            'total_tokens': total_tokens,
-            'avg_wait_time': center.avg_service_time
-        }
-        
-        return render_template('admin_analytics.html', center=center, analytics=analytics)
-    except Exception as e:
-        flash(f'Analytics error: {str(e)}. Try generating demo data first.', 'danger')
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
+    if not center:
+        flash('Service center not found', 'danger')
         return redirect(url_for('admin_dashboard'))
+    
+    today = datetime.now().date()
+    
+    # Daily customers
+    daily_customers = Token.query.filter(
+        Token.service_center_id == center_id,
+        db.func.date(Token.created_time) == today
+    ).count()
+    
+    # Last 7 days
+    last_7_days = []
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        count = Token.query.filter(
+            Token.service_center_id == center_id,
+            db.func.date(Token.created_time) == date
+        ).count()
+        last_7_days.append({'date': date.strftime('%a'), 'count': count})
+    
+    # Online vs Walk-in
+    total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+    walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
+    online_tokens = total_tokens - walkin_tokens
+    
+    analytics = {
+        'daily_customers': daily_customers,
+        'last_7_days': last_7_days,
+        'peak_hours': [],
+        'online_tokens': online_tokens,
+        'walkin_tokens': walkin_tokens,
+        'total_tokens': total_tokens,
+        'avg_wait_time': center.avg_service_time
+    }
+    
+    return render_template('admin_analytics.html', center=center, analytics=analytics)
 
 @app.route('/test-email-config')
 def test_email_config():
