@@ -1359,46 +1359,50 @@ def admin_analytics():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
-    center_id = session['admin_center_id']
-    center = ServiceCenter.query.get(center_id)
-    
-    today = datetime.now().date()
-    
-    # Daily customers
-    daily_customers = Token.query.filter(
-        Token.service_center_id == center_id,
-        db.func.date(Token.created_time) == today
-    ).count()
-    
-    # Last 7 days
-    last_7_days = []
-    for i in range(6, -1, -1):
-        date = today - timedelta(days=i)
-        count = Token.query.filter(
+    try:
+        center_id = session['admin_center_id']
+        center = ServiceCenter.query.get(center_id)
+        
+        today = datetime.now().date()
+        
+        # Daily customers
+        daily_customers = Token.query.filter(
             Token.service_center_id == center_id,
-            db.func.date(Token.created_time) == date
+            db.func.date(Token.created_time) == today
         ).count()
-        last_7_days.append({'date': date.strftime('%a'), 'count': count})
-    
-    # Peak hours - simplified
-    peak_hours = []
-    
-    # Online vs Walk-in
-    total_tokens = Token.query.filter_by(service_center_id=center_id).count()
-    walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
-    online_tokens = total_tokens - walkin_tokens
-    
-    analytics = {
-        'daily_customers': daily_customers,
-        'last_7_days': last_7_days,
-        'peak_hours': peak_hours,
-        'online_tokens': online_tokens,
-        'walkin_tokens': walkin_tokens,
-        'total_tokens': total_tokens,
-        'avg_wait_time': center.avg_service_time
-    }
-    
-    return render_template('admin_analytics.html', center=center, analytics=analytics)
+        
+        # Last 7 days
+        last_7_days = []
+        for i in range(6, -1, -1):
+            date = today - timedelta(days=i)
+            count = Token.query.filter(
+                Token.service_center_id == center_id,
+                db.func.date(Token.created_time) == date
+            ).count()
+            last_7_days.append({'date': date.strftime('%a'), 'count': count})
+        
+        # Peak hours - simplified
+        peak_hours = []
+        
+        # Online vs Walk-in
+        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+        walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
+        online_tokens = total_tokens - walkin_tokens
+        
+        analytics = {
+            'daily_customers': daily_customers,
+            'last_7_days': last_7_days,
+            'peak_hours': peak_hours,
+            'online_tokens': online_tokens,
+            'walkin_tokens': walkin_tokens,
+            'total_tokens': total_tokens,
+            'avg_wait_time': center.avg_service_time
+        }
+        
+        return render_template('admin_analytics.html', center=center, analytics=analytics)
+    except Exception as e:
+        flash(f'Analytics error: {str(e)}. Try generating demo data first.', 'danger')
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/test-email-config')
 def test_email_config():
@@ -1463,6 +1467,53 @@ def migrate_db():
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
         return f"<h2>Migration Error</h2><p>❌ {str(e)}</p>"
+
+@app.route('/admin/generate-demo-data')
+def generate_demo_data():
+    """Generate demo tokens for analytics testing"""
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    try:
+        center_id = session['admin_center_id']
+        center = ServiceCenter.query.get(center_id)
+        
+        # Get or create demo user
+        demo_user = User.query.filter_by(mobile='0000000000').first()
+        if not demo_user:
+            demo_user = User(name='Demo User', mobile='0000000000', password=generate_password_hash('demo123'))
+            db.session.add(demo_user)
+            db.session.commit()
+        
+        # Generate tokens for last 7 days
+        count = 0
+        for days_ago in range(7):
+            date = datetime.now() - timedelta(days=days_ago)
+            tokens_per_day = 5 + (days_ago % 3) * 2  # 5-9 tokens per day
+            
+            for i in range(tokens_per_day):
+                # Random time during business hours
+                hour = 9 + (i * 2) % 9  # 9 AM to 5 PM
+                token_time = date.replace(hour=hour, minute=i*10 % 60, second=0, microsecond=0)
+                
+                token = Token(
+                    user_id=demo_user.id,
+                    service_center_id=center_id,
+                    token_number=f"D{count+1:03d}",
+                    status='Completed',
+                    created_time=token_time,
+                    completed_time=token_time + timedelta(minutes=center.avg_service_time),
+                    is_walkin=(i % 3 == 0)  # Every 3rd token is walk-in
+                )
+                db.session.add(token)
+                count += 1
+        
+        db.session.commit()
+        flash(f'✅ Generated {count} demo tokens for analytics!', 'success')
+        return redirect(url_for('admin_analytics'))
+    except Exception as e:
+        flash(f'Error generating demo data: {str(e)}', 'danger')
+        return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
     init_db()
