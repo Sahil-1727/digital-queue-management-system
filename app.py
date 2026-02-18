@@ -13,9 +13,13 @@ import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
+import pytz
 
 # Load environment variables
 load_dotenv()
+
+# Timezone configuration
+IST = pytz.timezone('Asia/Kolkata')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')
@@ -787,7 +791,7 @@ def queue_status(token_id):
     
     # For 1st person: Current time + 10 min ready + travel
     if position <= 1:
-        current_time = datetime.now()
+        current_time = datetime.now(IST)
         leave_time = current_time + timedelta(minutes=10)
         reach_counter_time = leave_time + timedelta(minutes=travel_time)
         print(f"DEBUG 1st: Now={current_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
