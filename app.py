@@ -1127,19 +1127,15 @@ def call_next():
     ).order_by(Token.id).first()
     
     if next_token:
-        position = Token.query.filter(
-            Token.service_center_id == center_id,
-            Token.status == 'Active',
-            Token.is_walkin == False,
-            Token.id < next_token.id
-        ).count() + 1
+        # Calculate expected arrival time: booking + 10 min prep + travel time
+        user = User.query.get(next_token.user_id)
+        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+        expected_arrival = next_token.created_time + timedelta(minutes=10 + travel_time)
         
-        wait_time = position * center.avg_service_time
-        expected_arrival = next_token.created_time + timedelta(minutes=wait_time)
-        
-        if datetime.now() < expected_arrival:
-            minutes_left = int((expected_arrival - datetime.now()).total_seconds() / 60)
-            flash(f'Please wait {minutes_left} more minutes. User needs time to arrive at counter.', 'warning')
+        current_time = datetime.now(IST)
+        if current_time < expected_arrival:
+            minutes_left = int((expected_arrival - current_time).total_seconds() / 60)
+            flash(f'Please wait {minutes_left} more minutes. User is expected to arrive at {expected_arrival.strftime("%I:%M %p")}.', 'warning')
             return redirect(url_for('admin_dashboard'))
         
         next_token.status = 'Serving'
