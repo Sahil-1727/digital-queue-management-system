@@ -785,11 +785,12 @@ def queue_status(token_id):
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # For 1st person: Book + 10 min ready + travel
+    # For 1st person: Current time + 10 min ready + travel
     if position <= 1:
-        leave_time = token.created_time + timedelta(minutes=10)
+        current_time = datetime.now()
+        leave_time = current_time + timedelta(minutes=10)
         reach_counter_time = leave_time + timedelta(minutes=travel_time)
-        print(f"DEBUG 1st: Book={token.created_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
+        print(f"DEBUG 1st: Now={current_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
     else:
         # For others: Calculate when counter becomes free
         # Counter free = 1st person reach time + (position-1) * service time
