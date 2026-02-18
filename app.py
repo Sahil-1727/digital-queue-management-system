@@ -143,110 +143,130 @@ def init_db():
             print("✅ Database tables created")
         except Exception as e:
             print(f"❌ Database init error: {e}")
+            return  # Exit early if tables can't be created
         
-        # Add service centers from approved registrations
-        approved_registrations = ServiceCenterRegistration.query.filter_by(status='Approved').all()
-        for reg in approved_registrations:
-            # Check if service center already exists
-            existing = ServiceCenter.query.filter_by(name=reg.center_name, location=f"{reg.city}, {reg.state}").first()
-            if not existing:
-                new_center = ServiceCenter(
-                    name=reg.center_name,
-                    category=reg.organization_type,
-                    location=f"{reg.city}, {reg.state}",
-                    avg_service_time=15
-                )
-                db.session.add(new_center)
-                db.session.commit()
-                
-                # Create admin for this center if credentials exist
-                if reg.admin_username and reg.admin_password:
-                    admin_exists = Admin.query.filter_by(username=reg.admin_username).first()
-                    if not admin_exists:
-                        new_admin = Admin(
-                            username=reg.admin_username,
-                            email=reg.email,
-                            password=reg.admin_password,  # Already hashed during approval
-                            service_center_id=new_center.id
-                        )
-                        db.session.add(new_admin)
-                        db.session.commit()
+        try:
+            # Add service centers from approved registrations
+            approved_registrations = ServiceCenterRegistration.query.filter_by(status='Approved').all()
+            for reg in approved_registrations:
+                # Check if service center already exists
+                existing = ServiceCenter.query.filter_by(name=reg.center_name, location=f"{reg.city}, {reg.state}").first()
+                if not existing:
+                    new_center = ServiceCenter(
+                        name=reg.center_name,
+                        category=reg.organization_type,
+                        location=f"{reg.city}, {reg.state}",
+                        avg_service_time=15
+                    )
+                    db.session.add(new_center)
+                    db.session.commit()
+                    
+                    # Create admin for this center if credentials exist
+                    if reg.admin_username and reg.admin_password:
+                        admin_exists = Admin.query.filter_by(username=reg.admin_username).first()
+                        if not admin_exists:
+                            new_admin = Admin(
+                                username=reg.admin_username,
+                                email=reg.email,
+                                password=reg.admin_password,  # Already hashed during approval
+                                service_center_id=new_center.id
+                            )
+                            db.session.add(new_admin)
+                            db.session.commit()
+        except Exception as e:
+            print(f"⚠️ Error processing approved registrations: {e}")
         
         # Add default service centers only if none exist
-        if ServiceCenter.query.count() == 0:
-            centers = [
-                # Medical Clinics (Nagpur coordinates)
-                ServiceCenter(name='APOLLO CLINIC', category='Medical Clinic', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=20),
-                ServiceCenter(name='The Nagpur Clinic', category='Medical Clinic', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=18),
-                ServiceCenter(name='Nagpur Clinic', category='Medical Clinic', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=15),
-                ServiceCenter(name='MOTHER INDIA FETAL MEDICINE CENTRE', category='Medical Clinic', location='Ramdaspeth, Nagpur', latitude=21.1307, longitude=79.0711, avg_service_time=25),
-                ServiceCenter(name='Ashvatam Clinic', category='Medical Clinic', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=18),
-                ServiceCenter(name='Apna Clinic', category='Medical Clinic', location='Gandhibagh, Nagpur', latitude=21.1540, longitude=79.0849, avg_service_time=15),
-                ServiceCenter(name='Dr.Agrawal Multispeciality Clinic', category='Medical Clinic', location='Wardha Road, Nagpur', latitude=21.1180, longitude=79.0510, avg_service_time=22),
-                ServiceCenter(name='Shree Clinic', category='Medical Clinic', location='Manish Nagar, Nagpur', latitude=21.1220, longitude=79.0420, avg_service_time=15),
-                ServiceCenter(name='Sai Clinic', category='Medical Clinic', location='Pratap Nagar, Nagpur', latitude=21.1650, longitude=79.0900, avg_service_time=18),
-                ServiceCenter(name='Suyash Clinic', category='Medical Clinic', location='Laxmi Nagar, Nagpur', latitude=21.1700, longitude=79.0950, avg_service_time=15),
-                ServiceCenter(name='INC CLINIC NAGPUR', category='Medical Clinic', location='Dhantoli, Nagpur', latitude=21.1350, longitude=79.0750, avg_service_time=20),
-                # Mobile Service Centers
-                ServiceCenter(name='Apple Service - NGRT Systems', category='Mobile Service', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=30),
-                ServiceCenter(name='Samsung Service - The Mobile Magic', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=25),
-                ServiceCenter(name='Samsung Service - Spectrum Marketing', category='Mobile Service', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=25),
-                ServiceCenter(name='Samsung Service - Karuna Management', category='Mobile Service', location='Rambagh Layout, Nagpur', latitude=21.1400, longitude=79.0700, avg_service_time=25),
-                ServiceCenter(name='Samsung CE - Akshay Refrigeration', category='Mobile Service', location='Somalwada, Nagpur', latitude=21.1600, longitude=79.1000, avg_service_time=28),
-                ServiceCenter(name='vivo India Service Center', category='Mobile Service', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=22),
-                ServiceCenter(name='vivo & iQOO Service Center', category='Mobile Service', location='Medical Chowk, Nagpur', latitude=21.1520, longitude=79.0840, avg_service_time=22),
-                ServiceCenter(name='OPPO Service Center', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=22),
-            ]
-            db.session.add_all(centers)
-            db.session.commit()
+        try:
+            if ServiceCenter.query.count() == 0:
+                centers = [
+                    # Medical Clinics (Nagpur coordinates)
+                    ServiceCenter(name='APOLLO CLINIC', category='Medical Clinic', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=20),
+                    ServiceCenter(name='The Nagpur Clinic', category='Medical Clinic', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=18),
+                    ServiceCenter(name='Nagpur Clinic', category='Medical Clinic', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=15),
+                    ServiceCenter(name='MOTHER INDIA FETAL MEDICINE CENTRE', category='Medical Clinic', location='Ramdaspeth, Nagpur', latitude=21.1307, longitude=79.0711, avg_service_time=25),
+                    ServiceCenter(name='Ashvatam Clinic', category='Medical Clinic', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=18),
+                    ServiceCenter(name='Apna Clinic', category='Medical Clinic', location='Gandhibagh, Nagpur', latitude=21.1540, longitude=79.0849, avg_service_time=15),
+                    ServiceCenter(name='Dr.Agrawal Multispeciality Clinic', category='Medical Clinic', location='Wardha Road, Nagpur', latitude=21.1180, longitude=79.0510, avg_service_time=22),
+                    ServiceCenter(name='Shree Clinic', category='Medical Clinic', location='Manish Nagar, Nagpur', latitude=21.1220, longitude=79.0420, avg_service_time=15),
+                    ServiceCenter(name='Sai Clinic', category='Medical Clinic', location='Pratap Nagar, Nagpur', latitude=21.1650, longitude=79.0900, avg_service_time=18),
+                    ServiceCenter(name='Suyash Clinic', category='Medical Clinic', location='Laxmi Nagar, Nagpur', latitude=21.1700, longitude=79.0950, avg_service_time=15),
+                    ServiceCenter(name='INC CLINIC NAGPUR', category='Medical Clinic', location='Dhantoli, Nagpur', latitude=21.1350, longitude=79.0750, avg_service_time=20),
+                    # Mobile Service Centers
+                    ServiceCenter(name='Apple Service - NGRT Systems', category='Mobile Service', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=30),
+                    ServiceCenter(name='Samsung Service - The Mobile Magic', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=25),
+                    ServiceCenter(name='Samsung Service - Spectrum Marketing', category='Mobile Service', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=25),
+                    ServiceCenter(name='Samsung Service - Karuna Management', category='Mobile Service', location='Rambagh Layout, Nagpur', latitude=21.1400, longitude=79.0700, avg_service_time=25),
+                    ServiceCenter(name='Samsung CE - Akshay Refrigeration', category='Mobile Service', location='Somalwada, Nagpur', latitude=21.1600, longitude=79.1000, avg_service_time=28),
+                    ServiceCenter(name='vivo India Service Center', category='Mobile Service', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=22),
+                    ServiceCenter(name='vivo & iQOO Service Center', category='Mobile Service', location='Medical Chowk, Nagpur', latitude=21.1520, longitude=79.0840, avg_service_time=22),
+                    ServiceCenter(name='OPPO Service Center', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=22),
+                ]
+                db.session.add_all(centers)
+                db.session.commit()
+                print("✅ Added default service centers")
+        except Exception as e:
+            print(f"⚠️ Error adding service centers: {e}")
         
         # Add admins
-        if Admin.query.count() == 0:
-            admins = [
-                Admin(username='apollo@admin.com', password=generate_password_hash('admin123'), service_center_id=1),
-                Admin(username='nagpurclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=2),
-                Admin(username='localclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=3),
-                Admin(username='motherindia@admin.com', password=generate_password_hash('admin123'), service_center_id=4),
-                Admin(username='ashvatam@admin.com', password=generate_password_hash('admin123'), service_center_id=5),
-                Admin(username='apna@admin.com', password=generate_password_hash('admin123'), service_center_id=6),
-                Admin(username='agrawal@admin.com', password=generate_password_hash('admin123'), service_center_id=7),
-                Admin(username='shree@admin.com', password=generate_password_hash('admin123'), service_center_id=8),
-                Admin(username='sai@admin.com', password=generate_password_hash('admin123'), service_center_id=9),
-                Admin(username='suyash@admin.com', password=generate_password_hash('admin123'), service_center_id=10),
-                Admin(username='inc@admin.com', password=generate_password_hash('admin123'), service_center_id=11),
-                Admin(username='apple@admin.com', password=generate_password_hash('admin123'), service_center_id=12),
-                Admin(username='samsung1@admin.com', password=generate_password_hash('admin123'), service_center_id=13),
-                Admin(username='samsung2@admin.com', password=generate_password_hash('admin123'), service_center_id=14),
-                Admin(username='samsung3@admin.com', password=generate_password_hash('admin123'), service_center_id=15),
-                Admin(username='samsung4@admin.com', password=generate_password_hash('admin123'), service_center_id=16),
-                Admin(username='vivo@admin.com', password=generate_password_hash('admin123'), service_center_id=17),
-                Admin(username='vivoiqoo@admin.com', password=generate_password_hash('admin123'), service_center_id=18),
-                Admin(username='oppo@admin.com', password=generate_password_hash('admin123'), service_center_id=19),
-            ]
-            db.session.add_all(admins)
-            db.session.commit()
+        try:
+            if Admin.query.count() == 0:
+                admins = [
+                    Admin(username='apollo@admin.com', password=generate_password_hash('admin123'), service_center_id=1),
+                    Admin(username='nagpurclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=2),
+                    Admin(username='localclinic@admin.com', password=generate_password_hash('admin123'), service_center_id=3),
+                    Admin(username='motherindia@admin.com', password=generate_password_hash('admin123'), service_center_id=4),
+                    Admin(username='ashvatam@admin.com', password=generate_password_hash('admin123'), service_center_id=5),
+                    Admin(username='apna@admin.com', password=generate_password_hash('admin123'), service_center_id=6),
+                    Admin(username='agrawal@admin.com', password=generate_password_hash('admin123'), service_center_id=7),
+                    Admin(username='shree@admin.com', password=generate_password_hash('admin123'), service_center_id=8),
+                    Admin(username='sai@admin.com', password=generate_password_hash('admin123'), service_center_id=9),
+                    Admin(username='suyash@admin.com', password=generate_password_hash('admin123'), service_center_id=10),
+                    Admin(username='inc@admin.com', password=generate_password_hash('admin123'), service_center_id=11),
+                    Admin(username='apple@admin.com', password=generate_password_hash('admin123'), service_center_id=12),
+                    Admin(username='samsung1@admin.com', password=generate_password_hash('admin123'), service_center_id=13),
+                    Admin(username='samsung2@admin.com', password=generate_password_hash('admin123'), service_center_id=14),
+                    Admin(username='samsung3@admin.com', password=generate_password_hash('admin123'), service_center_id=15),
+                    Admin(username='samsung4@admin.com', password=generate_password_hash('admin123'), service_center_id=16),
+                    Admin(username='vivo@admin.com', password=generate_password_hash('admin123'), service_center_id=17),
+                    Admin(username='vivoiqoo@admin.com', password=generate_password_hash('admin123'), service_center_id=18),
+                    Admin(username='oppo@admin.com', password=generate_password_hash('admin123'), service_center_id=19),
+                ]
+                db.session.add_all(admins)
+                db.session.commit()
+                print("✅ Added admin accounts")
+        except Exception as e:
+            print(f"⚠️ Error adding admins: {e}")
         
         # Add demo users
-        if User.query.count() == 0:
-            demo_users = [
-                User(name='Rahul Sharma', mobile='9876543210', password=generate_password_hash('demo123')),
-                User(name='Priya Patel', mobile='9876543211', password=generate_password_hash('demo123')),
-                User(name='Amit Kumar', mobile='9876543212', password=generate_password_hash('demo123')),
-                User(name='Sneha Deshmukh', mobile='9876543213', password=generate_password_hash('demo123')),
-                User(name='Vikram Singh', mobile='9876543214', password=generate_password_hash('demo123')),
-            ]
-            db.session.add_all(demo_users)
-            db.session.commit()
+        try:
+            if User.query.count() == 0:
+                demo_users = [
+                    User(name='Rahul Sharma', mobile='9876543210', password=generate_password_hash('demo123')),
+                    User(name='Priya Patel', mobile='9876543211', password=generate_password_hash('demo123')),
+                    User(name='Amit Kumar', mobile='9876543212', password=generate_password_hash('demo123')),
+                    User(name='Sneha Deshmukh', mobile='9876543213', password=generate_password_hash('demo123')),
+                    User(name='Vikram Singh', mobile='9876543214', password=generate_password_hash('demo123')),
+                ]
+                db.session.add_all(demo_users)
+                db.session.commit()
+                print("✅ Added demo users")
+        except Exception as e:
+            print(f"⚠️ Error adding demo users: {e}")
         
         # Add super admin
-        if SuperAdmin.query.count() == 0:
-            super_admin = SuperAdmin(
-                username='superadmin@queueflow.com',
-                password=generate_password_hash('superadmin123'),
-                email='superadmin@queueflow.com'
-            )
-            db.session.add(super_admin)
-            db.session.commit()
+        try:
+            if SuperAdmin.query.count() == 0:
+                super_admin = SuperAdmin(
+                    username='superadmin@queueflow.com',
+                    password=generate_password_hash('superadmin123'),
+                    email='superadmin@queueflow.com'
+                )
+                db.session.add(super_admin)
+                db.session.commit()
+                print("✅ Added super admin")
+        except Exception as e:
+            print(f"⚠️ Error adding super admin: {e}")
 
 # Helper functions
 def get_active_token_for_user(user_id):
@@ -448,12 +468,19 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
 @app.before_request
 def initialize_database():
     if not hasattr(app, 'db_initialized'):
-        with app.app_context():
-            db.create_all()
-            # Add default data only if tables are empty
-            if ServiceCenter.query.count() == 0:
-                init_db()
-            app.db_initialized = True
+        try:
+            with app.app_context():
+                db.create_all()
+                # Add default data only if tables are empty
+                try:
+                    if ServiceCenter.query.count() == 0:
+                        init_db()
+                except Exception as e:
+                    print(f"⚠️ Error checking/initializing data: {e}")
+                app.db_initialized = True
+        except Exception as e:
+            print(f"❌ Database initialization error: {e}")
+            app.db_initialized = True  # Mark as initialized to prevent infinite loops
 
 # Routes - User Module
 @app.route('/')
