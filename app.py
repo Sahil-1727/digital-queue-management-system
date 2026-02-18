@@ -273,23 +273,25 @@ def expire_old_tokens():
     db.session.commit()
 
 def send_reset_email(email, reset_link, user_type="User"):
-    """Send password reset email using Mailgun API (HTTP-based, works on Render)"""
-    print(f"🔍 Attempting to send email to {email}")
+    """Send password reset email using Brevo API (free 300 emails/day)"""
+    print(f"🔐 Attempting to send email to {email}")
     
-    # Try Mailgun API first (HTTP-based, no SMTP blocking)
-    mailgun_api_key = os.getenv('MAILGUN_API_KEY', '')
-    mailgun_domain = os.getenv('MAILGUN_DOMAIN', '')
+    # Brevo (formerly Sendinblue) - Free tier: 300 emails/day, no credit card
+    brevo_api_key = os.getenv('BREVO_API_KEY', '')
     
-    if mailgun_api_key and mailgun_domain:
+    if brevo_api_key:
         try:
             response = requests.post(
-                f"https://api.mailgun.net/v3/{mailgun_domain}/messages",
-                auth=("api", mailgun_api_key),
-                data={
-                    "from": f"QueueFlow <mailgun@{mailgun_domain}>",
-                    "to": email,
+                "https://api.brevo.com/v3/smtp/email",
+                headers={
+                    "api-key": brevo_api_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "sender": {"name": "QueueFlow", "email": "noreply@queueflow.app"},
+                    "to": [{"email": email}],
                     "subject": "QueueFlow - Password Reset Request",
-                    "html": f"""
+                    "htmlContent": f"""
                     <html>
                       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -313,15 +315,15 @@ def send_reset_email(email, reset_link, user_type="User"):
                 },
                 timeout=10
             )
-            if response.status_code == 200:
-                print(f"✅ Email sent via Mailgun to {email}")
+            if response.status_code == 201:
+                print(f"✅ Email sent via Brevo to {email}")
                 return True
             else:
-                print(f"❌ Mailgun error: {response.status_code} - {response.text}")
+                print(f"❌ Brevo error: {response.status_code} - {response.text}")
         except Exception as e:
-            print(f"❌ Mailgun failed: {e}")
+            print(f"❌ Brevo failed: {e}")
     
-    # Fallback: Show reset link in console (for development/testing)
+    # Fallback: Show reset link in console
     print(f"⚠️ Email service not configured. Reset link: {reset_link}")
     return False
 
