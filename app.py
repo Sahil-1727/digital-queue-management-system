@@ -263,6 +263,7 @@ def calculate_wait_time(center_id, token_position):
     return token_position * center.avg_service_time
 
 def expire_old_tokens():
+    # Expire pending payment tokens after 2 hours
     expiry_time = datetime.now() - timedelta(hours=2)
     expired_tokens = Token.query.filter(
         Token.status == 'PendingPayment',
@@ -270,6 +271,16 @@ def expire_old_tokens():
     ).all()
     for token in expired_tokens:
         token.status = 'Expired'
+    
+    # Expire active tokens after 4 hours (if admin never called them)
+    active_expiry_time = datetime.now() - timedelta(hours=4)
+    old_active_tokens = Token.query.filter(
+        Token.status == 'Active',
+        Token.created_time < active_expiry_time
+    ).all()
+    for token in old_active_tokens:
+        token.status = 'Expired'
+    
     db.session.commit()
 
 def send_reset_email(email, reset_link, user_type="User"):
@@ -607,6 +618,20 @@ def queue_status(token_id):
     token = Token.query.get_or_404(token_id)
     if token.user_id != session['user_id']:
         flash('Unauthorized access!', 'danger')
+        return redirect(url_for('services'))
+    
+    # Auto-expire tokens older than 4 hours that are still Active
+    if token.status == 'Active':
+        hours_since_creation = (datetime.now() - token.created_time).total_seconds() / 3600
+        if hours_since_creation > 4:
+            token.status = 'Expired'
+            db.session.commit()
+            flash('Your token has expired. Please book a new token.', 'warning')
+            return redirect(url_for('services'))
+    
+    # If token is not Active or Serving, redirect
+    if token.status not in ['Active', 'Serving']:
+        flash(f'Token is {token.status.lower()}.', 'info')
         return redirect(url_for('services'))
     
     serving_token = get_serving_token(token.service_center_id)
