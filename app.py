@@ -56,7 +56,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     mobile = db.Column(db.String(10), unique=True, nullable=False)
-    email = db.Column(db.String(100), nullable=True)
+    email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     address = db.Column(db.String(200), nullable=True)
     latitude = db.Column(db.Float, nullable=True)
@@ -248,11 +248,11 @@ def init_db():
         try:
             if User.query.count() == 0:
                 demo_users = [
-                    User(name='Rahul Sharma', mobile='9876543210', password=generate_password_hash('demo123')),
-                    User(name='Priya Patel', mobile='9876543211', password=generate_password_hash('demo123')),
-                    User(name='Amit Kumar', mobile='9876543212', password=generate_password_hash('demo123')),
-                    User(name='Sneha Deshmukh', mobile='9876543213', password=generate_password_hash('demo123')),
-                    User(name='Vikram Singh', mobile='9876543214', password=generate_password_hash('demo123')),
+                    User(name='Rahul Sharma', mobile='9876543210', email='rahul@demo.com', password=generate_password_hash('demo123')),
+                    User(name='Priya Patel', mobile='9876543211', email='priya@demo.com', password=generate_password_hash('demo123')),
+                    User(name='Amit Kumar', mobile='9876543212', email='amit@demo.com', password=generate_password_hash('demo123')),
+                    User(name='Sneha Deshmukh', mobile='9876543213', email='sneha@demo.com', password=generate_password_hash('demo123')),
+                    User(name='Vikram Singh', mobile='9876543214', email='vikram@demo.com', password=generate_password_hash('demo123')),
                 ]
                 db.session.add_all(demo_users)
                 db.session.commit()
@@ -574,7 +574,7 @@ def register():
             
             print(f"📝 Registration attempt: name={name}, mobile={mobile}, email={email}")
             
-            if not all([name, mobile, password]):
+            if not all([name, mobile, email, password]):
                 flash('All fields are required!', 'danger')
                 return redirect(url_for('register'))
             
@@ -588,7 +588,7 @@ def register():
             user = User(
                 name=name, 
                 mobile=mobile, 
-                email=email if email else None, 
+                email=email, 
                 password=generate_password_hash(password)
             )
             db.session.add(user)
@@ -1208,7 +1208,7 @@ def add_walkin():
                 db.session.commit()
         else:
             # Anonymous walk-in
-            user = User(name=name, mobile=f'W{int(datetime.now().timestamp())}', password=generate_password_hash('walkin123'))
+            user = User(name=name, mobile=f'W{int(datetime.now().timestamp())}', email=f'walkin{int(datetime.now().timestamp())}@queueflow.com', password=generate_password_hash('walkin123'))
             db.session.add(user)
             db.session.commit()
         
@@ -1679,7 +1679,7 @@ def generate_demo_data():
         # Get or create demo user
         demo_user = User.query.filter_by(mobile='0000000000').first()
         if not demo_user:
-            demo_user = User(name='Demo User', mobile='0000000000', password=generate_password_hash('demo123'))
+            demo_user = User(name='Demo User', mobile='0000000000', email='demo@queueflow.com', password=generate_password_hash('demo123'))
             db.session.add(demo_user)
             db.session.commit()
         
