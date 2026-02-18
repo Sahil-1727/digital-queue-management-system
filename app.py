@@ -722,14 +722,12 @@ def payment(token_id):
                 if serving_token:
                     position += 1
                 
-                wait_time = calculate_wait_time(center.id, position)
-                
                 # Calculate travel time
                 user = User.query.get(session['user_id'])
                 travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
                 
                 leave_time = datetime.now() + timedelta(minutes=10)
-                reach_time = leave_time + timedelta(minutes=travel_time + wait_time)
+                reach_time = leave_time + timedelta(minutes=travel_time)
                 
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
         except Exception as e:
@@ -776,8 +774,6 @@ def queue_status(token_id):
         if serving_token:
             position += 1
     
-    wait_time = calculate_wait_time(token.service_center_id, position)
-    
     # Calculate travel time based on user and center location
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
@@ -785,14 +781,14 @@ def queue_status(token_id):
     
     # Leave time = current time + 10 min (get ready time)
     leave_time = datetime.now() + timedelta(minutes=10)
-    # Reach counter = leave time + travel time + wait time
-    reach_counter_time = leave_time + timedelta(minutes=travel_time + wait_time)
+    # Reach counter = leave time + travel time
+    reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
     return render_template('queue_status.html', 
                          token=token, 
                          serving_token=serving_token,
                          position=position,
-                         wait_time=wait_time,
+                         wait_time=0,
                          travel_time=travel_time,
                          leave_time=leave_time,
                          reach_counter_time=reach_counter_time)
