@@ -303,9 +303,9 @@ def generate_token_number(center_id):
 def calculate_wait_time(center_id, token_position):
     """Calculate realistic wait time in minutes"""
     center = ServiceCenter.query.get(center_id)
-    # If first in queue (position 1), minimal wait time
+    # If currently being served or first in queue, minimal wait time
     if token_position <= 1:
-        return center.avg_service_time
+        return 5  # 5 minutes buffer
     # For others: (position - 1) × avg service time
     wait_minutes = (token_position - 1) * center.avg_service_time
     # Cap maximum wait time at 3 hours (180 minutes)
@@ -723,8 +723,8 @@ def payment(token_id):
                     position += 1
                 
                 wait_time = calculate_wait_time(center.id, position)
-                leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
-                reach_time = datetime.now() + timedelta(minutes=wait_time)
+                leave_time = datetime.now() + timedelta(minutes=wait_time)
+                reach_time = datetime.now() + timedelta(minutes=wait_time + 5)
                 
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
         except Exception as e:
