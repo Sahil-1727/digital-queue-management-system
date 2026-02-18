@@ -349,56 +349,62 @@ def send_reset_email(email, reset_link, user_type="User"):
     return False
 
 def send_timing_alert(email, user_name, token_number, center_name, leave_time, reach_time):
-    """Send timing alert email when token is confirmed"""
+    """Send timing alert email using Brevo API"""
+    brevo_api_key = os.getenv('BREVO_API_KEY', '')
+    brevo_sender_email = os.getenv('BREVO_SENDER_EMAIL', 'queueflowqms@gmail.com')
+    
+    if not brevo_api_key:
+        print("⚠️ Brevo API key not configured")
+        return False
+    
     try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'QueueFlow - Token {token_number} Timing Alert'
-        msg['From'] = app.config['MAIL_USERNAME']
-        msg['To'] = email
-        
-        html = f"""
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #10B981;">✅ Token Confirmed!</h2>
-              <p>Hello {user_name},</p>
-              <p>Your token has been confirmed at <strong>{center_name}</strong>.</p>
-              
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #4B6CB7; margin-top: 0;">Token Details</h3>
-                <p style="font-size: 24px; font-weight: bold; color: #333; margin: 10px 0;">Token: {token_number}</p>
-                <p style="margin: 5px 0;"><strong>Service Center:</strong> {center_name}</p>
-              </div>
-              
-              <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
-                <h3 style="color: #856404; margin-top: 0;">⏰ Important Timings</h3>
-                <p style="margin: 8px 0;"><strong>🏠 Leave Home By:</strong> {leave_time.strftime('%I:%M %p')}</p>
-                <p style="margin: 8px 0;"><strong>🏥 Reach Counter By:</strong> {reach_time.strftime('%I:%M %p')}</p>
-              </div>
-              
-              <p style="color: #666; font-size: 14px;">💡 <em>Tip: Leave 10 minutes before your estimated time to avoid delays.</em></p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="http://127.0.0.1:9000/track" style="background-color: #4B6CB7; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Track Your Token</a>
-              </div>
-              
-              <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-              <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
-            </div>
-          </body>
-        </html>
-        """
-        
-        part = MIMEText(html, 'html')
-        msg.attach(part)
-        
-        with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
-            server.starttls()
-            server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-            server.send_message(msg)
-        
-        print(f"✅ Timing alert sent to {email}")
-        return True
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": brevo_api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "sender": {"name": "QueueFlow", "email": brevo_sender_email},
+                "to": [{"email": email}],
+                "subject": f"QueueFlow - Token {token_number} Timing Alert",
+                "htmlContent": f"""
+                <html>
+                  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                      <h2 style="color: #10B981;">✅ Token Confirmed!</h2>
+                      <p>Hello {user_name},</p>
+                      <p>Your token has been confirmed at <strong>{center_name}</strong>.</p>
+                      
+                      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #2DD4BF; margin-top: 0;">Token Details</h3>
+                        <p style="font-size: 24px; font-weight: bold; color: #333; margin: 10px 0;">Token: {token_number}</p>
+                        <p style="margin: 5px 0;"><strong>Service Center:</strong> {center_name}</p>
+                      </div>
+                      
+                      <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                        <h3 style="color: #856404; margin-top: 0;">⏰ Important Timings</h3>
+                        <p style="margin: 8px 0;"><strong>🏠 Leave Home By:</strong> {leave_time.strftime('%I:%M %p')}</p>
+                        <p style="margin: 8px 0;"><strong>🏥 Reach Counter By:</strong> {reach_time.strftime('%I:%M %p')}</p>
+                      </div>
+                      
+                      <p style="color: #666; font-size: 14px;">💡 <em>Tip: Leave 10 minutes before your estimated time to avoid delays.</em></p>
+                      
+                      <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                      <p style="color: #999; font-size: 12px;">QueueFlow - Smart Queue Management Platform</p>
+                    </div>
+                  </body>
+                </html>
+                """
+            },
+            timeout=10
+        )
+        if response.status_code == 201:
+            print(f"✅ Timing alert sent to {email}")
+            return True
+        else:
+            print(f"❌ Brevo error: {response.status_code}")
+            return False
     except Exception as e:
         print(f"❌ Email error: {e}")
         return False
