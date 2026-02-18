@@ -86,7 +86,7 @@
                                 <td>{{ center.name }}</td>
                                 <td>{{ center.category }}</td>
                                 <td>{{ center.location }}</td>
-                                <td>{{ center.avg_service_time }} mins</td>
+                                <td>{{ center.avg_service_time if center.avg_service_time else 15 }} mins</td>
                                 <td>
                                     <form method="POST" action="{{ url_for('superadmin_delete_center', center_id=center.id) }}" 
                                           onsubmit="return confirm('Are you sure you want to delete {{ center.name }}? This will delete all tokens and admin accounts.');" 

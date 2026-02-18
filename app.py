@@ -1296,8 +1296,12 @@ def superadmin_manage_centers():
     if 'superadmin_id' not in session:
         return redirect(url_for('superadmin_login'))
     
-    centers = ServiceCenter.query.order_by(ServiceCenter.id).all()
-    return render_template('superadmin_manage_centers.html', centers=centers)
+    try:
+        centers = ServiceCenter.query.order_by(ServiceCenter.id).all()
+        return render_template('superadmin_manage_centers.html', centers=centers)
+    except Exception as e:
+        flash(f'Error loading centers: {str(e)}', 'danger')
+        return redirect(url_for('superadmin_dashboard'))
 
 @app.route('/admin/delete-center', methods=['POST'])
 def admin_delete_center():
