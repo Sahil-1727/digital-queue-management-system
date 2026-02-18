@@ -16,16 +16,28 @@
         }
         .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
         .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 700; }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .superadmin-header h4 { font-size: 1rem; }
+            .superadmin-header .d-flex { flex-direction: column; gap: 0.5rem; align-items: flex-start !important; }
+            .superadmin-header .d-flex.gap-2 { flex-direction: row; flex-wrap: wrap; }
+            .display-4 { font-size: 2rem !important; }
+            .table { font-size: 0.85rem; }
+            .btn-sm { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+            .modal-body { font-size: 0.9rem; }
+            .modal-body .row { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
     <div class="superadmin-header">
         <div class="container-fluid px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">👑 Super Admin Dashboard</h4>
-                <div class="d-flex gap-2">
-                    <span class="text-white">{{ session.superadmin_username }}</span>
-                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Manage Centers</a>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0 fw-bold">👑 Super Admin</h4>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="text-white d-none d-md-inline">{{ session.superadmin_username }}</span>
+                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Manage</a>
                     <a href="{{ url_for('superadmin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>
@@ -46,35 +58,35 @@
 
         <!-- Stats Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card text-center" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(45, 212, 191, 0.3);">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2">{{ stats.pending }}</h2>
-                        <p class="mb-0 fw-semibold">Pending Requests</p>
+                    <div class="card-body py-3">
+                        <h2 class="display-4 fw-bold mb-1">{{ stats.pending }}</h2>
+                        <p class="mb-0 fw-semibold small">Pending</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card text-center" style="background: #0F172A; color: white; border: 2px solid #2DD4BF;">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2" style="color: #2DD4BF;">{{ stats.approved }}</h2>
-                        <p class="mb-0 fw-semibold">Approved</p>
+                    <div class="card-body py-3">
+                        <h2 class="display-4 fw-bold mb-1" style="color: #2DD4BF;">{{ stats.approved }}</h2>
+                        <p class="mb-0 fw-semibold small">Approved</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card text-center" style="background: rgba(45, 212, 191, 0.1); color: #0F172A; border: 2px solid #2DD4BF;">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2" style="color: #0F172A;">{{ stats.rejected }}</h2>
-                        <p class="mb-0 fw-semibold">Rejected</p>
+                    <div class="card-body py-3">
+                        <h2 class="display-4 fw-bold mb-1" style="color: #0F172A;">{{ stats.rejected }}</h2>
+                        <p class="mb-0 fw-semibold small">Rejected</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card text-center" style="background: white; color: #0F172A; border: 2px solid #E2E8F0;">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2" style="color: #2DD4BF;">{{ stats.total }}</h2>
-                        <p class="mb-0 fw-semibold">Total Requests</p>
+                    <div class="card-body py-3">
+                        <h2 class="display-4 fw-bold mb-1" style="color: #2DD4BF;">{{ stats.total }}</h2>
+                        <p class="mb-0 fw-semibold small">Total</p>
                     </div>
                 </div>
             </div>
@@ -121,7 +133,7 @@
                                     </td>
                                     <td><small>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}</small></td>
                                     <td>
-                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#viewModal{{ reg.id }}">View Details</button>
+                                        <button class="btn btn-sm btn-success w-100" data-bs-toggle="modal" data-bs-target="#viewModal{{ reg.id }}">View</button>
                                     </td>
                                 </tr>
                                 
