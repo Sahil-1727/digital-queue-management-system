@@ -85,6 +85,7 @@ class Token(db.Model):
     token_number = db.Column(db.String(10), nullable=False)
     status = db.Column(db.String(20), default='PendingPayment')  # PendingPayment, Active, Serving, Completed, Expired
     created_time = db.Column(db.DateTime, default=datetime.now)
+    completed_time = db.Column(db.DateTime, nullable=True)
     no_show_reason = db.Column(db.String(500), nullable=True)
     no_show_time = db.Column(db.DateTime, nullable=True)
     is_walkin = db.Column(db.Boolean, default=False)
@@ -940,6 +941,7 @@ def call_next():
     serving_token = get_serving_token(center_id)
     if serving_token:
         serving_token.status = 'Completed'
+        serving_token.completed_time = datetime.now()
     
     next_token = Token.query.filter_by(
         service_center_id=center_id,
@@ -982,6 +984,7 @@ def call_next_walkin():
     walkin_serving_token = get_walkin_serving_token(center_id)
     if walkin_serving_token:
         walkin_serving_token.status = 'Completed'
+        walkin_serving_token.completed_time = datetime.now()
     
     next_token = Token.query.filter_by(
         service_center_id=center_id,
@@ -1006,6 +1009,7 @@ def complete_token(token_id):
     
     token = Token.query.get_or_404(token_id)
     token.status = 'Completed'
+    token.completed_time = datetime.now()
     db.session.commit()
     flash('Token marked as completed.', 'success')
     return redirect(url_for('admin_dashboard'))
