@@ -1371,44 +1371,30 @@ def admin_analytics():
         last_7_days.append({'date': date.strftime('%a'), 'count': count})
     
     # Peak hours (last 7 days)
-    peak_hours = db.session.query(
-        db.func.extract('hour', Token.created_time).label('hour'),
-        db.func.count(Token.id).label('count')
-    ).filter(
-        Token.service_center_id == center_id,
-        Token.created_time >= datetime.now() - timedelta(days=7)
-    ).group_by('hour').order_by(db.desc('count')).limit(3).all()
+    try:
+        peak_hours = db.session.query(
+            db.func.extract('hour', Token.created_time).label('hour'),
+            db.func.count(Token.id).label('count')
+        ).filter(
+            Token.service_center_id == center_id,
+            Token.created_time >= datetime.now() - timedelta(days=7)
+        ).group_by('hour').order_by(db.desc('count')).limit(3).all()
+        peak_hours = [(int(h.hour), h.count) for h in peak_hours]
+    except Exception:
+        peak_hours = []
     
     # Online vs Walk-in ratio
     total_tokens = Token.query.filter_by(service_center_id=center_id).count()
     walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
     online_tokens = total_tokens - walkin_tokens
     
-    # Average waiting time (completed tokens in last 7 days)
-    try:
-        completed_tokens = Token.query.filter(
-            Token.service_center_id == center_id,
-            Token.status == 'Completed',
-            Token.created_time >= datetime.now() - timedelta(days=7)
-        ).all()
-        
-        if completed_tokens:
-            # Filter tokens that have completed_time set
-            valid_tokens = [t for t in completed_tokens if hasattr(t, 'completed_time') and t.completed_time]
-            if valid_tokens:
-                total_wait = sum([(t.completed_time - t.created_time).total_seconds() / 60 for t in valid_tokens])
-                avg_wait_time = int(total_wait / len(valid_tokens))
-            else:
-                avg_wait_time = center.avg_service_time
-        else:
-            avg_wait_time = center.avg_service_time
-    except Exception:
-        avg_wait_time = center.avg_service_time
+    # Average waiting time - use center's avg_service_time as default
+    avg_wait_time = center.avg_service_time
     
     analytics = {
         'daily_customers': daily_customers,
         'last_7_days': last_7_days,
-        'peak_hours': [(int(h.hour), h.count) for h in peak_hours],
+        'peak_hours': peak_hours,
         'online_tokens': online_tokens,
         'walkin_tokens': walkin_tokens,
         'total_tokens': total_tokens,
