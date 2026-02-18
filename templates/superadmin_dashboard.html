@@ -139,23 +139,23 @@
                                 
                                 <!-- View Modal -->
                                 <div class="modal fade" id="viewModal{{ reg.id }}" tabindex="-1">
-                                    <div class="modal-dialog modal-lg">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
                                         <div class="modal-content">
-                                            <div class="modal-header">
+                                            <div class="modal-header" style="background: #0F172A; color: white;">
                                                 <h5 class="modal-title fw-bold">{{ reg.center_name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                             </div>
-                                            <div class="modal-body">
+                                            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                                                 <!-- Payment Info Alert -->
-                                                <div class="alert alert-{{ 'success' if reg.payment_status == 'Completed' else 'warning' }} mb-4">
-                                                    <div class="d-flex justify-content-between align-items-center">
+                                                <div class="alert alert-{{ 'success' if reg.payment_status == 'Completed' else 'warning' }} mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                                         <div>
-                                                            <strong>💳 Payment Status:</strong> 
+                                                            <strong>💳 Payment:</strong> 
                                                             <span class="badge bg-{{ 'success' if reg.payment_status == 'Completed' else 'warning' }} ms-2">
                                                                 {{ reg.payment_status }}
                                                             </span>
                                                         </div>
-                                                        <div class="text-end">
+                                                        <div>
                                                             <strong>₹{{ reg.registration_fee }}</strong>
                                                             {% if reg.payment_id %}
                                                                 <br><small>ID: {{ reg.payment_id }}</small>
@@ -164,91 +164,107 @@
                                                     </div>
                                                 </div>
 
-                                                <h6 class="fw-bold mb-3 text-primary">🏛️ Business Information</h6>
-                                                <div class="row g-3 mb-4">
-                                                    <div class="col-md-6">
-                                                        <strong>Organization Type:</strong><br>{{ reg.organization_type }}
+                                                <h6 class="fw-bold mb-2" style="color: #2DD4BF;">🏛️ Business Information</h6>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Organization Type</small><br>
+                                                        <strong>{{ reg.organization_type }}</strong>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <strong>Years in Business:</strong><br>{{ reg.years_in_business or 'Not specified' }} years
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Years in Business</small><br>
+                                                        <strong>{{ reg.years_in_business or 'N/A' }}</strong>
                                                     </div>
                                                     {% if reg.gst_number %}
-                                                    <div class="col-md-6">
-                                                        <strong>GST Number:</strong><br>{{ reg.gst_number }}
+                                                    <div class="col-12">
+                                                        <small class="text-muted">GST Number</small><br>
+                                                        <strong>{{ reg.gst_number }}</strong>
                                                     </div>
                                                     {% endif %}
                                                     {% if reg.website %}
-                                                    <div class="col-md-6">
-                                                        <strong>Website:</strong><br><a href="{{ reg.website }}" target="_blank">{{ reg.website }}</a>
+                                                    <div class="col-12">
+                                                        <small class="text-muted">Website</small><br>
+                                                        <a href="{{ reg.website }}" target="_blank">{{ reg.website }}</a>
                                                     </div>
                                                     {% endif %}
                                                     {% if reg.business_hours %}
-                                                    <div class="col-md-12">
-                                                        <strong>Business Hours:</strong><br>{{ reg.business_hours }}
+                                                    <div class="col-12">
+                                                        <small class="text-muted">Business Hours</small><br>
+                                                        <strong>{{ reg.business_hours }}</strong>
                                                     </div>
                                                     {% endif %}
                                                 </div>
 
-                                                <h6 class="fw-bold mb-3 text-primary">👤 Owner Information</h6>
-                                                <div class="row g-3 mb-4">
-                                                    <div class="col-md-6">
-                                                        <strong>Owner/Manager:</strong><br>{{ reg.owner_name }}
+                                                <h6 class="fw-bold mb-2" style="color: #2DD4BF;">👤 Owner Information</h6>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Owner/Manager</small><br>
+                                                        <strong>{{ reg.owner_name }}</strong>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <strong>Email:</strong><br>{{ reg.email }}
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Email</small><br>
+                                                        <strong style="font-size: 0.85rem;">{{ reg.email }}</strong>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <strong>Phone:</strong><br>{{ reg.phone }}
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Phone</small><br>
+                                                        <strong>{{ reg.phone }}</strong>
                                                     </div>
                                                     {% if reg.alternate_phone %}
-                                                    <div class="col-md-6">
-                                                        <strong>Alternate Phone:</strong><br>{{ reg.alternate_phone }}
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Alternate Phone</small><br>
+                                                        <strong>{{ reg.alternate_phone }}</strong>
                                                     </div>
                                                     {% endif %}
                                                 </div>
 
-                                                <h6 class="fw-bold mb-3 text-primary">📍 Location Details</h6>
-                                                <div class="row g-3 mb-4">
-                                                    <div class="col-md-12">
-                                                        <strong>Address:</strong><br>{{ reg.address }}
+                                                <h6 class="fw-bold mb-2" style="color: #2DD4BF;">📍 Location</h6>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-12">
+                                                        <small class="text-muted">Address</small><br>
+                                                        <strong>{{ reg.address }}</strong>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <strong>City:</strong><br>{{ reg.city }}
+                                                    <div class="col-4">
+                                                        <small class="text-muted">City</small><br>
+                                                        <strong>{{ reg.city }}</strong>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <strong>State:</strong><br>{{ reg.state }}
+                                                    <div class="col-4">
+                                                        <small class="text-muted">State</small><br>
+                                                        <strong>{{ reg.state }}</strong>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <strong>Pincode:</strong><br>{{ reg.pincode }}
+                                                    <div class="col-4">
+                                                        <small class="text-muted">Pincode</small><br>
+                                                        <strong>{{ reg.pincode }}</strong>
                                                     </div>
                                                 </div>
 
-                                                <h6 class="fw-bold mb-3 text-primary">📊 Operational Details</h6>
-                                                <div class="row g-3 mb-4">
-                                                    <div class="col-md-6">
-                                                        <strong>Number of Counters:</strong><br>{{ reg.counters or 'Not specified' }}
+                                                <h6 class="fw-bold mb-2" style="color: #2DD4BF;">📊 Operational Details</h6>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Counters</small><br>
+                                                        <strong>{{ reg.counters or 'N/A' }}</strong>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <strong>Expected Daily Customers:</strong><br>{{ reg.daily_customers or 'Not specified' }}
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Daily Customers</small><br>
+                                                        <strong>{{ reg.daily_customers or 'N/A' }}</strong>
                                                     </div>
-                                                    <div class="col-md-12">
-                                                        <strong>Submitted On:</strong><br>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}
+                                                    <div class="col-12">
+                                                        <small class="text-muted">Submitted On</small><br>
+                                                        <strong>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}</strong>
                                                     </div>
                                                 </div>
 
                                                 {% if reg.additional_info %}
-                                                <h6 class="fw-bold mb-3 text-primary">📝 Additional Information</h6>
-                                                <div class="alert alert-light">
+                                                <h6 class="fw-bold mb-2" style="color: #2DD4BF;">📝 Additional Info</h6>
+                                                <div class="alert alert-light mb-0">
                                                     {{ reg.additional_info }}
                                                 </div>
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
                                                 <form method="POST" action="{{ url_for('reject_registration', reg_id=reg.id) }}" class="d-inline">
-                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this registration?')">Reject</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reject this registration?')">Reject</button>
                                                 </form>
                                                 <form method="POST" action="{{ url_for('approve_registration', reg_id=reg.id) }}" class="d-inline">
-                                                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this registration?')">Approve</button>
+                                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve this registration?')">Approve</button>
                                                 </form>
                                             </div>
                                         </div>
