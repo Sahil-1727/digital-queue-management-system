@@ -133,6 +133,14 @@
                                     <input type="text" class="form-control" name="pincode" placeholder="6-digit" pattern="[0-9]{6}" maxlength="6" required>
                                 </div>
 
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="getCenterLocation()">📍 Get Service Center Location</button>
+                                    <small class="text-muted ms-2">This helps users calculate travel time</small>
+                                    <input type="hidden" name="latitude" id="latitude">
+                                    <input type="hidden" name="longitude" id="longitude">
+                                    <div id="location-status" class="mt-2"></div>
+                                </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Business Hours</label>
                                     <input type="text" class="form-control" name="business_hours" placeholder="e.g., Mon-Sat 9AM-6PM">
@@ -219,6 +227,25 @@
             } else {
                 input.type = 'password';
                 use.setAttribute('href', '#eye-off');
+            }
+        }
+        
+        function getCenterLocation() {
+            const statusDiv = document.getElementById('location-status');
+            if (navigator.geolocation) {
+                statusDiv.innerHTML = '<small class="text-info">Getting location...</small>';
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        statusDiv.innerHTML = '<small class="text-success">✓ Location captured successfully</small>';
+                    },
+                    function(error) {
+                        statusDiv.innerHTML = '<small class="text-danger">✗ Location access denied. Users won\'t see travel time.</small>';
+                    }
+                );
+            } else {
+                statusDiv.innerHTML = '<small class="text-danger">✗ Geolocation not supported by browser</small>';
             }
         }
     </script>

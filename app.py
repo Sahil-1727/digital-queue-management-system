@@ -66,6 +66,8 @@ class ServiceCenter(db.Model):
     name = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(50), nullable=False)
     location = db.Column(db.String(100), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     avg_service_time = db.Column(db.Integer, default=15)  # minutes per token
     tokens = db.relationship('Token', backref='service_center', lazy=True)
     admins = db.relationship('Admin', backref='service_center', lazy=True)
@@ -114,6 +116,8 @@ class ServiceCenterRegistration(db.Model):
     state = db.Column(db.String(50), nullable=False)
     pincode = db.Column(db.String(6), nullable=False)
     address = db.Column(db.String(200), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     business_hours = db.Column(db.String(100), nullable=True)
     counters = db.Column(db.Integer, nullable=True)
     daily_customers = db.Column(db.Integer, nullable=True)
@@ -280,6 +284,27 @@ def calculate_wait_time(center_id, token_position):
     wait_minutes = (token_position - 1) * center.avg_service_time
     # Cap maximum wait time at 3 hours (180 minutes)
     return min(wait_minutes, 180)
+
+def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
+    """Calculate travel time in minutes based on distance (assuming 30 km/h avg speed)"""
+    if not all([user_lat, user_lon, center_lat, center_lon]):
+        return 10  # Default 10 minutes if location not available
+    
+    # Haversine formula to calculate distance
+    from math import radians, sin, cos, sqrt, atan2
+    
+    R = 6371  # Earth radius in km
+    lat1, lon1, lat2, lon2 = map(radians, [user_lat, user_lon, center_lat, center_lon])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    distance = R * c
+    
+    # Assume average speed of 30 km/h in city traffic
+    travel_time = (distance / 30) * 60  # Convert to minutes
+    return int(travel_time)
 
 def expire_old_tokens():
     # Expire pending payment tokens after 2 hours
@@ -463,6 +488,8 @@ def register_center():
             state=request.form.get('state'),
             pincode=request.form.get('pincode'),
             address=request.form.get('address'),
+            latitude=float(request.form.get('latitude')) if request.form.get('latitude') else None,
+            longitude=float(request.form.get('longitude')) if request.form.get('longitude') else None,
             business_hours=request.form.get('business_hours'),
             counters=request.form.get('counters') or None,
             daily_customers=request.form.get('daily_customers') or None,
@@ -687,7 +714,14 @@ def queue_status(token_id):
             position += 1
     
     wait_time = calculate_wait_time(token.service_center_id, position)
-    leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - 10))
+    
+    # Calculate travel time based on user and center location
+    user = User.query.get(session['user_id'])
+    center = ServiceCenter.query.get(token.service_center_id)
+    travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+    
+    # Leave time = current time + wait time - travel time - 5 min buffer
+    leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - travel_time - 5))
     reach_counter_time = datetime.now() + timedelta(minutes=wait_time)
     
     return render_template('queue_status.html', 
@@ -695,6 +729,7 @@ def queue_status(token_id):
                          serving_token=serving_token,
                          position=position,
                          wait_time=wait_time,
+                         travel_time=travel_time,
                          leave_time=leave_time,
                          reach_counter_time=reach_counter_time)
 
@@ -1262,6 +1297,8 @@ def approve_registration(reg_id):
         name=registration.center_name,
         category=registration.organization_type,
         location=f"{registration.address}, {registration.city}, {registration.state} - {registration.pincode}",
+        latitude=registration.latitude,
+        longitude=registration.longitude,
         avg_service_time=avg_time
     )
     db.session.add(service_center)
@@ -1517,6 +1554,40 @@ def migrate_db():
                 results.append("✅ Added address, latitude, longitude columns to users table")
             else:
                 results.append("ℹ️ User location columns already exist")
+            
+            # Check and add service center location columns
+            result = conn.execute(db.text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='service_centers' AND column_name='latitude'"
+            ))
+            if not result.fetchone():
+                conn.execute(db.text(
+                    "ALTER TABLE service_centers ADD COLUMN latitude FLOAT"
+                ))
+                conn.execute(db.text(
+                    "ALTER TABLE service_centers ADD COLUMN longitude FLOAT"
+                ))
+                conn.commit()
+                results.append("✅ Added latitude, longitude columns to service_centers table")
+            else:
+                results.append("ℹ️ Service center location columns already exist")
+            
+            # Check and add registration location columns
+            result = conn.execute(db.text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='service_center_registrations' AND column_name='latitude'"
+            ))
+            if not result.fetchone():
+                conn.execute(db.text(
+                    "ALTER TABLE service_center_registrations ADD COLUMN latitude FLOAT"
+                ))
+                conn.execute(db.text(
+                    "ALTER TABLE service_center_registrations ADD COLUMN longitude FLOAT"
+                ))
+                conn.commit()
+                results.append("✅ Added latitude, longitude columns to service_center_registrations table")
+            else:
+                results.append("ℹ️ Registration location columns already exist")
             
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:

@@ -75,7 +75,10 @@
                             <div class="alert alert-success mb-3" style="border-radius: 16px; border: none; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
                                 <h5 class="text-center fw-bold text-success mb-2">🏠 Suggested Leave Time</h5>
                                 <h2 class="text-center display-4 fw-bold text-success mb-2">{{ leave_time.strftime('%I:%M %p') }}</h2>
-                                <p class="text-center mb-0 text-success">Leave home around this time to avoid waiting</p>
+                                <p class="text-center mb-1 text-success">Leave home around this time to avoid waiting</p>
+                                {% if travel_time %}
+                                <p class="text-center mb-0 small text-success">🚗 Travel time: ~{{ travel_time }} mins</p>
+                                {% endif %}
                             </div>
                             <div class="alert alert-info mb-3" style="border-radius: 16px; border: none; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
                                 <h6 class="text-center fw-bold text-primary mb-2">⏰ Approx. Time to Reach Counter</h6>
