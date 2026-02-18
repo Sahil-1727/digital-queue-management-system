@@ -278,6 +278,7 @@ def send_reset_email(email, reset_link, user_type="User"):
     
     # Brevo (formerly Sendinblue) - Free tier: 300 emails/day, no credit card
     brevo_api_key = os.getenv('BREVO_API_KEY', '')
+    brevo_sender_email = os.getenv('BREVO_SENDER_EMAIL', 'queueflowqms@gmail.com')
     
     if brevo_api_key:
         try:
@@ -288,7 +289,7 @@ def send_reset_email(email, reset_link, user_type="User"):
                     "Content-Type": "application/json"
                 },
                 json={
-                    "sender": {"name": "QueueFlow", "email": "noreply@queueflow.app"},
+                    "sender": {"name": "QueueFlow", "email": brevo_sender_email},
                     "to": [{"email": email}],
                     "subject": "QueueFlow - Password Reset Request",
                     "htmlContent": f"""
