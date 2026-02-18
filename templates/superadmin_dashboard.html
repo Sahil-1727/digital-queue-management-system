@@ -34,7 +34,7 @@
     <div class="superadmin-header">
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h4 class="mb-0 fw-bold">👑 Super Admin</h4>
+                <h4 class="mb-0 fw-bold" style="color: #2DD4BF;">👑 Super Admin</h4>
                 <div class="d-flex gap-2 flex-wrap">
                     <span class="text-white d-none d-md-inline">{{ session.superadmin_username }}</span>
                     <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Manage</a>
@@ -116,8 +116,8 @@
                             <tbody>
                                 {% for reg in pending %}
                                 <tr>
-                                    <td class="fw-bold">{{ reg.center_name }}</td>
-                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: #2DD4BF;">{{ reg.center_name }}</td>
+                                    <td><span class="badge" style="background: #2DD4BF; color: #0F172A;">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td>
                                         <small>{{ reg.email }}</small><br>
@@ -287,8 +287,8 @@
                             <tbody>
                                 {% for reg in approved %}
                                 <tr>
-                                    <td class="fw-bold">{{ reg.center_name }}</td>
-                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: #2DD4BF;">{{ reg.center_name }}</td>
+                                    <td><span class="badge" style="background: #2DD4BF; color: #0F172A;">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td><small>{{ reg.email }}</small></td>
                                     <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
@@ -326,8 +326,8 @@
                             <tbody>
                                 {% for reg in rejected %}
                                 <tr>
-                                    <td class="fw-bold">{{ reg.center_name }}</td>
-                                    <td><span class="badge bg-primary">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: #2DD4BF;">{{ reg.center_name }}</td>
+                                    <td><span class="badge" style="background: #2DD4BF; color: #0F172A;">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td><small>{{ reg.email }}</small></td>
                                     <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>

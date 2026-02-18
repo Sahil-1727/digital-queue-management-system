@@ -21,9 +21,9 @@
     <div class="admin-header">
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">📊 Transaction History - {{ center.name }}</h4>
+                <h4 class="mb-0 fw-bold" style="color: #2DD4BF;">📊 Transaction History - {{ center.name }}</h4>
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-light btn-sm">← Dashboard</a>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">← Dashboard</a>
                     <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                                 {% for token in tokens %}
                                 <tr>
                                     <td class="px-4 py-3">
-                                        <span class="fw-bold text-primary" style="font-size: 1.1rem;">{{ token.token_number }}</span>
+                                        <span class="fw-bold" style="font-size: 1.1rem; color: #2DD4BF;">{{ token.token_number }}</span>
                                     </td>
                                     <td class="fw-semibold">{{ token.user.name }}</td>
                                     <td>{{ token.user.mobile }}</td>
