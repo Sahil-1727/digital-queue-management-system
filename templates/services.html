@@ -14,17 +14,28 @@
                 <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow
             </a>
             <div class="d-flex align-items-center gap-2">
+                <a href="{{ url_for('user_profile') }}" class="btn btn-sm" style="background: rgba(45, 212, 191, 0.1); color: #2DD4BF; border: 1px solid rgba(45, 212, 191, 0.3);">Profile</a>
                 <a href="{{ url_for('user_history') }}" class="btn btn-sm" style="background: rgba(45, 212, 191, 0.1); color: #2DD4BF; border: 1px solid rgba(45, 212, 191, 0.3);">History</a>
-                <span class="text-white">{{ session.user_name }}</span>
+                <span class="text-white d-none d-md-inline">{{ session.user_name }}</span>
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
             </div>
         </div>
     </nav>
 
     <div class="container py-5">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4">
             <h1 class="display-5 fw-bold mb-2">Available Service Centers</h1>
             <p class="text-muted">Choose a service center and get your digital token</p>
+        </div>
+        
+        <!-- Category Filters -->
+        <div class="mb-4">
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                <a href="{{ url_for('services') }}" class="btn btn-sm {{ 'btn-primary' if not request.args.get('category') else 'btn-outline-secondary' }}" style="{% if not request.args.get('category') %}background: #2DD4BF; color: #0F172A; border: none;{% endif %}">All</a>
+                <a href="{{ url_for('services', category='Medical Clinic') }}" class="btn btn-sm {{ 'btn-primary' if request.args.get('category') == 'Medical Clinic' else 'btn-outline-secondary' }}" style="{% if request.args.get('category') == 'Medical Clinic' %}background: #2DD4BF; color: #0F172A; border: none;{% endif %}">Medical</a>
+                <a href="{{ url_for('services', category='Mobile Service') }}" class="btn btn-sm {{ 'btn-primary' if request.args.get('category') == 'Mobile Service' else 'btn-outline-secondary' }}" style="{% if request.args.get('category') == 'Mobile Service' %}background: #2DD4BF; color: #0F172A; border: none;{% endif %}">Mobile Service</a>
+                <a href="{{ url_for('services', category='Bank') }}" class="btn btn-sm {{ 'btn-primary' if request.args.get('category') == 'Bank' else 'btn-outline-secondary' }}" style="{% if request.args.get('category') == 'Bank' %}background: #2DD4BF; color: #0F172A; border: none;{% endif %}">Bank</a>
+            </div>
         </div>
         
         {% with messages = get_flashed_messages(with_categories=true) %}

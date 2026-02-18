@@ -52,6 +52,9 @@ class User(db.Model):
     mobile = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(100), nullable=True)
     password = db.Column(db.String(200), nullable=False)
+    address = db.Column(db.String(200), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     no_show_count = db.Column(db.Integer, default=0)
     reset_token = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
@@ -550,19 +553,26 @@ def services():
         return redirect(url_for('login'))
     
     expire_old_tokens()
-    centers = ServiceCenter.query.all()
+    
+    # Get category filter
+    category_filter = request.args.get('category')
+    
+    if category_filter:
+        # Filter by category (partial match)
+        centers = ServiceCenter.query.filter(ServiceCenter.category.contains(category_filter)).all()
+    else:
+        centers = ServiceCenter.query.all()
+    
     active_token = get_active_token_for_user(session['user_id'])
     
     center_data = []
     for center in centers:
         queue_count = get_queue_count(center.id)
-        # Check if center was created in last 7 days (newly approved)
-        is_new = (datetime.now() - center.id).days < 7 if hasattr(center, 'created_at') else False
         center_data.append({
             'center': center,
             'queue_count': queue_count,
             'can_request': queue_count < 15,
-            'is_new': center.id > 19  # Centers with ID > 19 are newly approved
+            'is_new': center.id > 19
         })
     
     return render_template('services.html', centers=center_data, active_token=active_token)
@@ -715,6 +725,30 @@ def user_history():
     ).order_by(Token.created_time.desc()).all()
     
     return render_template('user_history.html', tokens=tokens, datetime=datetime)
+
+@app.route('/profile', methods=['GET', 'POST'])
+def user_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    
+    if request.method == 'POST':
+        user.name = request.form.get('name')
+        user.email = request.form.get('email')
+        user.address = request.form.get('address')
+        
+        lat = request.form.get('latitude')
+        lon = request.form.get('longitude')
+        if lat and lon:
+            user.latitude = float(lat)
+            user.longitude = float(lon)
+        
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user_profile'))
+    
+    return render_template('user_profile.html', user=user)
 
 @app.route('/logout')
 def logout():
@@ -1463,6 +1497,26 @@ def migrate_db():
                 results.append("✅ Added completed_time column to tokens table")
             else:
                 results.append("ℹ️ completed_time column already exists in tokens table")
+            
+            # Check and add user location columns
+            result = conn.execute(db.text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='users' AND column_name='address'"
+            ))
+            if not result.fetchone():
+                conn.execute(db.text(
+                    "ALTER TABLE users ADD COLUMN address VARCHAR(200)"
+                ))
+                conn.execute(db.text(
+                    "ALTER TABLE users ADD COLUMN latitude FLOAT"
+                ))
+                conn.execute(db.text(
+                    "ALTER TABLE users ADD COLUMN longitude FLOAT"
+                ))
+                conn.commit()
+                results.append("✅ Added address, latitude, longitude columns to users table")
+            else:
+                results.append("ℹ️ User location columns already exist")
             
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
