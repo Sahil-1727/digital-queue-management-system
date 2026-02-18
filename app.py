@@ -301,13 +301,13 @@ def generate_token_number(center_id):
     return f"T{count + 1:03d}"
 
 def calculate_wait_time(center_id, token_position):
-    """Calculate realistic wait time in minutes"""
+    """Calculate wait time until service starts (in minutes)"""
     center = ServiceCenter.query.get(center_id)
-    # If currently being served or first in queue, minimal wait time
+    # If first in queue, service starts immediately
     if token_position <= 1:
-        return 2  # 2 minutes buffer for instant service
-    # For others: (position - 1) × avg service time + 2 min buffer
-    wait_minutes = (token_position - 1) * center.avg_service_time + 2
+        return 0
+    # For others: (position - 1) × avg service time
+    wait_minutes = (token_position - 1) * center.avg_service_time
     # Cap maximum wait time at 3 hours (180 minutes)
     return min(wait_minutes, 180)
 
@@ -722,11 +722,17 @@ def payment(token_id):
                 if serving_token:
                     position += 1
                 
-                # Calculate travel time
+                # Calculate wait time and travel time
                 user = User.query.get(session['user_id'])
                 travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
                 
-                leave_time = datetime.now() + timedelta(minutes=10)
+                wait_time = calculate_wait_time(center.id, position)
+                service_start_time = datetime.now() + timedelta(minutes=wait_time)
+                
+                leave_time = service_start_time - timedelta(minutes=travel_time + 5)
+                if leave_time < datetime.now():
+                    leave_time = datetime.now()
+                
                 reach_time = leave_time + timedelta(minutes=travel_time)
                 
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
@@ -779,8 +785,16 @@ def queue_status(token_id):
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # Leave time = current time + 10 min (get ready time)
-    leave_time = datetime.now() + timedelta(minutes=10)
+    # Calculate expected service start time based on queue position
+    wait_time = calculate_wait_time(token.service_center_id, position)
+    service_start_time = datetime.now() + timedelta(minutes=wait_time)
+    
+    # Leave time = service start time - travel time - 5 min buffer
+    leave_time = service_start_time - timedelta(minutes=travel_time + 5)
+    # If leave time is in the past, leave now
+    if leave_time < datetime.now():
+        leave_time = datetime.now()
+    
     # Reach counter = leave time + travel time
     reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
@@ -788,7 +802,7 @@ def queue_status(token_id):
                          token=token, 
                          serving_token=serving_token,
                          position=position,
-                         wait_time=0,
+                         wait_time=wait_time,
                          travel_time=travel_time,
                          leave_time=leave_time,
                          reach_counter_time=reach_counter_time)
