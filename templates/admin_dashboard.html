@@ -67,7 +67,7 @@
             <div class="col-lg-6">
                 <div class="card counter-card mb-3">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">💻 Counter 1: Online Queue</h5>
+                        <h5 class="fw-bold mb-3" style="color: #2DD4BF;">💻 Counter 1: Online Queue</h5>
                         {% if serving_token %}
                             <div class="text-center mb-3">
                                 <div class="token-display">{{ serving_token.token_number }}</div>
@@ -110,7 +110,7 @@
                                 <tbody>
                                     {% for token in waiting_tokens %}
                                     <tr>
-                                        <td><span class="fw-bold text-primary">{{ token.token_number }}</span></td>
+                                        <td><span class="fw-bold" style="color: #2DD4BF;">{{ token.token_number }}</span></td>
                                         <td class="fw-semibold">{{ token.user.name }}</td>
                                         <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
                                     </tr>
@@ -128,7 +128,7 @@
             <div class="col-lg-6">
                 <div class="card counter-card walkin mb-3">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3 text-success">🚶 Counter 2: Walk-In Queue</h5>
+                        <h5 class="fw-bold mb-3" style="color: #2DD4BF;">🚶 Counter 2: Walk-In Queue</h5>
                         {% if walkin_serving_token %}
                             <div class="text-center mb-3">
                                 <div class="token-display" style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ walkin_serving_token.token_number }}</div>
@@ -151,7 +151,7 @@
                 <a href="{{ url_for('call_next_walkin') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next (Walk-In)</a>
 
                 <div class="card">
-                    <div class="card-header" style="background: #0F172A; color: white; border-radius: 16px 16px 0 0;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
                         <h6 class="mb-0 fw-semibold">📋 Waiting ({{ walkin_waiting_tokens|length }})</h6>
                     </div>
                     <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
@@ -167,7 +167,7 @@
                                 <tbody>
                                     {% for token in walkin_waiting_tokens %}
                                     <tr>
-                                        <td><span class="fw-bold text-success">{{ token.token_number }}</span></td>
+                                        <td><span class="fw-bold" style="color: #2DD4BF;">{{ token.token_number }}</span></td>
                                         <td class="fw-semibold">{{ token.user.name }}</td>
                                         <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
                                     </tr>
