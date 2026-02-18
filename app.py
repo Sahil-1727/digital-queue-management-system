@@ -1385,17 +1385,24 @@ def admin_analytics():
     online_tokens = total_tokens - walkin_tokens
     
     # Average waiting time (completed tokens in last 7 days)
-    completed_tokens = Token.query.filter(
-        Token.service_center_id == center_id,
-        Token.status == 'Completed',
-        Token.completed_time.isnot(None),
-        Token.created_time >= datetime.now() - timedelta(days=7)
-    ).all()
-    
-    if completed_tokens:
-        total_wait = sum([(t.completed_time - t.created_time).total_seconds() / 60 for t in completed_tokens])
-        avg_wait_time = int(total_wait / len(completed_tokens))
-    else:
+    try:
+        completed_tokens = Token.query.filter(
+            Token.service_center_id == center_id,
+            Token.status == 'Completed',
+            Token.created_time >= datetime.now() - timedelta(days=7)
+        ).all()
+        
+        if completed_tokens:
+            # Filter tokens that have completed_time set
+            valid_tokens = [t for t in completed_tokens if hasattr(t, 'completed_time') and t.completed_time]
+            if valid_tokens:
+                total_wait = sum([(t.completed_time - t.created_time).total_seconds() / 60 for t in valid_tokens])
+                avg_wait_time = int(total_wait / len(valid_tokens))
+            else:
+                avg_wait_time = center.avg_service_time
+        else:
+            avg_wait_time = center.avg_service_time
+    except Exception:
         avg_wait_time = center.avg_service_time
     
     analytics = {
@@ -1438,25 +1445,39 @@ def test_send_email():
 
 @app.route('/migrate-db-add-column')
 def migrate_db():
-    """Manual migration endpoint to add avg_service_time column"""
+    """Manual migration endpoint to add missing columns"""
+    results = []
     try:
         with db.engine.connect() as conn:
-            # Check if column exists
+            # Check and add avg_service_time column
             result = conn.execute(db.text(
                 "SELECT column_name FROM information_schema.columns "
                 "WHERE table_name='service_center_registrations' AND column_name='avg_service_time'"
             ))
-            exists = result.fetchone()
-            
-            if not exists:
-                # Add the column
+            if not result.fetchone():
                 conn.execute(db.text(
                     "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
                 ))
                 conn.commit()
-                return "<h2>Migration Success</h2><p>✅ Added avg_service_time column</p>"
+                results.append("✅ Added avg_service_time column")
             else:
-                return "<h2>Migration Skipped</h2><p>ℹ️ Column already exists</p>"
+                results.append("ℹ️ avg_service_time column already exists")
+            
+            # Check and add completed_time column
+            result = conn.execute(db.text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='tokens' AND column_name='completed_time'"
+            ))
+            if not result.fetchone():
+                conn.execute(db.text(
+                    "ALTER TABLE tokens ADD COLUMN completed_time TIMESTAMP"
+                ))
+                conn.commit()
+                results.append("✅ Added completed_time column")
+            else:
+                results.append("ℹ️ completed_time column already exists")
+            
+            return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
         return f"<h2>Migration Error</h2><p>❌ {str(e)}</p>"
 
