@@ -789,6 +789,7 @@ def queue_status(token_id):
     if position <= 1:
         leave_time = token.created_time + timedelta(minutes=10)
         reach_counter_time = leave_time + timedelta(minutes=travel_time)
+        print(f"DEBUG 1st: Book={token.created_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
     else:
         # For others: Calculate when counter becomes free
         # Counter free = 1st person reach time + (position-1) * service time
