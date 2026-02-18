@@ -1339,6 +1339,73 @@ def token_qr(token_number):
                          qr_code=img_base64,
                          track_url=track_url)
 
+@app.route('/admin/analytics')
+def admin_analytics():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
+    # Today's date
+    today = datetime.now().date()
+    
+    # Daily customers (today)
+    daily_customers = Token.query.filter(
+        Token.service_center_id == center_id,
+        db.func.date(Token.created_time) == today
+    ).count()
+    
+    # Last 7 days data
+    last_7_days = []
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        count = Token.query.filter(
+            Token.service_center_id == center_id,
+            db.func.date(Token.created_time) == date
+        ).count()
+        last_7_days.append({'date': date.strftime('%a'), 'count': count})
+    
+    # Peak hours (last 7 days)
+    peak_hours = db.session.query(
+        db.func.extract('hour', Token.created_time).label('hour'),
+        db.func.count(Token.id).label('count')
+    ).filter(
+        Token.service_center_id == center_id,
+        Token.created_time >= datetime.now() - timedelta(days=7)
+    ).group_by('hour').order_by(db.desc('count')).limit(3).all()
+    
+    # Online vs Walk-in ratio
+    total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+    walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
+    online_tokens = total_tokens - walkin_tokens
+    
+    # Average waiting time (completed tokens in last 7 days)
+    completed_tokens = Token.query.filter(
+        Token.service_center_id == center_id,
+        Token.status == 'Completed',
+        Token.completed_time.isnot(None),
+        Token.created_time >= datetime.now() - timedelta(days=7)
+    ).all()
+    
+    if completed_tokens:
+        total_wait = sum([(t.completed_time - t.created_time).total_seconds() / 60 for t in completed_tokens])
+        avg_wait_time = int(total_wait / len(completed_tokens))
+    else:
+        avg_wait_time = center.avg_service_time
+    
+    analytics = {
+        'daily_customers': daily_customers,
+        'last_7_days': last_7_days,
+        'peak_hours': [(int(h.hour), h.count) for h in peak_hours],
+        'online_tokens': online_tokens,
+        'walkin_tokens': walkin_tokens,
+        'total_tokens': total_tokens,
+        'avg_wait_time': avg_wait_time
+    }
+    
+    return render_template('admin_analytics.html', center=center, analytics=analytics)
+
 @app.route('/test-email-config')
 def test_email_config():
     """Test endpoint to verify email configuration"""

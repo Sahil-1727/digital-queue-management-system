@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - {{ center.name }}</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: #0F172A !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-bar {
+            background: #2DD4BF;
+            height: 30px;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('home') }}" style="color: #2DD4BF;">QueueFlow</a>
+            <div class="ms-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Dashboard</a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-light ms-2">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-header" style="background: #0F172A; color: white;">
+                <h4 class="mb-0">📈 Analytics - {{ center.name }}</h4>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h2 class="mb-0">{{ analytics.daily_customers }}</h2>
+                    <p class="mb-0">Today's Customers</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h2 class="mb-0">{{ analytics.avg_wait_time }}</h2>
+                    <p class="mb-0">Avg Wait (mins)</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h2 class="mb-0">{{ analytics.online_tokens }}</h2>
+                    <p class="mb-0">Online Bookings</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h2 class="mb-0">{{ analytics.walkin_tokens }}</h2>
+                    <p class="mb-0">Walk-In Customers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <!-- Last 7 Days -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="background: #F8FAFC;">
+                        <h5 class="mb-0">📅 Last 7 Days</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for day in analytics.last_7_days %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>{{ day.date }}</span>
+                                <span class="fw-bold">{{ day.count }}</span>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar" style="width: {{ (day.count / 20 * 100) if day.count < 20 else 100 }}%; background: #2DD4BF;">
+                                    {{ day.count }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Peak Hours & Ratio -->
+            <div class="col-md-6">
+                <!-- Peak Hours -->
+                <div class="card mb-3">
+                    <div class="card-header" style="background: #F8FAFC;">
+                        <h5 class="mb-0">⏰ Peak Hours</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if analytics.peak_hours %}
+                            {% for hour, count in analytics.peak_hours %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ '%02d:00 - %02d:00'|format(hour, hour+1) }}</span>
+                                <span class="badge" style="background: #2DD4BF; color: #0F172A;">{{ count }} customers</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Online vs Walk-in -->
+                <div class="card">
+                    <div class="card-header" style="background: #F8FAFC;">
+                        <h5 class="mb-0">📊 Online vs Walk-In</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>🌐 Online</span>
+                                <span class="fw-bold">{{ analytics.online_tokens }} ({{ (analytics.online_tokens / analytics.total_tokens * 100)|round|int if analytics.total_tokens > 0 else 0 }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar" style="width: {{ (analytics.online_tokens / analytics.total_tokens * 100) if analytics.total_tokens > 0 else 0 }}%; background: #2DD4BF;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>🚶 Walk-In</span>
+                                <span class="fw-bold">{{ analytics.walkin_tokens }} ({{ (analytics.walkin_tokens / analytics.total_tokens * 100)|round|int if analytics.total_tokens > 0 else 0 }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar" style="width: {{ (analytics.walkin_tokens / analytics.total_tokens * 100) if analytics.total_tokens > 0 else 0 }}%; background: #14B8A6;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

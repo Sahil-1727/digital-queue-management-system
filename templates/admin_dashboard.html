@@ -27,6 +27,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0 fw-bold">🛠️ {{ center.name }}</h4>
                 <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_analytics') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">📈 Analytics</a>
                     <a href="{{ url_for('add_walkin') }}" class="btn btn-light btn-sm">🚶 Add Walk-In</a>
                     <a href="{{ url_for('admin_history') }}" class="btn btn-outline-light btn-sm">History</a>
                     <form method="POST" action="{{ url_for('admin_delete_center') }}" style="display: inline;" 
