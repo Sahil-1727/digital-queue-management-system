@@ -1358,16 +1358,15 @@ def admin_analytics():
     center_id = session['admin_center_id']
     center = ServiceCenter.query.get(center_id)
     
-    # Today's date
     today = datetime.now().date()
     
-    # Daily customers (today)
+    # Daily customers
     daily_customers = Token.query.filter(
         Token.service_center_id == center_id,
         db.func.date(Token.created_time) == today
     ).count()
     
-    # Last 7 days data
+    # Last 7 days
     last_7_days = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
@@ -1377,26 +1376,13 @@ def admin_analytics():
         ).count()
         last_7_days.append({'date': date.strftime('%a'), 'count': count})
     
-    # Peak hours (last 7 days)
-    try:
-        peak_hours_raw = db.session.query(
-            db.func.extract('hour', Token.created_time).label('hour'),
-            db.func.count(Token.id).label('count')
-        ).filter(
-            Token.service_center_id == center_id,
-            Token.created_time >= datetime.now() - timedelta(days=7)
-        ).group_by(db.func.extract('hour', Token.created_time)).order_by(db.desc('count')).limit(3).all()
-        peak_hours = [(int(h.hour), h.count) for h in peak_hours_raw]
-    except Exception:
-        peak_hours = []
+    # Peak hours - simplified
+    peak_hours = []
     
-    # Online vs Walk-in ratio
+    # Online vs Walk-in
     total_tokens = Token.query.filter_by(service_center_id=center_id).count()
     walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
     online_tokens = total_tokens - walkin_tokens
-    
-    # Average waiting time - use center's avg_service_time as default
-    avg_wait_time = center.avg_service_time
     
     analytics = {
         'daily_customers': daily_customers,
@@ -1405,7 +1391,7 @@ def admin_analytics():
         'online_tokens': online_tokens,
         'walkin_tokens': walkin_tokens,
         'total_tokens': total_tokens,
-        'avg_wait_time': avg_wait_time
+        'avg_wait_time': center.avg_service_time
     }
     
     return render_template('admin_analytics.html', center=center, analytics=analytics)
