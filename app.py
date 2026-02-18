@@ -175,27 +175,27 @@ def init_db():
         # Add default service centers only if none exist
         if ServiceCenter.query.count() == 0:
             centers = [
-                # Medical Clinics
-                ServiceCenter(name='APOLLO CLINIC', category='Multi-speciality Clinic', location='Civil Lines, Nagpur', avg_service_time=20),
-                ServiceCenter(name='The Nagpur Clinic', category='Medical Clinic', location='Dharampeth, Nagpur', avg_service_time=18),
-                ServiceCenter(name='Nagpur Clinic', category='Local Clinic', location='Sitabuldi, Nagpur', avg_service_time=15),
-                ServiceCenter(name='MOTHER INDIA FETAL MEDICINE CENTRE', category='Pregnancy Care', location='Ramdaspeth, Nagpur', avg_service_time=25),
-                ServiceCenter(name='Ashvatam Clinic', category='Medical Clinic', location='Sadar, Nagpur', avg_service_time=18),
-                ServiceCenter(name='Apna Clinic', category='Neighborhood Clinic', location='Gandhibagh, Nagpur', avg_service_time=15),
-                ServiceCenter(name='Dr.Agrawal Multispeciality Clinic', category='Multispeciality Clinic', location='Wardha Road, Nagpur', avg_service_time=22),
-                ServiceCenter(name='Shree Clinic', category='General Clinic', location='Manish Nagar, Nagpur', avg_service_time=15),
-                ServiceCenter(name='Sai Clinic', category='Medical Clinic', location='Pratap Nagar, Nagpur', avg_service_time=18),
-                ServiceCenter(name='Suyash Clinic', category='Neighborhood Clinic', location='Laxmi Nagar, Nagpur', avg_service_time=15),
-                ServiceCenter(name='INC CLINIC NAGPUR', category='Naturopathic Practitioner', location='Dhantoli, Nagpur', avg_service_time=20),
+                # Medical Clinics (Nagpur coordinates)
+                ServiceCenter(name='APOLLO CLINIC', category='Medical Clinic', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=20),
+                ServiceCenter(name='The Nagpur Clinic', category='Medical Clinic', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=18),
+                ServiceCenter(name='Nagpur Clinic', category='Medical Clinic', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=15),
+                ServiceCenter(name='MOTHER INDIA FETAL MEDICINE CENTRE', category='Medical Clinic', location='Ramdaspeth, Nagpur', latitude=21.1307, longitude=79.0711, avg_service_time=25),
+                ServiceCenter(name='Ashvatam Clinic', category='Medical Clinic', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=18),
+                ServiceCenter(name='Apna Clinic', category='Medical Clinic', location='Gandhibagh, Nagpur', latitude=21.1540, longitude=79.0849, avg_service_time=15),
+                ServiceCenter(name='Dr.Agrawal Multispeciality Clinic', category='Medical Clinic', location='Wardha Road, Nagpur', latitude=21.1180, longitude=79.0510, avg_service_time=22),
+                ServiceCenter(name='Shree Clinic', category='Medical Clinic', location='Manish Nagar, Nagpur', latitude=21.1220, longitude=79.0420, avg_service_time=15),
+                ServiceCenter(name='Sai Clinic', category='Medical Clinic', location='Pratap Nagar, Nagpur', latitude=21.1650, longitude=79.0900, avg_service_time=18),
+                ServiceCenter(name='Suyash Clinic', category='Medical Clinic', location='Laxmi Nagar, Nagpur', latitude=21.1700, longitude=79.0950, avg_service_time=15),
+                ServiceCenter(name='INC CLINIC NAGPUR', category='Medical Clinic', location='Dhantoli, Nagpur', latitude=21.1350, longitude=79.0750, avg_service_time=20),
                 # Mobile Service Centers
-                ServiceCenter(name='Apple Service - NGRT Systems', category='Apple Authorized', location='Civil Lines, Nagpur', avg_service_time=30),
-                ServiceCenter(name='Samsung Service - The Mobile Magic', category='Samsung Authorized', location='Sitabuldi, Nagpur', avg_service_time=25),
-                ServiceCenter(name='Samsung Service - Spectrum Marketing', category='Samsung Authorized', location='Dharampeth, Nagpur', avg_service_time=25),
-                ServiceCenter(name='Samsung Service - Karuna Management', category='Samsung Authorized', location='Rambagh Layout, Nagpur', avg_service_time=25),
-                ServiceCenter(name='Samsung CE - Akshay Refrigeration', category='Samsung Authorized', location='Somalwada, Nagpur', avg_service_time=28),
-                ServiceCenter(name='vivo India Service Center', category='vivo Authorized', location='Sadar, Nagpur', avg_service_time=22),
-                ServiceCenter(name='vivo & iQOO Service Center', category='vivo/iQOO Authorized', location='Medical Chowk, Nagpur', avg_service_time=22),
-                ServiceCenter(name='OPPO Service Center', category='OPPO Authorized', location='Sitabuldi, Nagpur', avg_service_time=22),
+                ServiceCenter(name='Apple Service - NGRT Systems', category='Mobile Service', location='Civil Lines, Nagpur', latitude=21.1458, longitude=79.0882, avg_service_time=30),
+                ServiceCenter(name='Samsung Service - The Mobile Magic', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=25),
+                ServiceCenter(name='Samsung Service - Spectrum Marketing', category='Mobile Service', location='Dharampeth, Nagpur', latitude=21.1466, longitude=79.0882, avg_service_time=25),
+                ServiceCenter(name='Samsung Service - Karuna Management', category='Mobile Service', location='Rambagh Layout, Nagpur', latitude=21.1400, longitude=79.0700, avg_service_time=25),
+                ServiceCenter(name='Samsung CE - Akshay Refrigeration', category='Mobile Service', location='Somalwada, Nagpur', latitude=21.1600, longitude=79.1000, avg_service_time=28),
+                ServiceCenter(name='vivo India Service Center', category='Mobile Service', location='Sadar, Nagpur', latitude=21.1509, longitude=79.0831, avg_service_time=22),
+                ServiceCenter(name='vivo & iQOO Service Center', category='Mobile Service', location='Medical Chowk, Nagpur', latitude=21.1520, longitude=79.0840, avg_service_time=22),
+                ServiceCenter(name='OPPO Service Center', category='Mobile Service', location='Sitabuldi, Nagpur', latitude=21.1498, longitude=79.0806, avg_service_time=22),
             ]
             db.session.add_all(centers)
             db.session.commit()
@@ -1508,86 +1508,101 @@ def migrate_db():
     try:
         with db.engine.connect() as conn:
             # Check and add avg_service_time column
-            result = conn.execute(db.text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='service_center_registrations' AND column_name='avg_service_time'"
-            ))
-            if not result.fetchone():
-                conn.execute(db.text(
-                    "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
+            try:
+                result = conn.execute(db.text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name='service_center_registrations' AND column_name='avg_service_time'"
                 ))
-                conn.commit()
-                results.append("✅ Added avg_service_time column to service_center_registrations")
-            else:
-                results.append("ℹ️ avg_service_time column already exists in service_center_registrations")
+                if not result.fetchone():
+                    conn.execute(db.text(
+                        "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
+                    ))
+                    conn.commit()
+                    results.append("✅ Added avg_service_time column to service_center_registrations")
+                else:
+                    results.append("ℹ️ avg_service_time column already exists in service_center_registrations")
+            except Exception as e:
+                results.append(f"⚠️ avg_service_time: {str(e)}")
             
             # Check and add completed_time column to tokens table
-            result = conn.execute(db.text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='tokens' AND column_name='completed_time'"
-            ))
-            if not result.fetchone():
-                conn.execute(db.text(
-                    "ALTER TABLE tokens ADD COLUMN completed_time TIMESTAMP"
+            try:
+                result = conn.execute(db.text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name='tokens' AND column_name='completed_time'"
                 ))
-                conn.commit()
-                results.append("✅ Added completed_time column to tokens table")
-            else:
-                results.append("ℹ️ completed_time column already exists in tokens table")
+                if not result.fetchone():
+                    conn.execute(db.text(
+                        "ALTER TABLE tokens ADD COLUMN completed_time TIMESTAMP"
+                    ))
+                    conn.commit()
+                    results.append("✅ Added completed_time column to tokens table")
+                else:
+                    results.append("ℹ️ completed_time column already exists in tokens table")
+            except Exception as e:
+                results.append(f"⚠️ completed_time: {str(e)}")
             
             # Check and add user location columns
-            result = conn.execute(db.text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='users' AND column_name='address'"
-            ))
-            if not result.fetchone():
-                conn.execute(db.text(
-                    "ALTER TABLE users ADD COLUMN address VARCHAR(200)"
+            try:
+                result = conn.execute(db.text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name='users' AND column_name='address'"
                 ))
-                conn.execute(db.text(
-                    "ALTER TABLE users ADD COLUMN latitude FLOAT"
-                ))
-                conn.execute(db.text(
-                    "ALTER TABLE users ADD COLUMN longitude FLOAT"
-                ))
-                conn.commit()
-                results.append("✅ Added address, latitude, longitude columns to users table")
-            else:
-                results.append("ℹ️ User location columns already exist")
+                if not result.fetchone():
+                    conn.execute(db.text(
+                        "ALTER TABLE users ADD COLUMN address VARCHAR(200)"
+                    ))
+                    conn.execute(db.text(
+                        "ALTER TABLE users ADD COLUMN latitude FLOAT"
+                    ))
+                    conn.execute(db.text(
+                        "ALTER TABLE users ADD COLUMN longitude FLOAT"
+                    ))
+                    conn.commit()
+                    results.append("✅ Added address, latitude, longitude columns to users table")
+                else:
+                    results.append("ℹ️ User location columns already exist")
+            except Exception as e:
+                results.append(f"⚠️ User location: {str(e)}")
             
             # Check and add service center location columns
-            result = conn.execute(db.text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='service_centers' AND column_name='latitude'"
-            ))
-            if not result.fetchone():
-                conn.execute(db.text(
-                    "ALTER TABLE service_centers ADD COLUMN latitude FLOAT"
+            try:
+                result = conn.execute(db.text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name='service_centers' AND column_name='latitude'"
                 ))
-                conn.execute(db.text(
-                    "ALTER TABLE service_centers ADD COLUMN longitude FLOAT"
-                ))
-                conn.commit()
-                results.append("✅ Added latitude, longitude columns to service_centers table")
-            else:
-                results.append("ℹ️ Service center location columns already exist")
+                if not result.fetchone():
+                    conn.execute(db.text(
+                        "ALTER TABLE service_centers ADD COLUMN latitude FLOAT"
+                    ))
+                    conn.execute(db.text(
+                        "ALTER TABLE service_centers ADD COLUMN longitude FLOAT"
+                    ))
+                    conn.commit()
+                    results.append("✅ Added latitude, longitude columns to service_centers table")
+                else:
+                    results.append("ℹ️ Service center location columns already exist")
+            except Exception as e:
+                results.append(f"⚠️ Service center location: {str(e)}")
             
             # Check and add registration location columns
-            result = conn.execute(db.text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='service_center_registrations' AND column_name='latitude'"
-            ))
-            if not result.fetchone():
-                conn.execute(db.text(
-                    "ALTER TABLE service_center_registrations ADD COLUMN latitude FLOAT"
+            try:
+                result = conn.execute(db.text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name='service_center_registrations' AND column_name='latitude'"
                 ))
-                conn.execute(db.text(
-                    "ALTER TABLE service_center_registrations ADD COLUMN longitude FLOAT"
-                ))
-                conn.commit()
-                results.append("✅ Added latitude, longitude columns to service_center_registrations table")
-            else:
-                results.append("ℹ️ Registration location columns already exist")
+                if not result.fetchone():
+                    conn.execute(db.text(
+                        "ALTER TABLE service_center_registrations ADD COLUMN latitude FLOAT"
+                    ))
+                    conn.execute(db.text(
+                        "ALTER TABLE service_center_registrations ADD COLUMN longitude FLOAT"
+                    ))
+                    conn.commit()
+                    results.append("✅ Added latitude, longitude columns to service_center_registrations table")
+                else:
+                    results.append("ℹ️ Registration location columns already exist")
+            except Exception as e:
+                results.append(f"⚠️ Registration location: {str(e)}")
             
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
