@@ -560,20 +560,30 @@ def registration_payment(reg_id):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
-        mobile = request.form['mobile']
-        email = request.form.get('email')
-        password = request.form['password']
-        
-        if User.query.filter_by(mobile=mobile).first():
-            flash('Mobile number already registered!', 'danger')
+        try:
+            name = request.form.get('name', '').strip()
+            mobile = request.form.get('mobile', '').strip()
+            email = request.form.get('email', '').strip()
+            password = request.form.get('password', '')
+            
+            if not all([name, mobile, password]):
+                flash('All fields are required!', 'danger')
+                return redirect(url_for('register'))
+            
+            if User.query.filter_by(mobile=mobile).first():
+                flash('Mobile number already registered!', 'danger')
+                return redirect(url_for('register'))
+            
+            user = User(name=name, mobile=mobile, email=email if email else None, password=generate_password_hash(password))
+            db.session.add(user)
+            db.session.commit()
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Registration error: {e}")
+            flash('Registration failed. Please try again.', 'danger')
             return redirect(url_for('register'))
-        
-        user = User(name=name, mobile=mobile, email=email, password=generate_password_hash(password))
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
     
     return render_template('register.html')
 
