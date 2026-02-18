@@ -723,8 +723,13 @@ def payment(token_id):
                     position += 1
                 
                 wait_time = calculate_wait_time(center.id, position)
-                leave_time = datetime.now() + timedelta(minutes=wait_time)
-                reach_time = datetime.now() + timedelta(minutes=wait_time + 5)
+                
+                # Calculate travel time
+                user = User.query.get(session['user_id'])
+                travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+                
+                leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - travel_time))
+                reach_time = leave_time + timedelta(minutes=travel_time)
                 
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
         except Exception as e:
@@ -778,9 +783,10 @@ def queue_status(token_id):
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # Leave time = current time + wait time - travel time - 5 min buffer
-    leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - travel_time - 5))
-    reach_counter_time = datetime.now() + timedelta(minutes=wait_time)
+    # Leave time = current time + wait time - travel time
+    leave_time = datetime.now() + timedelta(minutes=max(0, wait_time - travel_time))
+    # Reach counter = leave time + travel time
+    reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
     return render_template('queue_status.html', 
                          token=token, 
