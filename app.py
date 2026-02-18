@@ -129,19 +129,7 @@ def init_db():
     with app.app_context():
         try:
             db.create_all()
-            
-            # Migration: Add avg_service_time column if it doesn't exist
-            try:
-                from sqlalchemy import inspect
-                inspector = inspect(db.engine)
-                columns = [col['name'] for col in inspector.get_columns('service_center_registrations')]
-                if 'avg_service_time' not in columns:
-                    with db.engine.connect() as conn:
-                        conn.execute(db.text('ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20'))
-                        conn.commit()
-                    print("✅ Added avg_service_time column")
-            except Exception as e:
-                print(f"⚠️ Migration skipped: {e}")
+            print("✅ Database tables created")
         except Exception as e:
             print(f"❌ Database init error: {e}")
         
