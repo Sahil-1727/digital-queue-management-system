@@ -270,9 +270,12 @@ def generate_token_number(center_id):
 def calculate_wait_time(center_id, token_position):
     """Calculate realistic wait time in minutes"""
     center = ServiceCenter.query.get(center_id)
-    # Base calculation: position × avg service time
-    wait_minutes = token_position * center.avg_service_time
-    # Cap maximum wait time at 3 hours (180 minutes) for realism
+    # If first in queue (position 1), minimal wait time
+    if token_position <= 1:
+        return center.avg_service_time
+    # For others: (position - 1) × avg service time
+    wait_minutes = (token_position - 1) * center.avg_service_time
+    # Cap maximum wait time at 3 hours (180 minutes)
     return min(wait_minutes, 180)
 
 def expire_old_tokens():
