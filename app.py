@@ -785,22 +785,43 @@ def queue_status(token_id):
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # Calculate wait time based on queue position
-    wait_time = calculate_wait_time(token.service_center_id, position)
-    
-    # For 1st person: immediate service
+    # For 1st person: Book + 10 min ready + travel
     if position <= 1:
-        leave_time = datetime.now() + timedelta(minutes=10)
+        leave_time = token.created_time + timedelta(minutes=10)
         reach_counter_time = leave_time + timedelta(minutes=travel_time)
     else:
-        # For others: service starts after wait time
-        service_start_time = token.created_time + timedelta(minutes=wait_time)
-        reach_counter_time = service_start_time
-        leave_time = reach_counter_time - timedelta(minutes=travel_time + 5)
+        # For others: Calculate when counter becomes free
+        # Counter free = 1st person reach time + (position-1) * service time
+        first_token = Token.query.filter(
+            Token.service_center_id == token.service_center_id,
+            Token.status.in_(['Active', 'Serving']),
+            Token.is_walkin == False
+        ).order_by(Token.id).first()
+        
+        if first_token:
+            # Estimate when first person reaches (their booking + 10 + travel)
+            first_user = User.query.get(first_token.user_id)
+            first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
+            first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
+            
+            # Counter free after all previous people finish
+            counter_free_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
+        else:
+            # Fallback if first token not found
+            counter_free_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
+        
+        # Reach counter when it becomes free
+        reach_counter_time = counter_free_time
+        
+        # Leave = reach - travel
+        leave_time = reach_counter_time - timedelta(minutes=travel_time)
         
         # If leave time is in past, leave now
         if leave_time < datetime.now():
             leave_time = datetime.now()
+    
+    # Calculate wait time for display only
+    wait_time = 0
     
     return render_template('queue_status.html', 
                          token=token, 
