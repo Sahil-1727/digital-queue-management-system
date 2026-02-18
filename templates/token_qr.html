@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token QR Code - QueueFlow</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        @media print {
+            body { background: white; }
+            .no-print { display: none; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card mx-auto" style="max-width: 600px;">
+            <div class="card-header text-center" style="background: #0F172A; color: white;">
+                <h4 class="mb-0">📲 Walk-In Token QR Code</h4>
+            </div>
+            <div class="card-body text-center">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show no-print">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="mb-4">
+                    <h2 style="color: #2DD4BF; font-weight: bold;">{{ token.token_number }}</h2>
+                    <p class="text-muted mb-0">{{ token.service_center.name }}</p>
+                </div>
+
+                <div class="qr-container mx-auto" style="max-width: 300px;">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+                </div>
+
+                <div class="mt-4">
+                    <p class="fw-bold mb-2">Scan to Track Token Status</p>
+                    <p class="text-muted small">{{ track_url }}</p>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <strong>📱 Instructions:</strong><br>
+                    1. Scan this QR code with your phone<br>
+                    2. Track your queue position in real-time<br>
+                    3. Get notified when it's your turn
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center mt-4 no-print">
+                    <button onclick="window.print()" class="btn btn-primary">🖨️ Print</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

@@ -7,6 +7,9 @@ import secrets
 import smtplib
 import socket
 import requests
+import qrcode
+import io
+import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -1087,7 +1090,7 @@ def add_walkin():
         db.session.commit()
         
         flash(f'Walk-in token {token_number} created successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('token_qr', token_number=token_number))
     
     return render_template('add_walkin.html', center=center)
 
@@ -1309,6 +1312,32 @@ def admin_delete_center():
     
     flash(f'Your service center "{center_name}" has been deleted successfully.', 'info')
     return redirect(url_for('home'))
+
+@app.route('/token-qr/<token_number>')
+def token_qr(token_number):
+    """Generate QR code for token tracking"""
+    token = Token.query.filter_by(token_number=token_number).first_or_404()
+    
+    # Generate tracking URL
+    track_url = url_for('track_status', token_number=token_number, _external=True)
+    
+    # Generate QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(track_url)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="#0F172A", back_color="white")
+    
+    # Convert to base64
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+    
+    return render_template('token_qr.html', 
+                         token=token, 
+                         qr_code=img_base64,
+                         track_url=track_url)
 
 @app.route('/test-email-config')
 def test_email_config():
