@@ -798,6 +798,9 @@ def queue_status(token_id):
     # Reach counter = leave time + travel time
     reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
+    # Debug print
+    print(f"🔍 Queue Status Debug: Position={position}, Wait={wait_time}min, Travel={travel_time}min, Service Start={service_start_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
+    
     return render_template('queue_status.html', 
                          token=token, 
                          serving_token=serving_token,
