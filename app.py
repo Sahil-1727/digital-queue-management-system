@@ -1288,6 +1288,30 @@ def test_send_email():
     except Exception as e:
         return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
 
+@app.route('/migrate-db-add-column')
+def migrate_db():
+    """Manual migration endpoint to add avg_service_time column"""
+    try:
+        with db.engine.connect() as conn:
+            # Check if column exists
+            result = conn.execute(db.text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='service_center_registrations' AND column_name='avg_service_time'"
+            ))
+            exists = result.fetchone()
+            
+            if not exists:
+                # Add the column
+                conn.execute(db.text(
+                    "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
+                ))
+                conn.commit()
+                return "<h2>Migration Success</h2><p>✅ Added avg_service_time column</p>"
+            else:
+                return "<h2>Migration Skipped</h2><p>ℹ️ Column already exists</p>"
+    except Exception as e:
+        return f"<h2>Migration Error</h2><p>❌ {str(e)}</p>"
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
