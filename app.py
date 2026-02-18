@@ -1218,10 +1218,14 @@ def test_email_config():
 @app.route('/test-send-email')
 def test_send_email():
     """Test endpoint to actually send an email"""
+    brevo_key = os.getenv('BREVO_API_KEY', '')
+    if not brevo_key:
+        return f"<h2>Email Send Test</h2><p>❌ BREVO_API_KEY not configured in environment variables</p>"
+    
     try:
         test_link = "https://digital-queue-management-system-1.onrender.com/"
-        result = send_reset_email('queueflowqms@gmail.com', test_link, 'Test')
-        return f"<h2>Email Send Test</h2><p>Result: {'SUCCESS ✅' if result else 'FAILED ❌'}</p><p>Check Render logs for details</p>"
+        result = send_reset_email('teltumdesahil441@gmail.com', test_link, 'Test')
+        return f"<h2>Email Send Test</h2><p>Result: {'SUCCESS ✅' if result else 'FAILED ❌'}</p><p>Check Render logs and your email inbox</p>"
     except Exception as e:
         return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
 
