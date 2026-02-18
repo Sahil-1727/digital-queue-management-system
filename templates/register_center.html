@@ -133,12 +133,21 @@
                                     <input type="text" class="form-control" name="pincode" placeholder="6-digit" pattern="[0-9]{6}" maxlength="6" required>
                                 </div>
 
-                                <div class="col-12">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="getCenterLocation()">📍 Get Service Center Location</button>
-                                    <small class="text-muted ms-2">This helps users calculate travel time</small>
-                                    <input type="hidden" name="latitude" id="latitude">
-                                    <input type="hidden" name="longitude" id="longitude">
-                                    <div id="location-status" class="mt-2"></div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Service Center Location Coordinates <span class="text-danger">*</span></label>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <input type="number" step="any" class="form-control" name="latitude" id="latitude" placeholder="Latitude (e.g., 21.1458)" required>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="number" step="any" class="form-control" name="longitude" id="longitude" placeholder="Longitude (e.g., 79.0882)" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-secondary w-100" onclick="getCenterLocation()" title="Get current location">📍</button>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Required for travel time calculation. Click 📍 to auto-detect or enter manually.</small>
+                                    <div id="location-status" class="mt-1"></div>
                                 </div>
 
                                 <div class="col-md-6">
