@@ -25,6 +25,7 @@
                 <h4 class="mb-0 fw-bold">👑 Super Admin Dashboard</h4>
                 <div class="d-flex gap-2">
                     <span class="text-white">{{ session.superadmin_username }}</span>
+                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Manage Centers</a>
                     <a href="{{ url_for('superadmin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>

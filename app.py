@@ -1256,6 +1256,60 @@ def superadmin_logout():
     session.clear()
     return redirect(url_for('superadmin_login'))
 
+@app.route('/superadmin/center/<int:center_id>/delete', methods=['POST'])
+def superadmin_delete_center(center_id):
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    center = ServiceCenter.query.get_or_404(center_id)
+    center_name = center.name
+    
+    # Delete all tokens for this center
+    Token.query.filter_by(service_center_id=center_id).delete()
+    
+    # Delete admin accounts for this center
+    Admin.query.filter_by(service_center_id=center_id).delete()
+    
+    # Delete the service center
+    db.session.delete(center)
+    db.session.commit()
+    
+    flash(f'Service center "{center_name}" deleted successfully!', 'success')
+    return redirect(url_for('superadmin_manage_centers'))
+
+@app.route('/superadmin/manage-centers')
+def superadmin_manage_centers():
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    centers = ServiceCenter.query.order_by(ServiceCenter.id).all()
+    return render_template('superadmin_manage_centers.html', centers=centers)
+
+@app.route('/admin/delete-center', methods=['POST'])
+def admin_delete_center():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get_or_404(center_id)
+    center_name = center.name
+    
+    # Delete all tokens for this center
+    Token.query.filter_by(service_center_id=center_id).delete()
+    
+    # Delete admin account
+    Admin.query.filter_by(service_center_id=center_id).delete()
+    
+    # Delete the service center
+    db.session.delete(center)
+    db.session.commit()
+    
+    # Logout admin
+    session.clear()
+    
+    flash(f'Your service center "{center_name}" has been deleted successfully.', 'info')
+    return redirect(url_for('home'))
+
 @app.route('/test-email-config')
 def test_email_config():
     """Test endpoint to verify email configuration"""

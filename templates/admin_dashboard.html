@@ -29,6 +29,10 @@
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('add_walkin') }}" class="btn btn-light btn-sm">🚶 Add Walk-In</a>
                     <a href="{{ url_for('admin_history') }}" class="btn btn-outline-light btn-sm">History</a>
+                    <form method="POST" action="{{ url_for('admin_delete_center') }}" style="display: inline;" 
+                          onsubmit="return confirm('Are you sure you want to delete your service center? This action cannot be undone!')">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete Center</button>
+                    </form>
                     <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>
