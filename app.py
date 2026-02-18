@@ -111,6 +111,7 @@ class ServiceCenterRegistration(db.Model):
     counters = db.Column(db.Integer, nullable=True)
     daily_customers = db.Column(db.Integer, nullable=True)
     years_in_business = db.Column(db.Integer, nullable=True)
+    avg_service_time = db.Column(db.Integer, default=20)  # Average service time in minutes
     gst_number = db.Column(db.String(15), nullable=True)
     website = db.Column(db.String(100), nullable=True)
     additional_info = db.Column(db.String(500), nullable=True)
@@ -440,6 +441,7 @@ def register_center():
             counters=request.form.get('counters') or None,
             daily_customers=request.form.get('daily_customers') or None,
             years_in_business=request.form.get('years_in_business') or None,
+            avg_service_time=int(request.form.get('avg_service_time', 20)),
             gst_number=request.form.get('gst_number'),
             website=request.form.get('website'),
             additional_info=request.form.get('additional_info'),
@@ -1187,8 +1189,8 @@ def approve_registration(reg_id):
     service_center = ServiceCenter(
         name=registration.center_name,
         category=registration.organization_type,
-        location=f"{registration.city}, {registration.state}",
-        avg_service_time=20  # Default service time
+        location=f"{registration.address}, {registration.city}, {registration.state} - {registration.pincode}",
+        avg_service_time=registration.avg_service_time or 20
     )
     db.session.add(service_center)
     db.session.flush()  # Get the service_center.id
