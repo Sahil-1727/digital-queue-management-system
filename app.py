@@ -1051,8 +1051,15 @@ def add_walkin():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
-    center_id = session['admin_center_id']
+    center_id = session.get('admin_center_id')
+    if not center_id:
+        flash('Session expired. Please login again.', 'danger')
+        return redirect(url_for('admin_login'))
+    
     center = ServiceCenter.query.get(center_id)
+    if not center:
+        flash('Service center not found.', 'danger')
+        return redirect(url_for('admin_login'))
     
     if request.method == 'POST':
         name = request.form.get('name', 'Walk-in Customer').strip()
@@ -1372,14 +1379,14 @@ def admin_analytics():
     
     # Peak hours (last 7 days)
     try:
-        peak_hours = db.session.query(
+        peak_hours_raw = db.session.query(
             db.func.extract('hour', Token.created_time).label('hour'),
             db.func.count(Token.id).label('count')
         ).filter(
             Token.service_center_id == center_id,
             Token.created_time >= datetime.now() - timedelta(days=7)
-        ).group_by('hour').order_by(db.desc('count')).limit(3).all()
-        peak_hours = [(int(h.hour), h.count) for h in peak_hours]
+        ).group_by(db.func.extract('hour', Token.created_time)).order_by(db.desc('count')).limit(3).all()
+        peak_hours = [(int(h.hour), h.count) for h in peak_hours_raw]
     except Exception:
         peak_hours = []
     
