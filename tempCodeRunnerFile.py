@@ -1,1 +1,1 @@
-/register-center
+samsung1@admin.com

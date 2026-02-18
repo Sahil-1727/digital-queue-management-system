@@ -785,21 +785,12 @@ def queue_status(token_id):
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # Calculate expected service start time based on queue position
-    wait_time = calculate_wait_time(token.service_center_id, position)
-    service_start_time = datetime.now() + timedelta(minutes=wait_time)
-    
-    # Leave time = service start time - travel time - 5 min buffer
-    leave_time = service_start_time - timedelta(minutes=travel_time + 5)
-    # If leave time is in the past, leave now
-    if leave_time < datetime.now():
-        leave_time = datetime.now()
-    
-    # Reach counter = leave time + travel time
+    # Simple logic: Leave now + 10 min prep, reach = leave + travel
+    leave_time = datetime.now() + timedelta(minutes=10)
     reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
-    # Debug print
-    print(f"🔍 Queue Status Debug: Position={position}, Wait={wait_time}min, Travel={travel_time}min, Service Start={service_start_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
+    # Calculate wait time for display
+    wait_time = calculate_wait_time(token.service_center_id, position)
     
     return render_template('queue_status.html', 
                          token=token, 
