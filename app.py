@@ -1445,11 +1445,11 @@ def migrate_db():
                     "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
                 ))
                 conn.commit()
-                results.append("✅ Added avg_service_time column")
+                results.append("✅ Added avg_service_time column to service_center_registrations")
             else:
-                results.append("ℹ️ avg_service_time column already exists")
+                results.append("ℹ️ avg_service_time column already exists in service_center_registrations")
             
-            # Check and add completed_time column
+            # Check and add completed_time column to tokens table
             result = conn.execute(db.text(
                 "SELECT column_name FROM information_schema.columns "
                 "WHERE table_name='tokens' AND column_name='completed_time'"
@@ -1459,9 +1459,9 @@ def migrate_db():
                     "ALTER TABLE tokens ADD COLUMN completed_time TIMESTAMP"
                 ))
                 conn.commit()
-                results.append("✅ Added completed_time column")
+                results.append("✅ Added completed_time column to tokens table")
             else:
-                results.append("ℹ️ completed_time column already exists")
+                results.append("ℹ️ completed_time column already exists in tokens table")
             
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
