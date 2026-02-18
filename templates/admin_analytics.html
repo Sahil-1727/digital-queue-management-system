@@ -14,11 +14,18 @@
             background: #0F172A !important;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
+        .navbar-brand { color: #2DD4BF !important; }
         .card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(45, 212, 191, 0.2);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        .card-header {
+            background: #0F172A !important;
+            color: white !important;
+            border-radius: 15px 15px 0 0 !important;
         }
         .stat-card {
             background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
@@ -26,12 +33,19 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(45, 212, 191, 0.3);
         }
-        .chart-bar {
-            background: #2DD4BF;
-            height: 30px;
-            border-radius: 5px;
-            transition: width 0.3s;
+        .stat-card h2 {
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .progress-bar {
+            background: #2DD4BF !important;
+        }
+        .badge {
+            background: #2DD4BF !important;
+            color: #0F172A !important;
+            font-weight: 600;
         }
     </style>
 </head>
