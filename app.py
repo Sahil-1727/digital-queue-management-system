@@ -978,7 +978,10 @@ def queue_status(token_id):
     
     # Auto-expire if reach_time has passed
     if token.status == 'Active' and token.reach_time:
-        if get_ist_now() > token.reach_time:
+        reach_time_ist = token.reach_time
+        if reach_time_ist.tzinfo is None:
+            reach_time_ist = IST.localize(reach_time_ist)
+        if get_ist_now() > reach_time_ist:
             token.status = 'Expired'
             db.session.commit()
             flash('Your token has expired as the reach time has passed. Please book a new token.', 'warning')
@@ -989,25 +992,39 @@ def queue_status(token_id):
         flash(f'Token is {token.status.lower()}.', 'info')
         return redirect(url_for('services'))
     
-    serving_token = get_serving_token(token.service_center_id)
+    try:
+        serving_token = get_serving_token(token.service_center_id)
+    except:
+        serving_token = None
     
     position = 0
     if token.status == 'Active':
-        position = Token.query.filter(
-            Token.service_center_id == token.service_center_id,
-            Token.status == 'Active',
-            Token.is_walkin == False,
-            Token.id < token.id
-        ).count() + 1
-        if serving_token:
-            position += 1
+        try:
+            position = Token.query.filter(
+                Token.service_center_id == token.service_center_id,
+                Token.status == 'Active',
+                Token.is_walkin == False,
+                Token.id < token.id
+            ).count() + 1
+            if serving_token:
+                position += 1
+        except:
+            position = 1
     
     # Use stored times from database
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+    
     leave_time = token.leave_time or get_ist_now()
     reach_counter_time = token.reach_time or get_ist_now()
+    
+    # Ensure times are timezone-aware
+    if leave_time.tzinfo is None:
+        leave_time = IST.localize(leave_time)
+    if reach_counter_time.tzinfo is None:
+        reach_counter_time = IST.localize(reach_counter_time)
+    
     wait_time = 0
     
     return render_template('queue_status.html', 
