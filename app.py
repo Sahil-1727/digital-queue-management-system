@@ -924,28 +924,47 @@ def payment(token_id):
         
         # Calculate and STORE fixed times
         if position <= 1:
-            # First person: leave in 10 minutes
+            # First person: Ready time (10 min) + Travel time
             leave_time = get_ist_now() + timedelta(minutes=10)
             reach_time = leave_time + timedelta(minutes=travel_time)
         else:
-            # Others: calculate when counter becomes free
-            first_token = Token.query.filter(
+            # Find previous person's service end time
+            previous_tokens = Token.query.filter(
                 Token.service_center_id == center.id,
                 Token.status.in_(['Active', 'Serving']),
-                Token.is_walkin == False
-            ).order_by(Token.id).first()
+                Token.is_walkin == False,
+                Token.id < token.id
+            ).order_by(Token.id).all()
             
-            if first_token:
+            if previous_tokens:
+                # Start from first person
+                first_token = previous_tokens[0]
                 first_user = User.query.get(first_token.user_id)
                 first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
-                first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
-                reach_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
+                
+                # First person's arrival time
+                first_leave = first_token.created_time + timedelta(minutes=10)
+                first_arrival = first_leave + timedelta(minutes=first_travel)
+                service_end_time = first_arrival + timedelta(minutes=center.avg_service_time)
+                
+                # Calculate for each person in between
+                for prev_token in previous_tokens[1:]:
+                    # Each person arrives when previous service ends
+                    # Service ends after avg_service_time
+                    service_end_time = service_end_time + timedelta(minutes=center.avg_service_time)
+                
+                # Current person arrives when previous service ends
+                reach_time = service_end_time
+                leave_time = reach_time - timedelta(minutes=travel_time)
+                
+                # If leave time is in past, set to now
+                if leave_time < get_ist_now():
+                    leave_time = get_ist_now()
+                    reach_time = leave_time + timedelta(minutes=travel_time)
             else:
-                reach_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
-            
-            leave_time = reach_time - timedelta(minutes=travel_time + 5)
-            if leave_time < get_ist_now():
-                leave_time = get_ist_now()
+                # Fallback
+                leave_time = get_ist_now() + timedelta(minutes=10)
+                reach_time = leave_time + timedelta(minutes=travel_time)
         
         # Store times in database
         token.status = 'Active'
@@ -975,17 +994,6 @@ def queue_status(token_id):
     if token.user_id != session['user_id']:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('services'))
-    
-    # Auto-expire if reach_time has passed
-    if token.status == 'Active' and token.reach_time:
-        reach_time_ist = token.reach_time
-        if reach_time_ist.tzinfo is None:
-            reach_time_ist = IST.localize(reach_time_ist)
-        if get_ist_now() > reach_time_ist:
-            token.status = 'Expired'
-            db.session.commit()
-            flash('Your token has expired as the reach time has passed. Please book a new token.', 'warning')
-            return redirect(url_for('services'))
     
     # If token is not Active or Serving, redirect
     if token.status not in ['Active', 'Serving']:
