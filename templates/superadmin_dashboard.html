@@ -37,7 +37,8 @@
                 <h4 class="mb-0 fw-bold">👑 <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Super Admin</span></h4>
                 <div class="d-flex gap-2 flex-wrap">
                     <span class="text-white d-none d-md-inline">{{ session.superadmin_username }}</span>
-                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Manage</a>
+                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Centers</a>
+                    <a href="{{ url_for('superadmin_admins') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Admins</a>
                     <a href="{{ url_for('superadmin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>

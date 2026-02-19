@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Admins - SuperAdmin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(45, 212, 191, 0.2);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('superadmin_dashboard') }}">
+                <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow SuperAdmin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_manage_centers') }}">Centers</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('superadmin_admins') }}">Admins</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 fw-bold mb-2">Manage Admins</h1>
+                <p class="text-muted">View and edit all admin accounts and their service centers</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead style="background: rgba(45, 212, 191, 0.1); border-bottom: 2px solid rgba(45, 212, 191, 0.3);">
+                            <tr>
+                                <th>ID</th>
+                                <th>Service Center</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Admin Username</th>
+                                <th>Admin Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admin in admins %}
+                            <tr>
+                                <td><span class="badge" style="background: rgba(45, 212, 191, 0.2); color: #2DD4BF;">{{ admin.id }}</span></td>
+                                <td><strong>{{ admin.service_center.name }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ admin.service_center.category }}</span></td>
+                                <td>{{ admin.service_center.location }}</td>
+                                <td><code style="color: #2DD4BF;">{{ admin.username }}</code></td>
+                                <td>{{ admin.email or 'Not set' }}</td>
+                                <td>
+                                    <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm" style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); color: #0F172A;">
+                                        ✏️ Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% if admins|length == 0 %}
+        <div class="text-center py-5">
+            <p class="text-muted">No admins found</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+</body>
+</html>

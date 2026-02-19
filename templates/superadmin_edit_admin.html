@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Admin - {{ center.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(45, 212, 191, 0.2);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('superadmin_dashboard') }}">
+                <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow SuperAdmin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_manage_centers') }}">Centers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_admins') }}">Admins</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin_logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 fw-bold mb-2">Edit Admin & Service Center</h1>
+                <p class="text-muted">Update admin account and service center details</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="row g-4">
+                <!-- Service Center Details -->
+                <div class="col-lg-8">
+                    <div class="card p-4 mb-4">
+                        <h4 class="mb-4" style="color: #2DD4BF;">🏥 Service Center Details</h4>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Center Name</label>
+                                <input type="text" class="form-control" name="center_name" value="{{ center.name }}" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Category</label>
+                                <input type="text" class="form-control" name="category" value="{{ center.category }}" required>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Location</label>
+                                <input type="text" class="form-control" name="location" value="{{ center.location }}" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" name="phone" value="{{ center.phone or '' }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" value="{{ center.email or '' }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Website</label>
+                                <input type="url" class="form-control" name="website" value="{{ center.website or '' }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Business Hours</label>
+                                <input type="text" class="form-control" name="business_hours" value="{{ center.business_hours or '' }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Avg Service Time (minutes)</label>
+                                <input type="number" class="form-control" name="avg_service_time" value="{{ center.avg_service_time }}" min="5" max="120">
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="3">{{ center.description or '' }}</textarea>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Services Offered</label>
+                                <textarea class="form-control" name="services_offered" rows="4">{{ center.services_offered or '' }}</textarea>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Facilities</label>
+                                <textarea class="form-control" name="facilities" rows="4">{{ center.facilities or '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Details -->
+                <div class="col-lg-4">
+                    <div class="card p-4 mb-4">
+                        <h4 class="mb-4" style="color: #2DD4BF;">👤 Admin Account</h4>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Admin ID</label>
+                            <input type="text" class="form-control" value="{{ admin.id }}" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="admin_username" value="{{ admin.username }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" name="admin_email" value="{{ admin.email or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="new_password" placeholder="Leave blank to keep current">
+                            <small class="text-muted">Only fill if you want to change password</small>
+                        </div>
+                    </div>
+
+                    <div class="card p-4" style="background: rgba(45, 212, 191, 0.05); border: 1px solid rgba(45, 212, 191, 0.2);">
+                        <h6 class="mb-3" style="color: #2DD4BF;">⚠️ Important</h6>
+                        <p class="small text-muted mb-0">Changes will be immediately reflected for the admin and visible to all users viewing this service center.</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-12">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; color: #0F172A;">
+                            💾 Save Changes
+                        </button>
+                        <a href="{{ url_for('superadmin_admins') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+</body>
+</html>

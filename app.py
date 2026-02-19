@@ -1663,6 +1663,59 @@ def reject_registration(reg_id):
     flash(f'Registration for {registration.center_name} rejected.', 'warning')
     return redirect(url_for('superadmin_dashboard'))
 
+@app.route('/superadmin/admins')
+def superadmin_admins():
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    try:
+        admins = Admin.query.join(ServiceCenter).order_by(ServiceCenter.name).all()
+        return render_template('superadmin_admins.html', admins=admins)
+    except Exception as e:
+        flash(f'Error loading admins: {str(e)}', 'danger')
+        return redirect(url_for('superadmin_dashboard'))
+
+@app.route('/superadmin/admin/<int:admin_id>/edit', methods=['GET', 'POST'])
+def superadmin_edit_admin(admin_id):
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    admin = Admin.query.get_or_404(admin_id)
+    center = ServiceCenter.query.get(admin.service_center_id)
+    
+    if request.method == 'POST':
+        try:
+            # Update service center details
+            center.name = request.form.get('center_name', '').strip()
+            center.category = request.form.get('category', '').strip()
+            center.location = request.form.get('location', '').strip()
+            center.description = request.form.get('description', '').strip()
+            center.phone = request.form.get('phone', '').strip()
+            center.email = request.form.get('email', '').strip()
+            center.website = request.form.get('website', '').strip()
+            center.business_hours = request.form.get('business_hours', '').strip()
+            center.services_offered = request.form.get('services_offered', '').strip()
+            center.facilities = request.form.get('facilities', '').strip()
+            center.avg_service_time = int(request.form.get('avg_service_time', 15))
+            
+            # Update admin details
+            admin.username = request.form.get('admin_username', '').strip()
+            admin.email = request.form.get('admin_email', '').strip()
+            
+            # Update password if provided
+            new_password = request.form.get('new_password', '').strip()
+            if new_password:
+                admin.password = generate_password_hash(new_password)
+            
+            db.session.commit()
+            flash('Admin and service center details updated successfully!', 'success')
+            return redirect(url_for('superadmin_admins'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating details: {str(e)}', 'danger')
+    
+    return render_template('superadmin_edit_admin.html', admin=admin, center=center)
+
 @app.route('/superadmin/logout')
 def superadmin_logout():
     session.clear()
