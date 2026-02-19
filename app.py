@@ -845,7 +845,7 @@ def services():
         import traceback
         traceback.print_exc()
         flash('Error loading services. Please try again.', 'danger')
-        return redirect(url_for('index'))
+        return render_template('services.html', centers=[], active_token=None)
 
 @app.route('/request_token/<int:center_id>')
 def request_token(center_id):
