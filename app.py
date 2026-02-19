@@ -108,6 +108,8 @@ class Token(db.Model):
     status = db.Column(db.String(20), default='PendingPayment')  # PendingPayment, Active, Serving, Completed, Expired
     created_time = db.Column(db.DateTime, default=datetime.now)
     completed_time = db.Column(db.DateTime, nullable=True)
+    leave_time = db.Column(db.DateTime, nullable=True)  # Fixed time to leave home
+    reach_time = db.Column(db.DateTime, nullable=True)  # Fixed time to reach counter
     no_show_reason = db.Column(db.String(500), nullable=True)
     no_show_time = db.Column(db.DateTime, nullable=True)
     is_walkin = db.Column(db.Boolean, default=False)
@@ -864,55 +866,59 @@ def payment(token_id):
         return redirect(url_for('services'))
     
     if request.method == 'POST':
+        user = User.query.get(session['user_id'])
+        center = ServiceCenter.query.get(token.service_center_id)
+        serving_token = get_serving_token(center.id)
+        
+        # Calculate position
+        position = Token.query.filter(
+            Token.service_center_id == center.id,
+            Token.status == 'Active',
+            Token.is_walkin == False,
+            Token.id < token.id
+        ).count() + 1
+        if serving_token:
+            position += 1
+        
+        # Calculate travel time
+        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+        
+        # Calculate and STORE fixed times
+        if position <= 1:
+            # First person: leave in 10 minutes
+            leave_time = datetime.now() + timedelta(minutes=10)
+            reach_time = leave_time + timedelta(minutes=travel_time)
+        else:
+            # Others: calculate when counter becomes free
+            first_token = Token.query.filter(
+                Token.service_center_id == center.id,
+                Token.status.in_(['Active', 'Serving']),
+                Token.is_walkin == False
+            ).order_by(Token.id).first()
+            
+            if first_token:
+                first_user = User.query.get(first_token.user_id)
+                first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
+                first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
+                reach_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
+            else:
+                reach_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
+            
+            leave_time = reach_time - timedelta(minutes=travel_time + 5)
+            if leave_time < datetime.now():
+                leave_time = datetime.now()
+        
+        # Store times in database
         token.status = 'Active'
+        token.leave_time = leave_time
+        token.reach_time = reach_time
         db.session.commit()
         
         flash('Payment successful! Your token is confirmed.', 'success')
         
         # Send timing alert email (non-blocking)
         try:
-            user = User.query.get(session['user_id'])
             if user.email:
-                center = ServiceCenter.query.get(token.service_center_id)
-                serving_token = get_serving_token(center.id)
-                
-                position = Token.query.filter(
-                    Token.service_center_id == center.id,
-                    Token.status == 'Active',
-                    Token.is_walkin == False,
-                    Token.id < token.id
-                ).count() + 1
-                if serving_token:
-                    position += 1
-                
-                # Calculate travel time
-                travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
-                
-                # Calculate exact times matching queue_status page
-                if position <= 1:
-                    # First person: leave in 10 minutes
-                    leave_time = datetime.now() + timedelta(minutes=10)
-                    reach_time = leave_time + timedelta(minutes=travel_time)
-                else:
-                    # Others: calculate when counter becomes free
-                    first_token = Token.query.filter(
-                        Token.service_center_id == center.id,
-                        Token.status.in_(['Active', 'Serving']),
-                        Token.is_walkin == False
-                    ).order_by(Token.id).first()
-                    
-                    if first_token:
-                        first_user = User.query.get(first_token.user_id)
-                        first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
-                        first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
-                        reach_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
-                    else:
-                        reach_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
-                    
-                    leave_time = reach_time - timedelta(minutes=travel_time + 5)
-                    if leave_time < datetime.now():
-                        leave_time = datetime.now()
-                
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
         except Exception as e:
             print(f"Email sending failed: {e}")
@@ -931,13 +937,12 @@ def queue_status(token_id):
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('services'))
     
-    # Auto-expire tokens older than 4 hours that are still Active
-    if token.status == 'Active':
-        hours_since_creation = (datetime.now() - token.created_time).total_seconds() / 3600
-        if hours_since_creation > 4:
+    # Auto-expire if reach_time has passed
+    if token.status == 'Active' and token.reach_time:
+        if datetime.now() > token.reach_time:
             token.status = 'Expired'
             db.session.commit()
-            flash('Your token has expired. Please book a new token.', 'warning')
+            flash('Your token has expired as the reach time has passed. Please book a new token.', 'warning')
             return redirect(url_for('services'))
     
     # If token is not Active or Serving, redirect
@@ -958,49 +963,12 @@ def queue_status(token_id):
         if serving_token:
             position += 1
     
-    # Calculate travel time based on user and center location
+    # Use stored times from database
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
-    
-    # For 1st person: Current time + 10 min ready + travel
-    if position <= 1:
-        current_time = datetime.now(IST)
-        leave_time = current_time + timedelta(minutes=10)
-        reach_counter_time = leave_time + timedelta(minutes=travel_time)
-        print(f"DEBUG 1st: Now={current_time.strftime('%H:%M')}, Leave={leave_time.strftime('%H:%M')}, Reach={reach_counter_time.strftime('%H:%M')}")
-    else:
-        # For others: Calculate when counter becomes free
-        # Counter free = 1st person reach time + (position-1) * service time
-        first_token = Token.query.filter(
-            Token.service_center_id == token.service_center_id,
-            Token.status.in_(['Active', 'Serving']),
-            Token.is_walkin == False
-        ).order_by(Token.id).first()
-        
-        if first_token:
-            # Estimate when first person reaches (their booking + 10 + travel)
-            first_user = User.query.get(first_token.user_id)
-            first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
-            first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
-            
-            # Counter free after all previous people finish
-            counter_free_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
-        else:
-            # Fallback if first token not found
-            counter_free_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
-        
-        # Reach counter when it becomes free
-        reach_counter_time = counter_free_time
-        
-        # Leave = reach - travel
-        leave_time = reach_counter_time - timedelta(minutes=travel_time)
-        
-        # If leave time is in past, leave now
-        if leave_time < datetime.now():
-            leave_time = datetime.now()
-    
-    # Calculate wait time for display only
+    leave_time = token.leave_time or datetime.now()
+    reach_counter_time = token.reach_time or datetime.now()
     wait_time = 0
     
     return render_template('queue_status.html', 
@@ -1885,7 +1853,7 @@ def migrate_db():
     try:
         with db.engine.connect() as conn:
             # Add new service center columns
-            new_columns = [
+            service_center_columns = [
                 ('description', 'VARCHAR(500)'),
                 ('phone', 'VARCHAR(15)'),
                 ('email', 'VARCHAR(100)'),
@@ -1895,7 +1863,7 @@ def migrate_db():
                 ('facilities', 'VARCHAR(500)')
             ]
             
-            for col_name, col_type in new_columns:
+            for col_name, col_type in service_center_columns:
                 try:
                     result = conn.execute(db.text(
                         f"SELECT column_name FROM information_schema.columns "
@@ -1907,6 +1875,29 @@ def migrate_db():
                         ))
                         conn.commit()
                         results.append(f"✅ Added {col_name} column to service_centers")
+                    else:
+                        results.append(f"ℹ️ {col_name} column already exists")
+                except Exception as e:
+                    results.append(f"⚠️ {col_name}: {str(e)}")
+            
+            # Add new token columns for fixed times
+            token_columns = [
+                ('leave_time', 'TIMESTAMP'),
+                ('reach_time', 'TIMESTAMP')
+            ]
+            
+            for col_name, col_type in token_columns:
+                try:
+                    result = conn.execute(db.text(
+                        f"SELECT column_name FROM information_schema.columns "
+                        f"WHERE table_name='tokens' AND column_name='{col_name}'"
+                    ))
+                    if not result.fetchone():
+                        conn.execute(db.text(
+                            f"ALTER TABLE tokens ADD COLUMN {col_name} {col_type}"
+                        ))
+                        conn.commit()
+                        results.append(f"✅ Added {col_name} column to tokens")
                     else:
                         results.append(f"ℹ️ {col_name} column already exists")
                 except Exception as e:
