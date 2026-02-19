@@ -440,6 +440,10 @@ def init_db():
             print(f"⚠️ Error adding super admin: {e}")
 
 # Helper functions
+def get_ist_now():
+    """Get current time in IST timezone"""
+    return datetime.now(IST)
+
 def get_active_token_for_user(user_id):
     try:
         return Token.query.filter_by(user_id=user_id).filter(
@@ -475,7 +479,7 @@ def get_walkin_serving_token(center_id):
         return None
 
 def generate_token_number(center_id):
-    today = datetime.now().date()
+    today = get_ist_now().date()
     count = Token.query.filter(
         Token.service_center_id == center_id,
         db.func.date(Token.created_time) == today
@@ -516,7 +520,7 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
 
 def expire_old_tokens():
     # Expire pending payment tokens after 2 hours
-    expiry_time = datetime.now() - timedelta(hours=2)
+    expiry_time = get_ist_now() - timedelta(hours=2)
     expired_tokens = Token.query.filter(
         Token.status == 'PendingPayment',
         Token.created_time < expiry_time
@@ -525,7 +529,7 @@ def expire_old_tokens():
         token.status = 'Expired'
     
     # Expire active tokens after 4 hours (if admin never called them)
-    active_expiry_time = datetime.now() - timedelta(hours=4)
+    active_expiry_time = get_ist_now() - timedelta(hours=4)
     old_active_tokens = Token.query.filter(
         Token.status == 'Active',
         Token.created_time < active_expiry_time
@@ -600,6 +604,17 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
         print("⚠️ Brevo API key not configured")
         return False
     
+    # Convert to IST if not already
+    if leave_time.tzinfo is None:
+        leave_time = IST.localize(leave_time)
+    else:
+        leave_time = leave_time.astimezone(IST)
+    
+    if reach_time.tzinfo is None:
+        reach_time = IST.localize(reach_time)
+    else:
+        reach_time = reach_time.astimezone(IST)
+    
     try:
         response = requests.post(
             "https://api.brevo.com/v3/smtp/email",
@@ -626,9 +641,11 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
                       </div>
                       
                       <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
-                        <h3 style="color: #856404; margin-top: 0;">⏰ Important Timings</h3>
+                        <h3 style="color: #856404; margin-top: 0;">⏰ Important Timings (IST)</h3>
                         <p style="margin: 8px 0;"><strong>🏠 Leave Home By:</strong> {leave_time.strftime('%I:%M %p')}</p>
                         <p style="margin: 8px 0;"><strong>🏥 Reach Counter By:</strong> {reach_time.strftime('%I:%M %p')}</p>
+                        <p style="margin: 8px 0;"><strong>📅 Date:</strong> {reach_time.strftime('%d %B %Y')}</p>
+                        <p style="margin: 8px 0;"><strong>🚗 Travel Time:</strong> ~{int((reach_time - leave_time).total_seconds() / 60)} mins</p>
                       </div>
                       
                       <p style="color: #666; font-size: 14px;">💡 <em>Tip: Leave 10 minutes before your estimated time to avoid delays.</em></p>
@@ -908,7 +925,7 @@ def payment(token_id):
         # Calculate and STORE fixed times
         if position <= 1:
             # First person: leave in 10 minutes
-            leave_time = datetime.now() + timedelta(minutes=10)
+            leave_time = get_ist_now() + timedelta(minutes=10)
             reach_time = leave_time + timedelta(minutes=travel_time)
         else:
             # Others: calculate when counter becomes free
@@ -927,8 +944,8 @@ def payment(token_id):
                 reach_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
             
             leave_time = reach_time - timedelta(minutes=travel_time + 5)
-            if leave_time < datetime.now():
-                leave_time = datetime.now()
+            if leave_time < get_ist_now():
+                leave_time = get_ist_now()
         
         # Store times in database
         token.status = 'Active'
@@ -961,7 +978,7 @@ def queue_status(token_id):
     
     # Auto-expire if reach_time has passed
     if token.status == 'Active' and token.reach_time:
-        if datetime.now() > token.reach_time:
+        if get_ist_now() > token.reach_time:
             token.status = 'Expired'
             db.session.commit()
             flash('Your token has expired as the reach time has passed. Please book a new token.', 'warning')
@@ -989,8 +1006,8 @@ def queue_status(token_id):
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
-    leave_time = token.leave_time or datetime.now()
-    reach_counter_time = token.reach_time or datetime.now()
+    leave_time = token.leave_time or get_ist_now()
+    reach_counter_time = token.reach_time or get_ist_now()
     wait_time = 0
     
     return render_template('queue_status.html', 
@@ -1088,7 +1105,7 @@ def forgot_password():
         # Generate reset token
         reset_token = secrets.token_urlsafe(32)
         user.reset_token = reset_token
-        user.reset_token_expiry = datetime.now() + timedelta(hours=1)
+        user.reset_token_expiry = get_ist_now() + timedelta(hours=1)
         db.session.commit()
         
         # Flash success immediately (don't wait for email)
@@ -1111,7 +1128,7 @@ def forgot_password():
 def reset_password(token):
     user = User.query.filter_by(reset_token=token).first()
     
-    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.now():
+    if not user or not user.reset_token_expiry or user.reset_token_expiry < get_ist_now():
         flash('Invalid or expired reset link!', 'danger')
         return redirect(url_for('login'))
     
@@ -1138,7 +1155,7 @@ def admin_forgot_password():
             # Generate reset token
             reset_token = secrets.token_urlsafe(32)
             admin.reset_token = reset_token
-            admin.reset_token_expiry = datetime.now() + timedelta(hours=1)
+            admin.reset_token_expiry = get_ist_now() + timedelta(hours=1)
             db.session.commit()
             
             # Send email
@@ -1157,7 +1174,7 @@ def admin_forgot_password():
 def admin_reset_password(token):
     admin = Admin.query.filter_by(reset_token=token).first()
     
-    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < datetime.now():
+    if not admin or not admin.reset_token_expiry or admin.reset_token_expiry < get_ist_now():
         flash('Invalid or expired reset link!', 'danger')
         return redirect(url_for('admin_login'))
     
@@ -1345,7 +1362,7 @@ def call_next():
         travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
         expected_arrival = next_token.created_time + timedelta(minutes=10 + travel_time)
         
-        current_time = datetime.now(IST)
+        current_time = get_ist_now()
         if current_time < expected_arrival:
             minutes_left = int((expected_arrival - current_time).total_seconds() / 60)
             flash(f'Please wait {minutes_left} more minutes. User is expected to arrive at {expected_arrival.strftime("%I:%M %p")}.', 'warning')
