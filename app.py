@@ -1679,102 +1679,33 @@ def migrate_db():
     results = []
     try:
         with db.engine.connect() as conn:
-            # Check and add avg_service_time column
-            try:
-                result = conn.execute(db.text(
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name='service_center_registrations' AND column_name='avg_service_time'"
-                ))
-                if not result.fetchone():
-                    conn.execute(db.text(
-                        "ALTER TABLE service_center_registrations ADD COLUMN avg_service_time INTEGER DEFAULT 20"
-                    ))
-                    conn.commit()
-                    results.append("✅ Added avg_service_time column to service_center_registrations")
-                else:
-                    results.append("ℹ️ avg_service_time column already exists in service_center_registrations")
-            except Exception as e:
-                results.append(f"⚠️ avg_service_time: {str(e)}")
+            # Add new service center columns
+            new_columns = [
+                ('description', 'VARCHAR(500)'),
+                ('phone', 'VARCHAR(15)'),
+                ('email', 'VARCHAR(100)'),
+                ('website', 'VARCHAR(100)'),
+                ('business_hours', 'VARCHAR(100)'),
+                ('services_offered', 'VARCHAR(500)'),
+                ('facilities', 'VARCHAR(500)')
+            ]
             
-            # Check and add completed_time column to tokens table
-            try:
-                result = conn.execute(db.text(
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name='tokens' AND column_name='completed_time'"
-                ))
-                if not result.fetchone():
-                    conn.execute(db.text(
-                        "ALTER TABLE tokens ADD COLUMN completed_time TIMESTAMP"
+            for col_name, col_type in new_columns:
+                try:
+                    result = conn.execute(db.text(
+                        f"SELECT column_name FROM information_schema.columns "
+                        f"WHERE table_name='service_centers' AND column_name='{col_name}'"
                     ))
-                    conn.commit()
-                    results.append("✅ Added completed_time column to tokens table")
-                else:
-                    results.append("ℹ️ completed_time column already exists in tokens table")
-            except Exception as e:
-                results.append(f"⚠️ completed_time: {str(e)}")
-            
-            # Check and add user location columns
-            try:
-                result = conn.execute(db.text(
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name='users' AND column_name='address'"
-                ))
-                if not result.fetchone():
-                    conn.execute(db.text(
-                        "ALTER TABLE users ADD COLUMN address VARCHAR(200)"
-                    ))
-                    conn.execute(db.text(
-                        "ALTER TABLE users ADD COLUMN latitude FLOAT"
-                    ))
-                    conn.execute(db.text(
-                        "ALTER TABLE users ADD COLUMN longitude FLOAT"
-                    ))
-                    conn.commit()
-                    results.append("✅ Added address, latitude, longitude columns to users table")
-                else:
-                    results.append("ℹ️ User location columns already exist")
-            except Exception as e:
-                results.append(f"⚠️ User location: {str(e)}")
-            
-            # Check and add service center location columns
-            try:
-                result = conn.execute(db.text(
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name='service_centers' AND column_name='latitude'"
-                ))
-                if not result.fetchone():
-                    conn.execute(db.text(
-                        "ALTER TABLE service_centers ADD COLUMN latitude FLOAT"
-                    ))
-                    conn.execute(db.text(
-                        "ALTER TABLE service_centers ADD COLUMN longitude FLOAT"
-                    ))
-                    conn.commit()
-                    results.append("✅ Added latitude, longitude columns to service_centers table")
-                else:
-                    results.append("ℹ️ Service center location columns already exist")
-            except Exception as e:
-                results.append(f"⚠️ Service center location: {str(e)}")
-            
-            # Check and add registration location columns
-            try:
-                result = conn.execute(db.text(
-                    "SELECT column_name FROM information_schema.columns "
-                    "WHERE table_name='service_center_registrations' AND column_name='latitude'"
-                ))
-                if not result.fetchone():
-                    conn.execute(db.text(
-                        "ALTER TABLE service_center_registrations ADD COLUMN latitude FLOAT"
-                    ))
-                    conn.execute(db.text(
-                        "ALTER TABLE service_center_registrations ADD COLUMN longitude FLOAT"
-                    ))
-                    conn.commit()
-                    results.append("✅ Added latitude, longitude columns to service_center_registrations table")
-                else:
-                    results.append("ℹ️ Registration location columns already exist")
-            except Exception as e:
-                results.append(f"⚠️ Registration location: {str(e)}")
+                    if not result.fetchone():
+                        conn.execute(db.text(
+                            f"ALTER TABLE service_centers ADD COLUMN {col_name} {col_type}"
+                        ))
+                        conn.commit()
+                        results.append(f"✅ Added {col_name} column to service_centers")
+                    else:
+                        results.append(f"ℹ️ {col_name} column already exists")
+                except Exception as e:
+                    results.append(f"⚠️ {col_name}: {str(e)}")
             
             return "<h2>Migration Results</h2>" + "".join([f"<p>{r}</p>" for r in results])
     except Exception as e:
