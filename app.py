@@ -79,6 +79,13 @@ class ServiceCenter(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     avg_service_time = db.Column(db.Integer, default=15)  # minutes per token
+    description = db.Column(db.String(500), nullable=True)
+    phone = db.Column(db.String(15), nullable=True)
+    email = db.Column(db.String(100), nullable=True)
+    website = db.Column(db.String(100), nullable=True)
+    business_hours = db.Column(db.String(100), nullable=True)
+    services_offered = db.Column(db.String(500), nullable=True)
+    facilities = db.Column(db.String(500), nullable=True)
     tokens = db.relationship('Token', backref='service_center', lazy=True)
     admins = db.relationship('Admin', backref='service_center', lazy=True)
 
@@ -726,18 +733,33 @@ def payment(token_id):
                 if serving_token:
                     position += 1
                 
-                # Calculate wait time and travel time
-                user = User.query.get(session['user_id'])
+                # Calculate travel time
                 travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
                 
-                wait_time = calculate_wait_time(center.id, position)
-                service_start_time = datetime.now() + timedelta(minutes=wait_time)
-                
-                leave_time = service_start_time - timedelta(minutes=travel_time + 5)
-                if leave_time < datetime.now():
-                    leave_time = datetime.now()
-                
-                reach_time = leave_time + timedelta(minutes=travel_time)
+                # Calculate exact times matching queue_status page
+                if position <= 1:
+                    # First person: leave in 10 minutes
+                    leave_time = datetime.now() + timedelta(minutes=10)
+                    reach_time = leave_time + timedelta(minutes=travel_time)
+                else:
+                    # Others: calculate when counter becomes free
+                    first_token = Token.query.filter(
+                        Token.service_center_id == center.id,
+                        Token.status.in_(['Active', 'Serving']),
+                        Token.is_walkin == False
+                    ).order_by(Token.id).first()
+                    
+                    if first_token:
+                        first_user = User.query.get(first_token.user_id)
+                        first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
+                        first_reach = first_token.created_time + timedelta(minutes=10 + first_travel)
+                        reach_time = first_reach + timedelta(minutes=(position - 1) * center.avg_service_time)
+                    else:
+                        reach_time = token.created_time + timedelta(minutes=(position - 1) * center.avg_service_time)
+                    
+                    leave_time = reach_time - timedelta(minutes=travel_time + 5)
+                    if leave_time < datetime.now():
+                        leave_time = datetime.now()
                 
                 send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
         except Exception as e:
@@ -1106,6 +1128,55 @@ def admin_history():
     ).order_by(Token.created_time.desc()).limit(100).all()
     
     return render_template('admin_history.html', center=center, tokens=tokens)
+
+@app.route('/admin/profile', methods=['GET', 'POST'])
+def admin_profile():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    if request.method == 'POST':
+        try:
+            center.description = request.form.get('description', '').strip()
+            center.phone = request.form.get('phone', '').strip()
+            center.email = request.form.get('email', '').strip()
+            center.website = request.form.get('website', '').strip()
+            center.business_hours = request.form.get('business_hours', '').strip()
+            center.services_offered = request.form.get('services_offered', '').strip()
+            center.facilities = request.form.get('facilities', '').strip()
+            center.avg_service_time = int(request.form.get('avg_service_time', 15))
+            
+            # Update admin email
+            admin.email = request.form.get('admin_email', '').strip()
+            
+            db.session.commit()
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('admin_profile'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating profile: {str(e)}', 'danger')
+    
+    return render_template('admin_profile.html', center=center, admin=admin)
+
+@app.route('/service-detail/<int:center_id>')
+def service_detail(center_id):
+    center = ServiceCenter.query.get_or_404(center_id)
+    queue_count = get_queue_count(center.id)
+    serving_token = get_serving_token(center.id)
+    
+    # Check if user has active token
+    active_token = None
+    if 'user_id' in session:
+        active_token = get_active_token_for_user(session['user_id'])
+    
+    return render_template('service_detail.html', 
+                         center=center, 
+                         queue_count=queue_count,
+                         serving_token=serving_token,
+                         active_token=active_token)
 
 @app.route('/admin/call_next')
 def call_next():

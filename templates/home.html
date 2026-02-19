@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QueueFlow - Smart Queue Management Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         /* Reset and Base */
@@ -28,12 +29,13 @@
         
         /* Animated Background */
         .hero-section {
-            background: #0F172A;
+            background: var(--bg-primary);
             position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
         
         .hero-bg-pattern {
@@ -79,9 +81,10 @@
             font-size: 4.5rem;
             font-weight: 900;
             line-height: 1.1;
-            color: white;
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             letter-spacing: -0.03em;
+            transition: color 0.3s ease;
         }
         
         .hero-title .gradient-text {
@@ -92,10 +95,11 @@
         
         .hero-subtitle {
             font-size: 1.25rem;
-            color: #94A3B8;
+            color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto 3rem;
             line-height: 1.7;
+            transition: color 0.3s ease;
         }
         
         .hero-buttons {
@@ -196,8 +200,9 @@
         /* Bento Grid Section */
         .bento-section {
             padding: 8rem 0;
-            background: #F8FAFC;
+            background: var(--bg-secondary);
             width: 100%;
+            transition: background-color 0.3s ease;
         }
         
         .bento-grid {
@@ -208,10 +213,10 @@
         }
         
         .bento-item {
-            background: white;
+            background: var(--card-bg);
             border-radius: 24px;
             padding: 2.5rem;
-            border: 1px solid #E2E8F0;
+            border: 1px solid var(--border);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -251,21 +256,24 @@
         .bento-title {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #0F172A;
+            color: var(--text-primary);
             margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
         }
         
         .bento-description {
-            color: #475569;
+            color: var(--text-secondary);
             line-height: 1.7;
+            transition: color 0.3s ease;
         }
         
         /* Testimonial Section */
         .testimonial-section {
             padding: 8rem 0;
-            background: #0F172A;
+            background: var(--bg-primary);
             position: relative;
             width: 100%;
+            transition: background-color 0.3s ease;
         }
         
         .testimonial-card {
@@ -609,6 +617,10 @@
         </div>
     </footer>
 
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px) scale(1.05)'; this.style.boxShadow='0 15px 40px rgba(45, 212, 191, 0.4)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3)'">🌙</button>
+
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
 </body>
 </html>
