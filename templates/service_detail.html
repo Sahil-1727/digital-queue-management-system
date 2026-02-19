@@ -219,13 +219,11 @@
         
         .info-content h6 {
             font-size: 0.875rem;
-            color: var(--text-muted);
             margin-bottom: 0.25rem;
         }
         
         .info-content p {
             font-size: 1rem;
-            color: var(--text-primary);
             margin: 0;
         }
         
@@ -244,6 +242,7 @@
             align-items: center;
             gap: 0.75rem;
             transition: all 0.3s ease;
+            color: var(--text-primary);
         }
         
         .feature-list li:hover {
@@ -381,7 +380,7 @@
                             <div class="section-icon">📝</div>
                             <h3 class="section-title">About</h3>
                         </div>
-                        <p class="text-secondary mb-0">{{ center.description }}</p>
+                        <p style="color: var(--text-secondary);" class="mb-0">{{ center.description }}</p>
                     </div>
                     {% endif %}
                     
@@ -395,7 +394,7 @@
                         <ul class="feature-list">
                             {% for service in center.services_offered.split('\n') %}
                                 {% if service.strip() %}
-                                <li>{{ service.strip('• ').strip() }}</li>
+                                <li style="color: var(--text-primary);">{{ service.strip('• ').strip() }}</li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
@@ -412,7 +411,7 @@
                         <ul class="feature-list">
                             {% for facility in center.facilities.split('\n') %}
                                 {% if facility.strip() %}
-                                <li>{{ facility.strip('• ').strip() }}</li>
+                                <li style="color: var(--text-primary);">{{ facility.strip('• ').strip() }}</li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
@@ -433,8 +432,8 @@
                         <div class="info-item">
                             <div class="info-icon">📱</div>
                             <div class="info-content">
-                                <h6>Phone</h6>
-                                <p>{{ center.phone }}</p>
+                                <h6 style="color: var(--text-muted);">Phone</h6>
+                                <p style="color: var(--text-primary);">{{ center.phone }}</p>
                             </div>
                         </div>
                         {% endif %}
@@ -443,8 +442,8 @@
                         <div class="info-item">
                             <div class="info-icon">✉️</div>
                             <div class="info-content">
-                                <h6>Email</h6>
-                                <p>{{ center.email }}</p>
+                                <h6 style="color: var(--text-muted);">Email</h6>
+                                <p style="color: var(--text-primary);">{{ center.email }}</p>
                             </div>
                         </div>
                         {% endif %}
@@ -453,8 +452,8 @@
                         <div class="info-item">
                             <div class="info-icon">🌐</div>
                             <div class="info-content">
-                                <h6>Website</h6>
-                                <p><a href="{{ center.website }}" target="_blank" style="color: var(--accent); text-decoration: none;">Visit Website</a></p>
+                                <h6 style="color: var(--text-muted);">Website</h6>
+                                <p style="color: var(--text-primary);"><a href="{{ center.website }}" target="_blank" style="color: var(--accent); text-decoration: none;">Visit Website</a></p>
                             </div>
                         </div>
                         {% endif %}
@@ -463,8 +462,8 @@
                         <div class="info-item">
                             <div class="info-icon">🕐</div>
                             <div class="info-content">
-                                <h6>Business Hours</h6>
-                                <p>{{ center.business_hours }}</p>
+                                <h6 style="color: var(--text-muted);">Business Hours</h6>
+                                <p style="color: var(--text-primary);">{{ center.business_hours }}</p>
                             </div>
                         </div>
                         {% endif %}
