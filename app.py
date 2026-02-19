@@ -802,30 +802,50 @@ def services():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    expire_old_tokens()
+    try:
+        expire_old_tokens()
+    except Exception as e:
+        print(f"⚠️ Error expiring tokens: {e}")
     
-    # Get category filter
-    category_filter = request.args.get('category')
-    
-    if category_filter:
-        # Filter by category (partial match)
-        centers = ServiceCenter.query.filter(ServiceCenter.category.contains(category_filter)).all()
-    else:
-        centers = ServiceCenter.query.all()
-    
-    active_token = get_active_token_for_user(session['user_id'])
-    
-    center_data = []
-    for center in centers:
-        queue_count = get_queue_count(center.id)
-        center_data.append({
-            'center': center,
-            'queue_count': queue_count,
-            'can_request': queue_count < 15,
-            'is_new': center.id > 19
-        })
-    
-    return render_template('services.html', centers=center_data, active_token=active_token)
+    try:
+        # Get category filter
+        category_filter = request.args.get('category')
+        
+        if category_filter:
+            # Filter by category (partial match)
+            centers = ServiceCenter.query.filter(ServiceCenter.category.contains(category_filter)).all()
+        else:
+            centers = ServiceCenter.query.all()
+        
+        active_token = get_active_token_for_user(session['user_id'])
+        
+        center_data = []
+        for center in centers:
+            try:
+                queue_count = get_queue_count(center.id)
+                center_data.append({
+                    'center': center,
+                    'queue_count': queue_count,
+                    'can_request': queue_count < 15,
+                    'is_new': center.id > 19
+                })
+            except Exception as e:
+                print(f"⚠️ Error processing center {center.id}: {e}")
+                # Add center with default values if error occurs
+                center_data.append({
+                    'center': center,
+                    'queue_count': 0,
+                    'can_request': True,
+                    'is_new': False
+                })
+        
+        return render_template('services.html', centers=center_data, active_token=active_token)
+    except Exception as e:
+        print(f"❌ Services page error: {e}")
+        import traceback
+        traceback.print_exc()
+        flash('Error loading services. Please try again.', 'danger')
+        return redirect(url_for('index'))
 
 @app.route('/request_token/<int:center_id>')
 def request_token(center_id):
