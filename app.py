@@ -441,21 +441,38 @@ def init_db():
 
 # Helper functions
 def get_active_token_for_user(user_id):
-    return Token.query.filter_by(user_id=user_id).filter(
-        Token.status.in_(['PendingPayment', 'Active', 'Serving'])
-    ).first()
+    try:
+        return Token.query.filter_by(user_id=user_id).filter(
+            Token.status.in_(['PendingPayment', 'Active', 'Serving'])
+        ).first()
+    except:
+        return None
 
 def get_queue_count(center_id):
-    return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=False).count()
+    try:
+        return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=False).count()
+    except:
+        # Fallback if is_walkin column doesn't exist
+        return Token.query.filter_by(service_center_id=center_id, status='Active').count()
 
 def get_serving_token(center_id):
-    return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=False).first()
+    try:
+        return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=False).first()
+    except:
+        # Fallback if is_walkin column doesn't exist
+        return Token.query.filter_by(service_center_id=center_id, status='Serving').first()
 
 def get_walkin_queue_count(center_id):
-    return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=True).count()
+    try:
+        return Token.query.filter_by(service_center_id=center_id, status='Active', is_walkin=True).count()
+    except:
+        return 0
 
 def get_walkin_serving_token(center_id):
-    return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=True).first()
+    try:
+        return Token.query.filter_by(service_center_id=center_id, status='Serving', is_walkin=True).first()
+    except:
+        return None
 
 def generate_token_number(center_id):
     today = datetime.now().date()
@@ -1888,7 +1905,10 @@ def migrate_db():
             # Add new token columns for fixed times
             token_columns = [
                 ('leave_time', 'TIMESTAMP'),
-                ('reach_time', 'TIMESTAMP')
+                ('reach_time', 'TIMESTAMP'),
+                ('no_show_reason', 'VARCHAR(500)'),
+                ('no_show_time', 'TIMESTAMP'),
+                ('is_walkin', 'BOOLEAN DEFAULT FALSE')
             ]
             
             for col_name, col_type in token_columns:
