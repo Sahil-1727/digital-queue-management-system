@@ -1271,16 +1271,64 @@ def admin_dashboard():
     
     center_id = session['admin_center_id']
     center = ServiceCenter.query.get(center_id)
+    current_time = get_ist_now()
     
-    # Online Queue (Counter 1)
+    # Currently Serving Token
     serving_token = get_serving_token(center_id)
+    
+    # Get all active tokens sorted by estimated_service_start
     waiting_tokens = Token.query.filter_by(
         service_center_id=center_id, 
         status='Active',
         is_walkin=False
-    ).order_by(Token.id).all()
+    ).order_by(Token.estimated_service_start).all()
     
-    # Walk-in Queue (Counter 2)
+    # Find next eligible token (arrived and counter free)
+    next_eligible_token = None
+    can_call_next = False
+    
+    if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
+        # Counter is free, find next arrived token
+        for token in waiting_tokens:
+            if token.reach_time:
+                reach_time = token.reach_time
+                if reach_time.tzinfo is None:
+                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                else:
+                    reach_time = reach_time.astimezone(IST)
+                
+                # Allow calling 5 min before arrival
+                if current_time >= (reach_time - timedelta(minutes=5)):
+                    next_eligible_token = token
+                    can_call_next = True
+                    break
+    
+    # Enrich tokens with status badges
+    enriched_tokens = []
+    for token in waiting_tokens:
+        token_data = {
+            'token': token,
+            'status_badge': 'Travelling',
+            'is_late': False
+        }
+        
+        if token.reach_time:
+            reach_time = token.reach_time
+            if reach_time.tzinfo is None:
+                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+            else:
+                reach_time = reach_time.astimezone(IST)
+            
+            if current_time >= reach_time:
+                token_data['status_badge'] = 'Arrived'
+                # Check if late (15 min grace period)
+                if current_time > (reach_time + timedelta(minutes=15)):
+                    token_data['status_badge'] = 'Late'
+                    token_data['is_late'] = True
+        
+        enriched_tokens.append(token_data)
+    
+    # Walk-in Queue
     walkin_serving_token = get_walkin_serving_token(center_id)
     walkin_waiting_tokens = Token.query.filter_by(
         service_center_id=center_id,
@@ -1288,40 +1336,103 @@ def admin_dashboard():
         is_walkin=True
     ).order_by(Token.id).all()
     
-    # Calculate when next token can be called (Online)
-    can_call_next = True
-    next_call_time = None
-    
-    next_token = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Active',
-        is_walkin=False
-    ).order_by(Token.id).first()
-    
-    if next_token:
-        position = Token.query.filter(
-            Token.service_center_id == center_id,
-            Token.status == 'Active',
-            Token.is_walkin == False,
-            Token.id < next_token.id
-        ).count() + 1
-        
-        wait_time = position * center.avg_service_time
-        expected_arrival = next_token.created_time + timedelta(minutes=wait_time)
-        
-        if datetime.now() < expected_arrival:
-            can_call_next = False
-            next_call_time = expected_arrival
-    
     return render_template('admin_dashboard.html', 
                          center=center,
                          serving_token=serving_token,
-                         waiting_tokens=waiting_tokens,
+                         waiting_tokens=enriched_tokens,
+                         next_eligible_token=next_eligible_token,
+                         can_call_next=can_call_next,
                          walkin_serving_token=walkin_serving_token,
                          walkin_waiting_tokens=walkin_waiting_tokens,
-                         can_call_next=can_call_next,
-                         next_call_time=next_call_time,
+                         current_time=current_time,
                          datetime=datetime)
+
+@app.route('/admin/queue-state')
+def admin_queue_state():
+    """Real-time queue state API for auto-refresh"""
+    if 'admin_id' not in session:
+        return {'error': 'Unauthorized'}, 401
+    
+    center_id = session['admin_center_id']
+    current_time = get_ist_now()
+    
+    serving_token = get_serving_token(center_id)
+    waiting_tokens = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=False
+    ).order_by(Token.estimated_service_start).all()
+    
+    # Build response
+    response = {
+        'current_time': current_time.isoformat(),
+        'serving': None,
+        'next_eligible': None,
+        'can_call_next': False,
+        'queue': []
+    }
+    
+    # Serving token data
+    if serving_token:
+        service_end = serving_token.actual_service_end
+        if service_end:
+            if service_end.tzinfo is None:
+                service_end = pytz.utc.localize(service_end).astimezone(IST)
+            else:
+                service_end = service_end.astimezone(IST)
+            remaining_seconds = int((service_end - current_time).total_seconds())
+        else:
+            remaining_seconds = 0
+        
+        response['serving'] = {
+            'token_number': serving_token.token_number,
+            'user_name': serving_token.user.name,
+            'remaining_seconds': max(0, remaining_seconds)
+        }
+    
+    # Check if can call next
+    if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
+        for token in waiting_tokens:
+            if token.reach_time:
+                reach_time = token.reach_time
+                if reach_time.tzinfo is None:
+                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                else:
+                    reach_time = reach_time.astimezone(IST)
+                
+                if current_time >= (reach_time - timedelta(minutes=5)):
+                    response['can_call_next'] = True
+                    response['next_eligible'] = {
+                        'token_number': token.token_number,
+                        'user_name': token.user.name
+                    }
+                    break
+    
+    # Queue list
+    for token in waiting_tokens:
+        reach_time = token.reach_time
+        if reach_time:
+            if reach_time.tzinfo is None:
+                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+            else:
+                reach_time = reach_time.astimezone(IST)
+            
+            arrival_seconds = int((reach_time - current_time).total_seconds())
+            status = 'Travelling'
+            
+            if current_time >= reach_time:
+                status = 'Arrived'
+                if current_time > (reach_time + timedelta(minutes=15)):
+                    status = 'Late'
+            
+            response['queue'].append({
+                'token_number': token.token_number,
+                'user_name': token.user.name,
+                'arrival_seconds': arrival_seconds,
+                'status': status
+            })
+    
+    return response
 
 @app.route('/admin/history')
 def admin_history():
