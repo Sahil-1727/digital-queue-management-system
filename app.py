@@ -2213,7 +2213,6 @@ def admin_analytics():
         flash('Service center not found', 'danger')
         return redirect(url_for('admin_dashboard'))
     
-    # Auto-expire late tokens before analytics
     try:
         expire_old_tokens()
     except Exception as e:
@@ -2241,21 +2240,28 @@ def admin_analytics():
         dates.append(date.strftime('%a'))
         counts.append(count)
     
-    # Generate 7-day trend chart
-    plt.figure(figsize=(10, 4))
-    plt.plot(dates, counts, marker='o', linewidth=2, markersize=8, color='#2DD4BF')
-    plt.fill_between(range(len(counts)), counts, alpha=0.3, color='#2DD4BF')
-    plt.xlabel('Day', fontsize=12)
-    plt.ylabel('Tokens', fontsize=12)
-    plt.title('7-Day Token Trend', fontsize=14, fontweight='bold')
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    # Generate charts with error handling
+    trend_chart = None
+    pie_chart = None
     
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
-    buf.seek(0)
-    trend_chart = base64.b64encode(buf.getvalue()).decode()
-    plt.close()
+    try:
+        # Generate 7-day trend chart
+        plt.figure(figsize=(10, 4))
+        plt.plot(dates, counts, marker='o', linewidth=2, markersize=8, color='#0F4C5C')
+        plt.fill_between(range(len(counts)), counts, alpha=0.3, color='#0F4C5C')
+        plt.xlabel('Day', fontsize=12)
+        plt.ylabel('Tokens', fontsize=12)
+        plt.title('7-Day Token Trend', fontsize=14, fontweight='bold')
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+        buf.seek(0)
+        trend_chart = base64.b64encode(buf.getvalue()).decode()
+        plt.close()
+    except Exception as e:
+        print(f"⚠️ Error generating trend chart: {e}")
     
     # Online vs Walk-in
     try:
@@ -2267,26 +2273,27 @@ def admin_analytics():
         walkin_tokens = 0
         online_tokens = total_tokens
     
-    # Generate pie chart for online vs walkin
-    if total_tokens > 0:
-        plt.figure(figsize=(6, 6))
-        labels = ['Online', 'Walk-in']
-        sizes = [online_tokens, walkin_tokens]
-        colors = ['#2DD4BF', '#14B8A6']
-        explode = (0.05, 0)
-        
-        plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
-                shadow=True, startangle=90, textprops={'fontsize': 12, 'fontweight': 'bold'})
-        plt.title('Online vs Walk-in Tokens', fontsize=14, fontweight='bold')
-        plt.axis('equal')
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
-        buf.seek(0)
-        pie_chart = base64.b64encode(buf.getvalue()).decode()
-        plt.close()
-    else:
-        pie_chart = None
+    # Generate pie chart
+    try:
+        if total_tokens > 0:
+            plt.figure(figsize=(6, 6))
+            labels = ['Online', 'Walk-in']
+            sizes = [online_tokens, walkin_tokens]
+            colors = ['#0F4C5C', '#C0843D']
+            explode = (0.05, 0)
+            
+            plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+                    shadow=True, startangle=90, textprops={'fontsize': 12, 'fontweight': 'bold'})
+            plt.title('Online vs Walk-in Tokens', fontsize=14, fontweight='bold')
+            plt.axis('equal')
+            
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+            buf.seek(0)
+            pie_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close()
+    except Exception as e:
+        print(f"⚠️ Error generating pie chart: {e}")
     
     analytics = {
         'daily_customers': daily_customers,
