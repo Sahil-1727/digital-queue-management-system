@@ -105,11 +105,20 @@ class Token(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     service_center_id = db.Column(db.Integer, db.ForeignKey('service_centers.id'), nullable=False)
     token_number = db.Column(db.String(10), nullable=False)
-    status = db.Column(db.String(20), default='PendingPayment')  # PendingPayment, Active, Serving, Completed, Expired
+    status = db.Column(db.String(20), default='PendingPayment')
     created_time = db.Column(db.DateTime, default=datetime.now)
     completed_time = db.Column(db.DateTime, nullable=True)
-    leave_time = db.Column(db.DateTime, nullable=True)  # Fixed time to leave home
-    reach_time = db.Column(db.DateTime, nullable=True)  # Fixed time to reach counter
+    
+    # User-side estimated times (for email/queue status)
+    leave_time = db.Column(db.DateTime, nullable=True)
+    reach_time = db.Column(db.DateTime, nullable=True)
+    
+    # Admin-side time-chain fields
+    estimated_service_start = db.Column(db.DateTime, nullable=True)
+    estimated_service_end = db.Column(db.DateTime, nullable=True)
+    actual_service_start = db.Column(db.DateTime, nullable=True)
+    actual_service_end = db.Column(db.DateTime, nullable=True)
+    
     no_show_reason = db.Column(db.String(500), nullable=True)
     no_show_time = db.Column(db.DateTime, nullable=True)
     is_walkin = db.Column(db.Boolean, default=False)
@@ -519,8 +528,10 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
     return int(travel_time)
 
 def expire_old_tokens():
+    current_time = get_ist_now()
+    
     # Expire pending payment tokens after 2 hours
-    expiry_time = get_ist_now() - timedelta(hours=2)
+    expiry_time = current_time - timedelta(hours=2)
     expired_tokens = Token.query.filter(
         Token.status == 'PendingPayment',
         Token.created_time < expiry_time
@@ -528,14 +539,24 @@ def expire_old_tokens():
     for token in expired_tokens:
         token.status = 'Expired'
     
-    # Expire active tokens after 4 hours (if admin never called them)
-    active_expiry_time = get_ist_now() - timedelta(hours=4)
-    old_active_tokens = Token.query.filter(
-        Token.status == 'Active',
-        Token.created_time < active_expiry_time
-    ).all()
-    for token in old_active_tokens:
-        token.status = 'Expired'
+    # Auto-expire active tokens if reach_time + service_time has passed
+    active_tokens = Token.query.filter(Token.status == 'Active').all()
+    for token in active_tokens:
+        if token.reach_time and token.estimated_service_end:
+            # Make timezone-aware if needed
+            reach_time = token.reach_time
+            service_end = token.estimated_service_end
+            
+            if reach_time.tzinfo is None:
+                reach_time = IST.localize(reach_time)
+            if service_end.tzinfo is None:
+                service_end = IST.localize(service_end)
+            
+            # Expire if estimated service end time has passed
+            if current_time > service_end:
+                token.status = 'Expired'
+                token.no_show_reason = 'Auto-expired: Did not arrive within expected time window'
+                token.no_show_time = current_time
     
     db.session.commit()
 
@@ -970,6 +991,8 @@ def payment(token_id):
         token.status = 'Active'
         token.leave_time = leave_time
         token.reach_time = reach_time
+        token.estimated_service_start = reach_time
+        token.estimated_service_end = reach_time + timedelta(minutes=center.avg_service_time)
         db.session.commit()
         
         flash('Payment successful! Your token is confirmed.', 'success')
@@ -1360,31 +1383,42 @@ def call_next():
     
     center_id = session['admin_center_id']
     center = ServiceCenter.query.get(center_id)
+    current_time = get_ist_now()
     
+    # Step 1: Check if counter is free
     serving_token = get_serving_token(center_id)
-    if serving_token:
-        serving_token.status = 'Completed'
-        serving_token.completed_time = datetime.now()
     
+    if serving_token:
+        # Check if service_end_time has passed
+        if serving_token.actual_service_end and serving_token.actual_service_end <= current_time:
+            # Auto-complete the serving token
+            serving_token.status = 'Completed'
+            serving_token.completed_time = current_time
+        else:
+            # Counter still busy
+            flash('Counter is busy. Please wait for current service to complete.', 'warning')
+            return redirect(url_for('admin_dashboard'))
+    
+    # Step 2: Fetch next token ordered by estimated_service_start
     next_token = Token.query.filter_by(
         service_center_id=center_id,
         status='Active',
         is_walkin=False
-    ).order_by(Token.id).first()
+    ).order_by(Token.estimated_service_start).first()
     
     if next_token:
-        # Calculate expected arrival time: booking + 10 min prep + travel time
-        user = User.query.get(next_token.user_id)
-        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
-        expected_arrival = next_token.created_time + timedelta(minutes=10 + travel_time)
+        # Step 3: Calculate call_time = max(current_time, estimated_arrival_time)
+        estimated_arrival = next_token.reach_time or current_time
+        if estimated_arrival.tzinfo is None:
+            estimated_arrival = IST.localize(estimated_arrival)
         
-        current_time = get_ist_now()
-        if current_time < expected_arrival:
-            minutes_left = int((expected_arrival - current_time).total_seconds() / 60)
-            flash(f'Please wait {minutes_left} more minutes. User is expected to arrive at {expected_arrival.strftime("%I:%M %p")}.', 'warning')
-            return redirect(url_for('admin_dashboard'))
+        call_time = max(current_time, estimated_arrival)
         
+        # Step 4: Update token with actual times
         next_token.status = 'Serving'
+        next_token.actual_service_start = call_time
+        next_token.actual_service_end = call_time + timedelta(minutes=center.avg_service_time)
+        
         db.session.commit()
         flash(f'Token {next_token.token_number} is now being served.', 'success')
     else:
@@ -1939,6 +1973,10 @@ def migrate_db():
             token_columns = [
                 ('leave_time', 'TIMESTAMP'),
                 ('reach_time', 'TIMESTAMP'),
+                ('estimated_service_start', 'TIMESTAMP'),
+                ('estimated_service_end', 'TIMESTAMP'),
+                ('actual_service_start', 'TIMESTAMP'),
+                ('actual_service_end', 'TIMESTAMP'),
                 ('no_show_reason', 'VARCHAR(500)'),
                 ('no_show_time', 'TIMESTAMP'),
                 ('is_walkin', 'BOOLEAN DEFAULT FALSE')
