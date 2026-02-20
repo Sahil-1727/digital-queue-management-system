@@ -1043,11 +1043,18 @@ def queue_status(token_id):
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
     
-    # Make timezone-aware if needed
-    if leave_time and leave_time.tzinfo is None:
-        leave_time = IST.localize(leave_time)
-    if reach_counter_time and reach_counter_time.tzinfo is None:
-        reach_counter_time = IST.localize(reach_counter_time)
+    # Convert UTC to IST (database stores in UTC)
+    if leave_time:
+        if leave_time.tzinfo is None:
+            leave_time = pytz.utc.localize(leave_time).astimezone(IST)
+        else:
+            leave_time = leave_time.astimezone(IST)
+    
+    if reach_counter_time:
+        if reach_counter_time.tzinfo is None:
+            reach_counter_time = pytz.utc.localize(reach_counter_time).astimezone(IST)
+        else:
+            reach_counter_time = reach_counter_time.astimezone(IST)
     
     return render_template('queue_status.html', 
                          token=token, 
