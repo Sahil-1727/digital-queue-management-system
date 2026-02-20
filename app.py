@@ -1132,7 +1132,8 @@ def queue_status(token_id):
                          wait_time=0,
                          travel_time=travel_time,
                          leave_time=leave_time,
-                         reach_counter_time=reach_counter_time)
+                         reach_counter_time=reach_counter_time,
+                         IST=IST)
 
 @app.route('/cancel_token/<int:token_id>')
 def cancel_token(token_id):
@@ -1199,7 +1200,7 @@ def user_history():
         
         enriched_tokens.append(token_data)
     
-    return render_template('user_history.html', tokens=enriched_tokens)
+    return render_template('user_history.html', tokens=enriched_tokens, IST=IST)
 
 @app.route('/profile', methods=['GET', 'POST'])
 def user_profile():
@@ -1894,7 +1895,8 @@ def track_status(token_number):
                          serving_token=serving_token,
                          position=position,
                          wait_time=wait_time,
-                         reach_counter_time=reach_counter_time)
+                         reach_counter_time=reach_counter_time,
+                         IST=IST)
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -2141,7 +2143,8 @@ def token_qr(token_number):
     return render_template('token_qr.html', 
                          token=token, 
                          qr_code=img_base64,
-                         track_url=track_url)
+                         track_url=track_url,
+                         IST=IST)
 
 @app.route('/admin/analytics')
 def admin_analytics():
@@ -2188,7 +2191,7 @@ def admin_analytics():
         'avg_wait_time': center.avg_service_time
     }
     
-    return render_template('admin_analytics.html', center=center, analytics=analytics)
+    return render_template('admin_analytics.html', center=center, analytics=analytics, IST=IST)
 
 @app.route('/test-email-config')
 def test_email_config():
