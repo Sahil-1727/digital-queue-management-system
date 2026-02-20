@@ -83,7 +83,10 @@
                                     <td class="fw-semibold">{{ token.user.name }}</td>
                                     <td>{{ token.user.mobile }}</td>
                                     <td>
-                                        {% if token.created_time %}
+                                        {% if token.status == 'Completed' and token.completed_time %}
+                                            <div>{{ token.completed_time.strftime('%d %b %Y') }}</div>
+                                            <small class="text-muted">{{ token.completed_time.strftime('%I:%M %p') }} IST</small>
+                                        {% elif token.created_time %}
                                             <div>{{ token.created_time.strftime('%d %b %Y') }}</div>
                                             <small class="text-muted">{{ token.created_time.strftime('%I:%M %p') }} IST</small>
                                         {% else %}

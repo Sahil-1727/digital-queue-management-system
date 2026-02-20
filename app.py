@@ -1792,51 +1792,59 @@ def add_walkin():
         return redirect(url_for('admin_login'))
     
     if request.method == 'POST':
-        name = request.form.get('name', 'Walk-in Customer').strip()
-        mobile = request.form.get('mobile', '').strip()
-        
         try:
-            if get_walkin_queue_count(center_id) >= 15:
-                flash('Walk-in queue is full!', 'warning')
-                return redirect(url_for('admin_dashboard'))
-        except:
-            pass
-        
-        # Create or get user
-        if mobile and len(mobile) == 10:
-            user = User.query.filter_by(mobile=mobile).first()
-            if not user:
-                user = User(name=name, mobile=mobile, password=generate_password_hash('walkin123'))
+            name = request.form.get('name', 'Walk-in Customer').strip()
+            mobile = request.form.get('mobile', '').strip()
+            
+            try:
+                if get_walkin_queue_count(center_id) >= 15:
+                    flash('Walk-in queue is full!', 'warning')
+                    return redirect(url_for('admin_dashboard'))
+            except:
+                pass
+            
+            # Create or get user
+            if mobile and len(mobile) == 10:
+                user = User.query.filter_by(mobile=mobile).first()
+                if not user:
+                    user = User(name=name, mobile=mobile, password=generate_password_hash('walkin123'))
+                    db.session.add(user)
+                    db.session.flush()
+            else:
+                # Anonymous walk-in
+                timestamp = int(get_ist_now().timestamp())
+                user = User(name=name, mobile=f'W{timestamp}', email=f'walkin{timestamp}@queueflow.com', password=generate_password_hash('walkin123'))
                 db.session.add(user)
                 db.session.flush()
-        else:
-            # Anonymous walk-in
-            timestamp = int(get_ist_now().timestamp())
-            user = User(name=name, mobile=f'W{timestamp}', email=f'walkin{timestamp}@queueflow.com', password=generate_password_hash('walkin123'))
-            db.session.add(user)
-            db.session.flush()
-        
-        # Generate token with W prefix
-        today = get_ist_now().date()
-        count = Token.query.filter(
-            Token.service_center_id == center_id,
-            db.func.date(Token.created_time) == today
-        ).count()
-        token_number = f"W{count + 1:03d}"
-        
-        token = Token(
-            user_id=user.id,
-            service_center_id=center_id,
-            token_number=token_number,
-            status='Active',
-            created_time=get_ist_now(),
-            is_walkin=True
-        )
-        db.session.add(token)
-        db.session.commit()
-        
-        flash(f'Walk-in token {token_number} created successfully!', 'success')
-        return redirect(url_for('token_qr', token_number=token_number))
+            
+            # Generate token with W prefix
+            today = get_ist_now().date()
+            count = Token.query.filter(
+                Token.service_center_id == center_id,
+                db.func.date(Token.created_time) == today
+            ).count()
+            token_number = f"W{count + 1:03d}"
+            
+            token = Token(
+                user_id=user.id,
+                service_center_id=center_id,
+                token_number=token_number,
+                status='Active',
+                created_time=get_ist_now(),
+                is_walkin=True
+            )
+            db.session.add(token)
+            db.session.commit()
+            
+            flash(f'Walk-in token {token_number} created successfully!', 'success')
+            return redirect(url_for('token_qr', token_number=token_number))
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Error creating walk-in token: {e}")
+            import traceback
+            traceback.print_exc()
+            flash(f'Error creating walk-in token: {str(e)}', 'danger')
+            return redirect(url_for('admin_dashboard'))
     
     return render_template('add_walkin.html', center=center)
 
