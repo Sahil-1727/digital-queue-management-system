@@ -450,8 +450,17 @@ def init_db():
 
 # Helper functions
 def get_ist_now():
-    """Get current time in UTC (for database storage)"""
+    """Get current time in UTC (for database storage)
+    
+    IMPORTANT: This returns UTC time for database storage.
+    All database DateTime fields store UTC only.
+    Convert to IST only when displaying to users.
+    """
     return datetime.utcnow()
+
+def get_ist_now_aware():
+    """Get current time as timezone-aware IST datetime for calculations"""
+    return datetime.now(IST)
 
 def ist_to_utc(ist_time):
     """Convert IST datetime to UTC for database storage"""
@@ -464,22 +473,30 @@ def ist_to_utc(ist_time):
 def utc_to_ist(utc_time):
     """Convert UTC datetime to IST - SINGLE SOURCE OF TRUTH for timezone conversion
     
+    This is the ONLY function that should be used to convert UTC to IST.
+    Use this in:
+    - Templates (via Jinja filter)
+    - API responses
+    - Email notifications
+    - Any user-facing datetime display
+    
     Args:
-        utc_time: datetime object (with or without timezone info)
+        utc_time: datetime object from database (UTC, timezone-naive)
     
     Returns:
-        datetime object in IST timezone
+        datetime object in IST timezone (timezone-aware)
     """
     if not utc_time:
         return None
     
+    # Database stores naive UTC - localize as UTC first, then convert to IST
     if utc_time.tzinfo is None:
-        # Database stores in UTC without timezone - localize as UTC first, then convert
         return pytz.utc.localize(utc_time).astimezone(IST)
     else:
+        # Already timezone-aware - just convert to IST
         return utc_time.astimezone(IST)
 
-# Register as Jinja filter
+# Register as Jinja filter for use in all templates
 app.jinja_env.filters['utc_to_ist'] = utc_to_ist
 
 def get_active_token_for_user(user_id):
