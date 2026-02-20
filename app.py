@@ -2269,6 +2269,7 @@ def migrate_db():
                 ('estimated_service_end', 'TIMESTAMP'),
                 ('actual_service_start', 'TIMESTAMP'),
                 ('actual_service_end', 'TIMESTAMP'),
+                ('completed_time', 'TIMESTAMP'),
                 ('no_show_reason', 'VARCHAR(500)'),
                 ('no_show_time', 'TIMESTAMP'),
                 ('is_walkin', 'BOOLEAN DEFAULT FALSE')
