@@ -1409,7 +1409,7 @@ def admin_dashboard():
     try:
         center_id = session['admin_center_id']
         center = ServiceCenter.query.get(center_id)
-        current_time = get_ist_now()
+        current_time = get_ist_now_aware()  # Use timezone-aware IST for comparisons
         
         # Currently Serving Token
         serving_token = get_serving_token(center_id)
