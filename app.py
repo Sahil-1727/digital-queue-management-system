@@ -805,6 +805,24 @@ def initialize_database():
         try:
             with app.app_context():
                 db.create_all()
+                
+                # Add missing columns to users table (migration)
+                try:
+                    with db.engine.connect() as conn:
+                        # Check if address column exists
+                        result = conn.execute(db.text(
+                            "SELECT column_name FROM information_schema.columns "
+                            "WHERE table_name='users' AND column_name='address'"
+                        ))
+                        if not result.fetchone():
+                            conn.execute(db.text("ALTER TABLE users ADD COLUMN address VARCHAR(200)"))
+                            conn.execute(db.text("ALTER TABLE users ADD COLUMN latitude FLOAT"))
+                            conn.execute(db.text("ALTER TABLE users ADD COLUMN longitude FLOAT"))
+                            conn.commit()
+                            print("✅ Added address, latitude, longitude columns to users table")
+except Exception as e:
+                    print(f"⚠️ Migration skipped (SQLite or columns exist): {e}")
+                
                 # Add default data only if tables are empty
                 try:
                     if ServiceCenter.query.count() == 0:
