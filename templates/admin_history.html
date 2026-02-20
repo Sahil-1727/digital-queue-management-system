@@ -83,8 +83,9 @@
                                     <td class="fw-semibold">{{ token.user.name }}</td>
                                     <td>{{ token.user.mobile }}</td>
                                     <td>
-                                        <div>{{ token.created_time.strftime('%d %b %Y') }}</div>
-                                        <small class="text-muted">{{ token.created_time.strftime('%I:%M %p') }}</small>
+                                        {% set created_ist = token.created_time.astimezone(IST) if token.created_time.tzinfo else IST.localize(token.created_time) %}
+                                        <div>{{ created_ist.strftime('%d %b %Y') }}</div>
+                                        <small class="text-muted">{{ created_ist.strftime('%I:%M %p') }} IST</small>
                                     </td>
                                     <td>
                                         <span class="badge {% if token.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">

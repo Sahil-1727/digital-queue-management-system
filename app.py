@@ -1166,7 +1166,7 @@ def user_history():
         Token.status.in_(['Completed', 'Expired'])
     ).order_by(Token.created_time.desc()).all()
     
-    return render_template('user_history.html', tokens=tokens, datetime=datetime)
+    return render_template('user_history.html', tokens=tokens, datetime=datetime, IST=IST)
 
 @app.route('/profile', methods=['GET', 'POST'])
 def user_profile():
@@ -1517,7 +1517,7 @@ def admin_history():
         Token.status.in_(['Completed', 'Expired'])
     ).order_by(Token.created_time.desc()).limit(100).all()
     
-    return render_template('admin_history.html', center=center, tokens=tokens)
+    return render_template('admin_history.html', center=center, tokens=tokens, IST=IST)
 
 @app.route('/admin/profile', methods=['GET', 'POST'])
 def admin_profile():
