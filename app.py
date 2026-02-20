@@ -1383,7 +1383,7 @@ def admin_dashboard():
         # Currently Serving Token
         serving_token = get_serving_token(center_id)
         
-        # Get all active tokens - try with is_walkin first, fallback without
+        # Get all active tokens
         waiting_tokens = []
         try:
             waiting_tokens = Token.query.filter_by(
@@ -1398,9 +1398,15 @@ def admin_dashboard():
                 status='Active'
             ).order_by(Token.id).all()
         
-        # Find next eligible token
+        # Find next eligible token and check if can call
         next_eligible_token = None
         can_call_next = False
+        
+        if not serving_token:
+            # Counter is free, find first token
+            if waiting_tokens:
+                next_eligible_token = waiting_tokens[0]
+                can_call_next = True
         
         # Enrich tokens with status badges
         enriched_tokens = []
