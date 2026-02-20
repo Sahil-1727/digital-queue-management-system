@@ -2297,28 +2297,10 @@ def admin_analytics():
         dates.append(date.strftime('%a'))
         counts.append(count)
     
-    # Generate charts with error handling
-    trend_chart = None
-    pie_chart = None
-    
-    try:
-        # Generate 7-day trend chart
-        plt.figure(figsize=(10, 4))
-        plt.plot(dates, counts, marker='o', linewidth=2, markersize=8, color='#0F4C5C')
-        plt.fill_between(range(len(counts)), counts, alpha=0.3, color='#0F4C5C')
-        plt.xlabel('Day', fontsize=12)
-        plt.ylabel('Tokens', fontsize=12)
-        plt.title('7-Day Token Trend', fontsize=14, fontweight='bold')
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
-        buf.seek(0)
-        trend_chart = base64.b64encode(buf.getvalue()).decode()
-        plt.close()
-    except Exception as e:
-        print(f"⚠️ Error generating trend chart: {e}")
+    # Status breakdown
+    completed = Token.query.filter_by(service_center_id=center_id, status='Completed').count()
+    expired = Token.query.filter_by(service_center_id=center_id, status='Expired').count()
+    active = Token.query.filter_by(service_center_id=center_id, status='Active').count()
     
     # Online vs Walk-in
     try:
@@ -2330,38 +2312,113 @@ def admin_analytics():
         walkin_tokens = 0
         online_tokens = total_tokens
     
-    # Generate pie chart
+    # Generate charts
+    trend_chart = None
+    status_chart = None
+    booking_chart = None
+    
     try:
+        # 1. Line Chart - 7-Day Trend (Primary)
+        plt.figure(figsize=(10, 4.5), facecolor='white')
+        plt.plot(dates, counts, marker='o', linewidth=3, markersize=10, 
+                color='#0F4C5C', markerfacecolor='#C0843D', markeredgewidth=2, markeredgecolor='#0F4C5C')
+        plt.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
+        plt.xlabel('Day', fontsize=11, color='#64748B', fontweight='500')
+        plt.ylabel('Tokens Booked', fontsize=11, color='#64748B', fontweight='500')
+        plt.title('Queue Activity - Last 7 Days', fontsize=13, fontweight='600', color='#1E293B', pad=15)
+        plt.grid(True, alpha=0.15, linestyle='--', linewidth=0.8)
+        plt.gca().spines['top'].set_visible(False)
+        plt.gca().spines['right'].set_visible(False)
+        plt.gca().spines['left'].set_color('#E2E8F0')
+        plt.gca().spines['bottom'].set_color('#E2E8F0')
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+        buf.seek(0)
+        trend_chart = base64.b64encode(buf.getvalue()).decode()
+        plt.close()
+    except Exception as e:
+        print(f"⚠️ Error generating trend chart: {e}")
+    
+    try:
+        # 2. Bar Chart - Status Breakdown
+        if completed + expired + active > 0:
+            plt.figure(figsize=(8, 4.5), facecolor='white')
+            statuses = ['Completed', 'Expired', 'Active']
+            values = [completed, expired, active]
+            colors = ['#2BB673', '#B91C1C', '#D97706']
+            
+            bars = plt.bar(statuses, values, color=colors, alpha=0.85, edgecolor='white', linewidth=2)
+            
+            # Add value labels on bars
+            for bar in bars:
+                height = bar.get_height()
+                plt.text(bar.get_x() + bar.get_width()/2., height,
+                        f'{int(height)}',
+                        ha='center', va='bottom', fontsize=11, fontweight='600', color='#1E293B')
+            
+            plt.ylabel('Token Count', fontsize=11, color='#64748B', fontweight='500')
+            plt.title('Token Status Distribution', fontsize=13, fontweight='600', color='#1E293B', pad=15)
+            plt.gca().spines['top'].set_visible(False)
+            plt.gca().spines['right'].set_visible(False)
+            plt.gca().spines['left'].set_color('#E2E8F0')
+            plt.gca().spines['bottom'].set_color('#E2E8F0')
+            plt.tight_layout()
+            
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+            buf.seek(0)
+            status_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close()
+    except Exception as e:
+        print(f"⚠️ Error generating status chart: {e}")
+    
+    try:
+        # 3. Doughnut Chart - Online vs Walk-in (Small)
         if total_tokens > 0:
-            plt.figure(figsize=(6, 6))
+            plt.figure(figsize=(5, 5), facecolor='white')
             labels = ['Online', 'Walk-in']
             sizes = [online_tokens, walkin_tokens]
             colors = ['#0F4C5C', '#C0843D']
-            explode = (0.05, 0)
             
-            plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
-                    shadow=True, startangle=90, textprops={'fontsize': 12, 'fontweight': 'bold'})
-            plt.title('Online vs Walk-in Tokens', fontsize=14, fontweight='bold')
+            wedges, texts, autotexts = plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                    startangle=90, textprops={'fontsize': 11, 'fontweight': '600', 'color': '#1E293B'},
+                    wedgeprops={'edgecolor': 'white', 'linewidth': 3})
+            
+            # Draw circle for doughnut
+            centre_circle = plt.Circle((0,0), 0.65, fc='white', linewidth=0)
+            plt.gca().add_artist(centre_circle)
+            
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('700')
+            
+            plt.title('Booking Type Split', fontsize=13, fontweight='600', color='#1E293B', pad=15)
             plt.axis('equal')
+            plt.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
             buf.seek(0)
-            pie_chart = base64.b64encode(buf.getvalue()).decode()
+            booking_chart = base64.b64encode(buf.getvalue()).decode()
             plt.close()
     except Exception as e:
-        print(f"⚠️ Error generating pie chart: {e}")
+        print(f"⚠️ Error generating booking chart: {e}")
     
     analytics = {
         'daily_customers': daily_customers,
         'last_7_days': last_7_days,
-        'peak_hours': [],
         'online_tokens': online_tokens,
         'walkin_tokens': walkin_tokens,
         'total_tokens': total_tokens,
+        'completed': completed,
+        'expired': expired,
+        'active': active,
         'avg_wait_time': center.avg_service_time,
         'trend_chart': trend_chart,
-        'pie_chart': pie_chart
+        'status_chart': status_chart,
+        'booking_chart': booking_chart
     }
     
     return render_template('admin_analytics.html', center=center, analytics=analytics, IST=IST)
