@@ -62,7 +62,7 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    mobile = db.Column(db.String(10), unique=True, nullable=False)
+    mobile = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     address = db.Column(db.String(200), nullable=True)
@@ -2397,6 +2397,14 @@ def migrate_db():
     results = []
     try:
         with db.engine.connect() as conn:
+            # Fix mobile column length for walk-in users
+            try:
+                conn.execute(db.text("ALTER TABLE users ALTER COLUMN mobile TYPE VARCHAR(20)"))
+                conn.commit()
+                results.append("✅ Updated mobile column to VARCHAR(20)")
+            except Exception as e:
+                results.append(f"⚠️ mobile column: {str(e)}")
+            
             # Add new service center columns
             service_center_columns = [
                 ('description', 'VARCHAR(500)'),
