@@ -1019,18 +1019,19 @@ def queue_status(token_id):
         except:
             position = 1
     
-    # Use stored times from database
+    # Use ONLY stored times from database (calculated at payment time)
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    leave_time = token.leave_time or get_ist_now()
-    reach_counter_time = token.reach_time or get_ist_now()
+    # Get stored times - these were calculated and saved at payment confirmation
+    leave_time = token.leave_time
+    reach_counter_time = token.reach_time
     
     # Ensure times are timezone-aware
-    if leave_time.tzinfo is None:
+    if leave_time and leave_time.tzinfo is None:
         leave_time = IST.localize(leave_time)
-    if reach_counter_time.tzinfo is None:
+    if reach_counter_time and reach_counter_time.tzinfo is None:
         reach_counter_time = IST.localize(reach_counter_time)
     
     wait_time = 0
