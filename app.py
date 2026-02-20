@@ -1622,28 +1622,6 @@ def call_next():
 
 @app.route('/admin/call_next_walkin')
 def call_next_walkin():
-            # Backend enforcement: Check arrival time
-            if next_token.reach_time:
-                reach_time = next_token.reach_time
-                if reach_time.tzinfo is None:
-                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
-                else:
-                    reach_time = reach_time.astimezone(IST)
-                
-                # 5 min buffer
-                call_allowed_from = reach_time - timedelta(minutes=5)
-                
-                if current_time < call_allowed_from:
-                    minutes_left = int((call_allowed_from - current_time).total_seconds() / 60)
-                    flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {reach_time.strftime("%I:%M %p")}', 'warning')
-                    db.session.commit()
-                    return redirect(url_for('admin_dashboard'))
-            
-            # All checks passed - serve token
-            next_token.status = 'Serving'
-            next_token.actual_service_start = current_time
-@app.route('/admin/call_next_walkin')
-def call_next_walkin():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
