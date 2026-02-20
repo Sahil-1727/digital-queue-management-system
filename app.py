@@ -832,8 +832,6 @@ def initialize_database():
                 app.db_initialized = True
         except Exception as e:
             print(f"❌ Database initialization error: {e}")
-            app.db_initialized = True  # Mark as initialized to prevent infinite loops:
-            print(f"❌ Database initialization error: {e}")
             app.db_initialized = True  # Mark as initialized to prevent infinite loops
 
 # Routes - User Module
