@@ -819,7 +819,13 @@ def initialize_database():
 # Routes - User Module
 @app.route('/')
 def index():
-    return render_template('home.html')
+    try:
+        return render_template('home.html')
+    except Exception as e:
+        print(f"❌ Landing page error: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<h1>Error loading page</h1><pre>{str(e)}</pre>", 500
 
 @app.route('/register-center', methods=['GET', 'POST'])
 def register_center():
