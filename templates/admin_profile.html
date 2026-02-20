@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Profile - {{ center.name }}</title>
+    <title>Profile - {{ center.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
     <style>
         :root[data-theme="midnight"] {
             --bg-primary: #0F172A;
@@ -246,35 +245,19 @@
             }
         }
     </style>
-    
-    </head>
+</head>
 <body class="page-content">
     <div class="bg-pattern"></div>
     <div class="bg-grid"></div>
     
+    <!-- Premium Internal Navbar -->
+    {% set user_name = center.name %}
+    {% set user_type = 'admin' %}
+    {% set breadcrumb = ['Profile', 'Settings'] %}
+    {% include 'includes/internal_navbar.html' %}
+    
     <div class="content-wrapper">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
-                    <span class="gradient-text">Queue</span>Flow Admin
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('admin_profile') }}">Profile</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_analytics') }}">Analytics</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_logout') }}">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="container py-5">
+        <div class="container py-4">
             <div class="row mb-4">
                 <div class="col-12">
                     <h1 class="display-6 fw-bold mb-2">Service Center Profile</h1>
