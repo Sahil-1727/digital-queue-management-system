@@ -1171,16 +1171,34 @@ def user_history():
     for token in tokens:
         token_data = {'token': token}
         
-        # Convert reach_time to IST
-        if token.reach_time:
-            reach_time = token.reach_time
-            if reach_time.tzinfo is None:
-                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
-            else:
-                reach_time = reach_time.astimezone(IST)
-            token_data['reach_time_ist'] = reach_time
+        # Determine which time to show based on status
+        if token.status == 'Completed' and token.actual_service_start:
+            # Show service start time for completed tokens
+            time_to_show = token.actual_service_start
+            time_label = 'Service Started'
+        elif token.no_show_time:
+            # Show no-show time
+            time_to_show = token.no_show_time
+            time_label = 'No-Show Marked'
+        elif token.reach_time:
+            # Show expected reach time (for expired tokens)
+            time_to_show = token.reach_time
+            time_label = 'Expected Arrival'
         else:
-            token_data['reach_time_ist'] = None
+            time_to_show = token.created_time
+            time_label = 'Booked'
+        
+        # Convert to IST
+        if time_to_show:
+            if time_to_show.tzinfo is None:
+                time_ist = pytz.utc.localize(time_to_show).astimezone(IST)
+            else:
+                time_ist = time_to_show.astimezone(IST)
+            token_data['display_time'] = time_ist
+            token_data['time_label'] = time_label
+        else:
+            token_data['display_time'] = None
+            token_data['time_label'] = 'N/A'
         
         enriched_tokens.append(token_data)
     

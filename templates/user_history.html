@@ -51,9 +51,10 @@
                                         <small class="text-muted">{{ item.token.service_center.category }}</small>
                                     </td>
                                     <td>
-                                        {% if item.reach_time_ist %}
-                                            <div>{{ item.reach_time_ist.strftime('%d %b %Y') }}</div>
-                                            <small class="text-muted">{{ item.reach_time_ist.strftime('%I:%M %p') }} IST</small>
+                                        {% if item.display_time %}
+                                            <div>{{ item.display_time.strftime('%d %b %Y') }}</div>
+                                            <small class="text-muted">{{ item.display_time.strftime('%I:%M %p') }} IST</small>
+                                            <div><span class="badge bg-secondary" style="font-size: 0.7rem;">{{ item.time_label }}</span></div>
                                         {% else %}
                                             <div class="text-muted">-</div>
                                         {% endif %}
