@@ -1117,16 +1117,18 @@ def queue_status(token_id):
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
     
-    # Convert UTC to IST (database stores in UTC)
+    # Convert UTC to IST (database stores in UTC without timezone)
     if leave_time:
         if leave_time.tzinfo is None:
-            leave_time = IST.localize(leave_time)
+            # Database stores in UTC without timezone info - must use pytz.utc.localize first
+            leave_time = pytz.utc.localize(leave_time).astimezone(IST)
         else:
             leave_time = leave_time.astimezone(IST)
     
     if reach_counter_time:
         if reach_counter_time.tzinfo is None:
-            reach_counter_time = IST.localize(reach_counter_time)
+            # Database stores in UTC without timezone info - must use pytz.utc.localize first
+            reach_counter_time = pytz.utc.localize(reach_counter_time).astimezone(IST)
         else:
             reach_counter_time = reach_counter_time.astimezone(IST)
     
