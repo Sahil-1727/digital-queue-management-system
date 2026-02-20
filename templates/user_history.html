@@ -41,30 +41,33 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for token in tokens %}
+                                {% for item in tokens %}
                                 <tr>
                                     <td class="px-4 py-3">
-                                        <span class="fw-bold text-primary" style="font-size: 1.1rem;">{{ token.token_number }}</span>
+                                        <span class="fw-bold text-primary" style="font-size: 1.1rem;">{{ item.token.token_number }}</span>
                                     </td>
                                     <td>
-                                        <div class="fw-semibold">{{ token.service_center.name }}</div>
-                                        <small class="text-muted">{{ token.service_center.category }}</small>
+                                        <div class="fw-semibold">{{ item.token.service_center.name }}</div>
+                                        <small class="text-muted">{{ item.token.service_center.category }}</small>
                                     </td>
                                     <td>
-                                        {% set created_ist = token.created_time.astimezone(IST) if token.created_time.tzinfo else IST.localize(token.created_time) %}
-                                        <div>{{ created_ist.strftime('%d %b %Y') }}</div>
-                                        <small class="text-muted">{{ created_ist.strftime('%I:%M %p') }} IST</small>
+                                        {% if item.reach_time_ist %}
+                                            <div>{{ item.reach_time_ist.strftime('%d %b %Y') }}</div>
+                                            <small class="text-muted">{{ item.reach_time_ist.strftime('%I:%M %p') }} IST</small>
+                                        {% else %}
+                                            <div class="text-muted">-</div>
+                                        {% endif %}
                                     </td>
                                     <td>
-                                        <span class="badge {% if token.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if token.status == 'Completed' %}✓ Completed{% else %}✗ {{ token.status }}{% endif %}
+                                        <span class="badge {% if item.token.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if item.token.status == 'Completed' %}✓ Completed{% else %}✗ {{ item.token.status }}{% endif %}
                                         </span>
                                     </td>
                                     <td>
-                                        {% if token.no_show_reason %}
+                                        {% if item.token.no_show_reason %}
                                             <div class="alert alert-danger mb-0 py-2 px-3" style="font-size: 0.85rem; max-width: 300px;">
                                                 <strong>⚠️ No-Show:</strong><br>
-                                                {{ token.no_show_reason }}
+                                                {{ item.token.no_show_reason }}
                                             </div>
                                         {% else %}
                                             <span class="text-muted">-</span>

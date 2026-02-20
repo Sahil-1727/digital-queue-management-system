@@ -1166,7 +1166,25 @@ def user_history():
         Token.status.in_(['Completed', 'Expired'])
     ).order_by(Token.created_time.desc()).all()
     
-    return render_template('user_history.html', tokens=tokens, datetime=datetime, IST=IST)
+    # Convert times to IST for display
+    enriched_tokens = []
+    for token in tokens:
+        token_data = {'token': token}
+        
+        # Convert reach_time to IST
+        if token.reach_time:
+            reach_time = token.reach_time
+            if reach_time.tzinfo is None:
+                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+            else:
+                reach_time = reach_time.astimezone(IST)
+            token_data['reach_time_ist'] = reach_time
+        else:
+            token_data['reach_time_ist'] = None
+        
+        enriched_tokens.append(token_data)
+    
+    return render_template('user_history.html', tokens=enriched_tokens)
 
 @app.route('/profile', methods=['GET', 'POST'])
 def user_profile():
