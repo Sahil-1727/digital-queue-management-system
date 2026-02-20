@@ -820,7 +820,7 @@ def initialize_database():
                             conn.execute(db.text("ALTER TABLE users ADD COLUMN longitude FLOAT"))
                             conn.commit()
                             print("✅ Added address, latitude, longitude columns to users table")
-except Exception as e:
+                except Exception as e:
                     print(f"⚠️ Migration skipped (SQLite or columns exist): {e}")
                 
                 # Add default data only if tables are empty
@@ -831,6 +831,8 @@ except Exception as e:
                     print(f"⚠️ Error checking/initializing data: {e}")
                 app.db_initialized = True
         except Exception as e:
+            print(f"❌ Database initialization error: {e}")
+            app.db_initialized = True  # Mark as initialized to prevent infinite loops:
             print(f"❌ Database initialization error: {e}")
             app.db_initialized = True  # Mark as initialized to prevent infinite loops
 
