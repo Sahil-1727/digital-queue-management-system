@@ -880,38 +880,6 @@ def register_center():
         import traceback
         traceback.print_exc()
         return f"<h1>Error loading center registration</h1><pre>{str(e)}</pre>", 500
-        
-        registration = ServiceCenterRegistration(
-            center_name=request.form.get('center_name'),
-            organization_type=request.form.get('organization_type'),
-            owner_name=request.form.get('owner_name'),
-            email=request.form.get('email'),
-            phone=phone,
-            password=generate_password_hash(password),
-            alternate_phone=request.form.get('alternate_phone'),
-            city=request.form.get('city'),
-            state=request.form.get('state'),
-            pincode=request.form.get('pincode'),
-            address=request.form.get('address'),
-            latitude=float(request.form.get('latitude')) if request.form.get('latitude') else None,
-            longitude=float(request.form.get('longitude')) if request.form.get('longitude') else None,
-            business_hours=request.form.get('business_hours'),
-            counters=request.form.get('counters') or None,
-            daily_customers=request.form.get('daily_customers') or None,
-            years_in_business=request.form.get('years_in_business') or None,
-            avg_service_time=avg_service_time,
-            gst_number=request.form.get('gst_number'),
-            website=request.form.get('website'),
-            additional_info=request.form.get('additional_info'),
-            status='Pending',
-            payment_status='Pending'
-        )
-        db.session.add(registration)
-        db.session.commit()
-        
-        return redirect(url_for('registration_payment', reg_id=registration.id))
-    
-    return render_template('register_center.html')
 
 @app.route('/registration-payment/<int:reg_id>', methods=['GET', 'POST'])
 def registration_payment(reg_id):
