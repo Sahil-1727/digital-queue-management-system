@@ -14,6 +14,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import pytz
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+import matplotlib.pyplot as plt
 
 # Load environment variables
 load_dotenv()
@@ -2201,8 +2204,10 @@ def admin_analytics():
         db.func.date(Token.created_time) == today
     ).count()
     
-    # Last 7 days
+    # Last 7 days data
     last_7_days = []
+    dates = []
+    counts = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
         count = Token.query.filter(
@@ -2210,11 +2215,55 @@ def admin_analytics():
             db.func.date(Token.created_time) == date
         ).count()
         last_7_days.append({'date': date.strftime('%a'), 'count': count})
+        dates.append(date.strftime('%a'))
+        counts.append(count)
+    
+    # Generate 7-day trend chart
+    plt.figure(figsize=(10, 4))
+    plt.plot(dates, counts, marker='o', linewidth=2, markersize=8, color='#2DD4BF')
+    plt.fill_between(range(len(counts)), counts, alpha=0.3, color='#2DD4BF')
+    plt.xlabel('Day', fontsize=12)
+    plt.ylabel('Tokens', fontsize=12)
+    plt.title('7-Day Token Trend', fontsize=14, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    buf.seek(0)
+    trend_chart = base64.b64encode(buf.getvalue()).decode()
+    plt.close()
     
     # Online vs Walk-in
-    total_tokens = Token.query.filter_by(service_center_id=center_id).count()
-    walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
-    online_tokens = total_tokens - walkin_tokens
+    try:
+        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+        walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
+        online_tokens = total_tokens - walkin_tokens
+    except:
+        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+        walkin_tokens = 0
+        online_tokens = total_tokens
+    
+    # Generate pie chart for online vs walkin
+    if total_tokens > 0:
+        plt.figure(figsize=(6, 6))
+        labels = ['Online', 'Walk-in']
+        sizes = [online_tokens, walkin_tokens]
+        colors = ['#2DD4BF', '#14B8A6']
+        explode = (0.05, 0)
+        
+        plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+                shadow=True, startangle=90, textprops={'fontsize': 12, 'fontweight': 'bold'})
+        plt.title('Online vs Walk-in Tokens', fontsize=14, fontweight='bold')
+        plt.axis('equal')
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+        buf.seek(0)
+        pie_chart = base64.b64encode(buf.getvalue()).decode()
+        plt.close()
+    else:
+        pie_chart = None
     
     analytics = {
         'daily_customers': daily_customers,
@@ -2223,7 +2272,9 @@ def admin_analytics():
         'online_tokens': online_tokens,
         'walkin_tokens': walkin_tokens,
         'total_tokens': total_tokens,
-        'avg_wait_time': center.avg_service_time
+        'avg_wait_time': center.avg_service_time,
+        'trend_chart': trend_chart,
+        'pie_chart': pie_chart
     }
     
     return render_template('admin_analytics.html', center=center, analytics=analytics, IST=IST)
