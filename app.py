@@ -1019,14 +1019,48 @@ def queue_status(token_id):
         except:
             position = 1
     
-    # Use ONLY stored times from database (calculated at payment time)
+    # Get stored times from database (same as email)
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
     travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
     
-    # Get stored times - these were calculated and saved at payment confirmation
+    # Use stored times from payment confirmation
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
+    
+    # If times not stored (old tokens), calculate using SAME logic as payment
+    if not leave_time or not reach_counter_time:
+        if position <= 1:
+            leave_time = get_ist_now() + timedelta(minutes=10)
+            reach_counter_time = leave_time + timedelta(minutes=travel_time)
+        else:
+            previous_tokens = Token.query.filter(
+                Token.service_center_id == token.service_center_id,
+                Token.status.in_(['Active', 'Serving']),
+                Token.is_walkin == False,
+                Token.id < token.id
+            ).order_by(Token.id).all()
+            
+            if previous_tokens:
+                first_token = previous_tokens[0]
+                first_user = User.query.get(first_token.user_id)
+                first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
+                first_leave = first_token.created_time + timedelta(minutes=10)
+                first_arrival = first_leave + timedelta(minutes=first_travel)
+                service_end_time = first_arrival + timedelta(minutes=center.avg_service_time)
+                
+                for prev_token in previous_tokens[1:]:
+                    service_end_time = service_end_time + timedelta(minutes=center.avg_service_time)
+                
+                reach_counter_time = service_end_time
+                leave_time = reach_counter_time - timedelta(minutes=travel_time)
+                
+                if leave_time < get_ist_now():
+                    leave_time = get_ist_now()
+                    reach_counter_time = leave_time + timedelta(minutes=travel_time)
+            else:
+                leave_time = get_ist_now() + timedelta(minutes=10)
+                reach_counter_time = leave_time + timedelta(minutes=travel_time)
     
     # Ensure times are timezone-aware
     if leave_time and leave_time.tzinfo is None:
