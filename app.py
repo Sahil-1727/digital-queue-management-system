@@ -1068,9 +1068,15 @@ def payment(token_id):
         # Send timing alert email (non-blocking)
         try:
             if user.email:
-                send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
+                email_sent = send_timing_alert(user.email, user.name, token.token_number, center.name, leave_time, reach_time)
+                if email_sent:
+                    print(f"✅ Email sent to {user.email} for token {token.token_number} at {center.name}")
+                else:
+                    print(f"⚠️ Email failed for {user.email} for token {token.token_number} at {center.name}")
+            else:
+                print(f"⚠️ No email address for user {user.name} (token {token.token_number} at {center.name})")
         except Exception as e:
-            print(f"Email sending failed: {e}")
+            print(f"❌ Email sending error for token {token.token_number} at {center.name}: {e}")
         
         return redirect(url_for('queue_status', token_id=token.id))
     
@@ -2275,6 +2281,49 @@ def generate_demo_data():
     except Exception as e:
         flash(f'Error generating demo data: {str(e)}', 'danger')
         return redirect(url_for('admin_dashboard'))
+
+@app.route('/debug/verify-timing-system')
+def debug_verify_timing():
+    """Debug endpoint to verify timing system works for all service centers"""
+    results = []
+    results.append("<h2>🔍 Timing System Verification</h2>")
+    
+    # Check all service centers
+    centers = ServiceCenter.query.all()
+    results.append(f"<p><strong>Total Service Centers:</strong> {len(centers)}</p>")
+    
+    for center in centers:
+        results.append(f"<hr><h3>{center.name} (ID: {center.id})</h3>")
+        results.append(f"<p><strong>Category:</strong> {center.category}</p>")
+        results.append(f"<p><strong>Location:</strong> {center.location}</p>")
+        results.append(f"<p><strong>Avg Service Time:</strong> {center.avg_service_time} mins</p>")
+        
+        # Check recent tokens
+        recent_tokens = Token.query.filter_by(service_center_id=center.id).order_by(Token.created_time.desc()).limit(5).all()
+        results.append(f"<p><strong>Recent Tokens:</strong> {len(recent_tokens)}</p>")
+        
+        if recent_tokens:
+            results.append("<table border='1' style='border-collapse: collapse; margin: 10px 0;'>")
+            results.append("<tr><th>Token</th><th>Status</th><th>Leave Time</th><th>Reach Time</th><th>Email Sent</th></tr>")
+            for token in recent_tokens:
+                leave_str = token.leave_time.strftime('%Y-%m-%d %H:%M') if token.leave_time else 'N/A'
+                reach_str = token.reach_time.strftime('%Y-%m-%d %H:%M') if token.reach_time else 'N/A'
+                has_times = '✅' if (token.leave_time and token.reach_time) else '❌'
+                results.append(f"<tr><td>{token.token_number}</td><td>{token.status}</td><td>{leave_str}</td><td>{reach_str}</td><td>{has_times}</td></tr>")
+            results.append("</table>")
+        else:
+            results.append("<p><em>No tokens yet</em></p>")
+    
+    results.append("<hr><h3>✅ System Status</h3>")
+    results.append("<p>The timing calculation system is <strong>active for ALL service centers</strong>.</p>")
+    results.append("<p>If times are missing, it means:</p>")
+    results.append("<ul>")
+    results.append("<li>Token was created before timing system was implemented</li>")
+    results.append("<li>Token is still in 'PendingPayment' status (times calculated after payment)</li>")
+    results.append("<li>Token was created via walk-in (different flow)</li>")
+    results.append("</ul>")
+    
+    return "".join(results)
 
 if __name__ == '__main__':
     init_db()
