@@ -1589,54 +1589,39 @@ def call_next():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
+    center_id = session['admin_center_id']
+    center = ServiceCenter.query.get(center_id)
+    
     try:
-        center_id = session['admin_center_id']
-        center = ServiceCenter.query.get(center_id)
-        
-        if not center:
-            flash('Service center not found.', 'danger')
-            return redirect(url_for('admin_dashboard'))
-        
-        current_time = get_ist_now()
-        
-        # Transaction safety: Check serving token with lock
-        serving_token = Token.query.filter_by(
-            service_center_id=center_id,
-            status='Serving',
-            is_walkin=False
-        ).with_for_update().first()
-        
-        if serving_token:
-            # Check if service_end_time has passed
-            if serving_token.actual_service_end:
-                service_end = serving_token.actual_service_end
-                if service_end.tzinfo is None:
-                    service_end = pytz.utc.localize(service_end).astimezone(IST)
-                else:
-                    service_end = service_end.astimezone(IST)
-                
-                if service_end <= current_time:
-                    # Auto-complete
-                    serving_token.status = 'Completed'
-                    serving_token.completed_time = current_time
-                else:
-                    # Counter still busy - backend enforcement
-                    flash('Counter is busy. Please wait for current service to complete.', 'warning')
-                    db.session.commit()
-                    return redirect(url_for('admin_dashboard'))
-            else:
-                flash('Counter is busy.', 'warning')
-                db.session.commit()
-                return redirect(url_for('admin_dashboard'))
-        
-        # Fetch next token ordered by estimated_service_start
+        serving_token = get_serving_token(center_id)
+    except:
+        serving_token = None
+    
+    if serving_token:
+        serving_token.status = 'Completed'
+        serving_token.completed_time = get_ist_now()
+    
+    try:
         next_token = Token.query.filter_by(
             service_center_id=center_id,
             status='Active',
             is_walkin=False
-        ).order_by(Token.estimated_service_start).first()
-        
-        if next_token:
+        ).order_by(Token.id).first()
+    except:
+        next_token = None
+    
+    if next_token:
+        next_token.status = 'Serving'
+        db.session.commit()
+        flash(f'Token {next_token.token_number} is now being served.', 'success')
+    else:
+        db.session.commit()
+        flash('No tokens in queue.', 'info')
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/call_next_walkin')
+def call_next_walkin():
             # Backend enforcement: Check arrival time
             if next_token.reach_time:
                 reach_time = next_token.reach_time
@@ -1657,20 +1642,6 @@ def call_next():
             # All checks passed - serve token
             next_token.status = 'Serving'
             next_token.actual_service_start = current_time
-            next_token.actual_service_end = current_time + timedelta(minutes=center.avg_service_time)
-            
-            db.session.commit()
-            flash(f'Token {next_token.token_number} is now being served.', 'success')
-        else:
-            db.session.commit()
-            flash('No tokens in queue.', 'info')
-    except Exception as e:
-        db.session.rollback()
-        print(f"❌ Error in call_next: {e}")
-        flash('An error occurred. Please try again.', 'danger')
-    
-    return redirect(url_for('admin_dashboard'))
-
 @app.route('/admin/call_next_walkin')
 def call_next_walkin():
     if 'admin_id' not in session:
@@ -1678,16 +1649,23 @@ def call_next_walkin():
     
     center_id = session['admin_center_id']
     
-    walkin_serving_token = get_walkin_serving_token(center_id)
+    try:
+        walkin_serving_token = get_walkin_serving_token(center_id)
+    except:
+        walkin_serving_token = None
+    
     if walkin_serving_token:
         walkin_serving_token.status = 'Completed'
-        walkin_serving_token.completed_time = datetime.now()
+        walkin_serving_token.completed_time = get_ist_now()
     
-    next_token = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Active',
-        is_walkin=True
-    ).order_by(Token.id).first()
+    try:
+        next_token = Token.query.filter_by(
+            service_center_id=center_id,
+            status='Active',
+            is_walkin=True
+        ).order_by(Token.id).first()
+    except:
+        next_token = None
     
     if next_token:
         next_token.status = 'Serving'
@@ -1706,7 +1684,7 @@ def complete_token(token_id):
     
     token = Token.query.get_or_404(token_id)
     token.status = 'Completed'
-    token.completed_time = datetime.now()
+    token.completed_time = get_ist_now()
     db.session.commit()
     flash('Token marked as completed.', 'success')
     return redirect(url_for('admin_dashboard'))
@@ -1779,13 +1757,14 @@ def add_walkin():
                 db.session.add(user)
                 db.session.commit()
         else:
-            # Anonymous walk-in
-            user = User(name=name, mobile=f'W{int(datetime.now().timestamp())}', email=f'walkin{int(datetime.now().timestamp())}@queueflow.com', password=generate_password_hash('walkin123'))
+            # Anonymous walk-in - use get_ist_now()
+            timestamp = int(get_ist_now().timestamp())
+            user = User(name=name, mobile=f'W{timestamp}', email=f'walkin{timestamp}@queueflow.com', password=generate_password_hash('walkin123'))
             db.session.add(user)
             db.session.commit()
         
         # Generate token with W prefix
-        today = datetime.now().date()
+        today = get_ist_now().date()
         count = Token.query.filter(
             Token.service_center_id == center_id,
             db.func.date(Token.created_time) == today
