@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="midnight">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Admins - SuperAdmin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    
+    
+    </head>
 <body class="page-content">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(79, 70, 229, 0.2);">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(15, 76, 92, 0.2);">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('superadmin_dashboard') }}">
-                <span style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow SuperAdmin
+                <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow SuperAdmin
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -54,7 +54,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead style="background: rgba(79, 70, 229, 0.1); border-bottom: 2px solid rgba(79, 70, 229, 0.3);">
+                        <thead style="background: rgba(15, 76, 92, 0.1); border-bottom: 2px solid rgba(15, 76, 92, 0.3);">
                             <tr>
                                 <th>ID</th>
                                 <th>Service Center</th>
@@ -68,14 +68,14 @@
                         <tbody>
                             {% for admin in admins %}
                             <tr>
-                                <td><span class="badge" style="background: rgba(79, 70, 229, 0.2); color: var(--primary-color);">{{ admin.id }}</span></td>
+                                <td><span class="badge" style="background: rgba(15, 76, 92, 0.2); color: var(--primary-color);">{{ admin.id }}</span></td>
                                 <td><strong>{{ admin.service_center.name }}</strong></td>
                                 <td><span class="badge bg-secondary">{{ admin.service_center.category }}</span></td>
                                 <td>{{ admin.service_center.location }}</td>
                                 <td><code style="color: var(--primary-color);">{{ admin.username }}</code></td>
                                 <td>{{ admin.email or 'Not set' }}</td>
                                 <td>
-                                    <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: #0F172A;">
+                                    <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm" style="background: var(--color-primary); color: #0F172A;">
                                         ✏️ Edit
                                     </a>
                                 </td>
@@ -95,7 +95,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
-</body>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
+    </body>
 </html>

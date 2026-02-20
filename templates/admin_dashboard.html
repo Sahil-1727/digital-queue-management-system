@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="midnight">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
+    
     <meta http-equiv="refresh" content="15">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    </head>
 <body class="page-content">
     <!-- Premium Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
@@ -105,7 +105,7 @@
                                     {% for item in waiting_tokens %}
                                     <tr>
                                         <td>
-                                            <span class="fw-bold" style="color: #2DD4BF;">{{ item.token.token_number }}</span>
+                                            <span class="fw-bold" style="color: var(--color-primary);">{{ item.token.token_number }}</span>
                                             {% if item.status_badge == 'Travelling' %}
                                                 <span class="badge bg-info ms-2">🚗 Travelling</span>
                                             {% elif item.status_badge == 'Arrived' %}
@@ -170,7 +170,7 @@
                                 <tbody>
                                     {% for token in walkin_waiting_tokens %}
                                     <tr>
-                                        <td><span class="fw-bold" style="color: #2DD4BF;">{{ token.token_number }}</span></td>
+                                        <td><span class="fw-bold" style="color: var(--color-primary);">{{ token.token_number }}</span></td>
                                         <td class="fw-semibold">{{ token.user.name }}</td>
                                         <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
                                     </tr>
@@ -191,8 +191,4 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
-    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;">🌙</button>
-</body>
-</html>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>

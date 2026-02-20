@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QueueFlow - Smart Queue Management Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         /* Hero Section */
@@ -54,37 +55,37 @@
             flex-wrap: wrap;
         }
         .btn-hero-primary {
-            background: #2DD4BF;
+            background: var(--color-primary);
             color: #0F172A;
             padding: 1rem 2.5rem;
             font-size: 1.125rem;
             font-weight: 700;
             border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3);
+            box-shadow: 0 10px 25px rgba(15, 76, 92, 0.3);
             transition: all 0.3s ease;
         }
         .btn-hero-primary:hover {
-            background: #14B8A6;
+            background: var(--color-primary-dark);
             transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(45, 212, 191, 0.4);
+            box-shadow: 0 15px 35px rgba(15, 76, 92, 0.4);
             color: white;
         }
         .btn-hero-secondary {
-            background: rgba(45, 212, 191, 0.1);
+            background: rgba(15, 76, 92, 0.1);
             backdrop-filter: blur(10px);
-            color: #2DD4BF;
+            color: var(--color-primary);
             padding: 1rem 2.5rem;
             font-size: 1.125rem;
             font-weight: 700;
             border-radius: 0.75rem;
-            border: 2px solid rgba(45, 212, 191, 0.3);
+            border: 2px solid rgba(15, 76, 92, 0.3);
             transition: all 0.3s ease;
         }
         .btn-hero-secondary:hover {
-            background: rgba(45, 212, 191, 0.2);
-            border-color: #2DD4BF;
+            background: rgba(15, 76, 92, 0.2);
+            border-color: var(--color-primary);
             transform: translateY(-3px);
-            color: #2DD4BF;
+            color: var(--color-primary);
         }
         /* Stats */
         .stats-section {
@@ -99,7 +100,7 @@
         .stat-number {
             font-size: 3rem;
             font-weight: 900;
-            background: linear-gradient(135deg, #0F172A 0%, #2DD4BF 100%);
+            background: linear-gradient(135deg, #0F172A 0%, var(--color-primary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -139,12 +140,12 @@
         .feature-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-            border-color: #2DD4BF;
+            border-color: var(--color-primary);
         }
         .feature-icon {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
             border-radius: 1rem;
             display: flex;
             align-items: center;
@@ -164,7 +165,7 @@
         }
         /* CTA Section */
         .cta-section {
-            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
             padding: 5rem 0;
             position: relative;
             overflow: hidden;
@@ -226,9 +227,8 @@
             transform: translateY(-3px);
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    
+    </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
@@ -460,6 +460,6 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

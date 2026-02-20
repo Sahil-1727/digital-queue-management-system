@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Token Status - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
     
     <meta http-equiv="refresh" content="30">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    
+    </head>
 <body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
@@ -80,6 +80,6 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

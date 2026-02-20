@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="midnight">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Profile - {{ center.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
     <style>
-        :root[data-theme="dark"] {
+        :root[data-theme="midnight"] {
             --bg-primary: #0F172A;
             --bg-secondary: #1E293B;
             --bg-tertiary: #334155;
@@ -16,7 +17,7 @@
             --text-muted: #94A3B8;
             --accent: var(--primary-color);
             --accent-hover: var(--primary-dark);
-            --border: rgba(79, 70, 229, 0.2);
+            --border: rgba(15, 76, 92, 0.2);
             --shadow: rgba(0, 0, 0, 0.3);
         }
         
@@ -39,8 +40,8 @@
             inset: 0;
             z-index: 0;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.05) 0%, transparent 50%);
         }
         
         .bg-grid {
@@ -48,8 +49,8 @@
             inset: 0;
             z-index: 0;
             background-image: 
-                linear-gradient(rgba(79, 70, 229, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(79, 70, 229, 0.02) 1px, transparent 1px);
+                linear-gradient(rgba(15, 76, 92, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 76, 92, 0.02) 1px, transparent 1px);
             background-size: 50px 50px;
             mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);
         }
@@ -123,7 +124,7 @@
             background: var(--bg-tertiary);
             border-color: var(--accent);
             color: var(--text-primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.1);
         }
         
         .form-control::placeholder {
@@ -151,7 +152,7 @@
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 10px 30px rgba(15, 76, 92, 0.3);
             color: var(--bg-primary);
         }
         
@@ -186,9 +187,9 @@
         }
         
         .alert-success {
-            background: rgba(79, 70, 229, 0.1);
+            background: rgba(15, 76, 92, 0.1);
             color: var(--accent);
-            border: 1px solid rgba(79, 70, 229, 0.3);
+            border: 1px solid rgba(15, 76, 92, 0.3);
         }
         
         .alert-danger {
@@ -229,8 +230,8 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(79, 70, 229, 0.1);
-            border: 1px solid rgba(79, 70, 229, 0.2);
+            background: rgba(15, 76, 92, 0.1);
+            border: 1px solid rgba(15, 76, 92, 0.2);
             padding: 0.5rem 1rem;
             border-radius: 8px;
             color: var(--accent);
@@ -245,9 +246,8 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    
+    </head>
 <body class="page-content">
     <div class="bg-pattern"></div>
     <div class="bg-grid"></div>
@@ -385,6 +385,6 @@
     </div>
     
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

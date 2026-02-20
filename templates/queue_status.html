@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="midnight">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Queue Status - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
+    
     <meta http-equiv="refresh" content="30">
     <style>
         .notification-bell { position: fixed; top: 20px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5); animation: shake 0.5s infinite; z-index: 9999; cursor: pointer; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    </head>
 <body class="page-content" style="background: var(--bg-secondary);">
     <div class="notification-bell" id="notification-bell" onclick="document.getElementById('notification-alert').scrollIntoView({behavior: 'smooth'})">🔔</div>
     
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card text-center hover-lift" style="background: rgba(45, 212, 191, 0.1); border: 2px solid var(--primary-color);">
+                                <div class="card text-center hover-lift" style="background: rgba(15, 76, 92, 0.1); border: 2px solid var(--primary-color);">
                                     <div class="card-body py-4">
                                         <h2 class="display-5 fw-bold mb-2">~{{ wait_time }}</h2>
                                         <small class="fw-semibold">Minutes Wait</small>
@@ -123,108 +123,4 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
-    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;">🌙</button>
-    <script>
-        // Notification system
-        let notificationShown = false;
-        let leaveNotificationShown = false;
-        
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-        
-        function showNotification(title, message) {
-            // Show floating bell
-            const bell = document.getElementById('notification-bell');
-            if (bell) {
-                bell.style.display = 'flex';
-            }
-            
-            // Show in-app notification
-            const alertDiv = document.getElementById('notification-alert');
-            const messageDiv = document.getElementById('notification-message');
-            if (alertDiv && messageDiv) {
-                messageDiv.textContent = message;
-                alertDiv.style.display = 'block';
-                alertDiv.style.animation = 'pulse 1s infinite';
-            }
-            
-            // Show browser notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, {
-                    body: message,
-                    icon: '/static/notification-icon.png',
-                    badge: '/static/notification-icon.png'
-                });
-            }
-        }
-        
-        function checkNotifications() {
-            const now = new Date();
-            const leaveTime = new Date('{{ leave_time.strftime("%Y-%m-%d %H:%M:%S") }}');
-            const reachTime = new Date('{{ reach_counter_time.strftime("%Y-%m-%d %H:%M:%S") }}');
-            
-            const minutesToLeave = Math.floor((leaveTime - now) / 60000);
-            const minutesToReach = Math.floor((reachTime - now) / 60000);
-            
-            // Check if queue is moving faster (position decreased)
-            const currentPosition = {{ position }};
-            const previousPosition = parseInt(sessionStorage.getItem('lastPosition') || currentPosition);
-            
-            if (currentPosition < previousPosition && currentPosition > 2) {
-                const positionDrop = previousPosition - currentPosition;
-                const speedIndicator = document.getElementById('queue-speed-indicator');
-                const speedMessage = document.getElementById('queue-speed-message');
-                
-                if (speedIndicator && speedMessage) {
-                    speedIndicator.style.display = 'block';
-                    speedMessage.textContent = `⚡ Queue moving ${positionDrop}x faster! ${positionDrop} people served quickly. You can leave early!`;
-                }
-                
-                if (positionDrop >= 2) {
-                    showNotification(
-                        '⚡ Queue Moving Fast!',
-                        `Queue is moving faster! ${positionDrop} people served quickly. Consider leaving early!`
-                    );
-                }
-            }
-            sessionStorage.setItem('lastPosition', currentPosition);
-            
-            // Notification 5 minutes before leave time
-            if (minutesToLeave <= 5 && minutesToLeave > 0 && !leaveNotificationShown) {
-                showNotification(
-                    '🏠 Time to Leave!',
-                    `Leave home in ${minutesToLeave} minutes to reach on time!`
-                );
-                leaveNotificationShown = true;
-            }
-            
-            // Notification 10 minutes before counter time
-            if (minutesToReach <= 10 && minutesToReach > 0 && !notificationShown) {
-                showNotification(
-                    '⏰ Please Reach Counter!',
-                    'Please reach the counter within 10 minutes. Your turn is coming soon!'
-                );
-                notificationShown = true;
-            }
-            
-            // Urgent notification when time is very close
-            if (minutesToReach <= 2 && minutesToReach > 0) {
-                showNotification(
-                    '🔴 URGENT: Your Turn Soon!',
-                    'Please be at the counter NOW! Your turn is in 2 minutes!'
-                );
-            }
-        }
-        
-        // Check immediately and every 30 seconds
-        {% if token.status == 'Active' and position > 0 %}
-        checkNotifications();
-        setInterval(checkNotifications, 30000);
-        {% endif %}
-    </script>
-</body>
-</html>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>

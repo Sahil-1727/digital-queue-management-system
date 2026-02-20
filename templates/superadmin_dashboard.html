@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Dashboard - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    <link rel="stylesheet" href="{{ url_for(\'static\', filename=\'css/theme.css\') }}">
+    
     
     <style>
         body { background: #F8FAFC; }
@@ -30,14 +31,13 @@
             .modal-body .row { font-size: 0.85rem; }
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-</head>
+    
+    </head>
 <body class="page-content">
     <div class="superadmin-header">
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h4 class="mb-0 fw-bold">👑 <span style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Super Admin</span></h4>
+                <h4 class="mb-0 fw-bold">👑 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Super Admin</span></h4>
                 <div class="d-flex gap-2 flex-wrap">
                     <span class="text-white d-none d-md-inline">{{ session.superadmin_username }}</span>
                     <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: var(--primary-color); color: #0F172A;">Centers</a>
@@ -63,7 +63,7 @@
         <!-- Stats Cards -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(79, 70, 229, 0.3);">
+                <div class="card text-center" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(15, 76, 92, 0.3);">
                     <div class="card-body py-3">
                         <h2 class="display-4 fw-bold mb-1">{{ stats.pending }}</h2>
                         <p class="mb-0 fw-semibold small">Pending</p>
@@ -79,7 +79,7 @@
                 </div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: rgba(79, 70, 229, 0.1); color: #0F172A; border: 2px solid var(--primary-color);">
+                <div class="card text-center" style="background: rgba(15, 76, 92, 0.1); color: #0F172A; border: 2px solid var(--primary-color);">
                     <div class="card-body py-3">
                         <h2 class="display-4 fw-bold mb-1" style="color: #0F172A;">{{ stats.rejected }}</h2>
                         <p class="mb-0 fw-semibold small">Rejected</p>
@@ -327,7 +327,7 @@
 
         <!-- Rejected Registrations -->
         <div class="card hover-lift fade-in-up">
-            <div class="card-header" style="background: rgba(79, 70, 229, 0.1); color: #0F172A; border-bottom: 2px solid var(--primary-color);">
+            <div class="card-header" style="background: rgba(15, 76, 92, 0.1); color: #0F172A; border-bottom: 2px solid var(--primary-color);">
                 <h5 class="mb-0 fw-semibold">❌ Recently Rejected (Last 10)</h5>
             </div>
             <div class="card-body p-0">
@@ -366,6 +366,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>
