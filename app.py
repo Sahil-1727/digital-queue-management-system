@@ -2317,29 +2317,34 @@ def admin_analytics():
     status_chart = None
     booking_chart = None
     
+    # Always generate charts even with zero data
     try:
         # 1. Line Chart - 7-Day Trend (Primary)
-        plt.figure(figsize=(10, 4.5), facecolor='white')
-        plt.plot(dates, counts, marker='o', linewidth=3, markersize=10, 
-                color='#0F4C5C', markerfacecolor='#C0843D', markeredgewidth=2, markeredgecolor='#0F4C5C')
-        plt.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
-        plt.xlabel('Day', fontsize=11, color='#64748B', fontweight='500')
-        plt.ylabel('Tokens Booked', fontsize=11, color='#64748B', fontweight='500')
-        plt.title('Queue Activity - Last 7 Days', fontsize=13, fontweight='600', color='#1E293B', pad=15)
-        plt.grid(True, alpha=0.15, linestyle='--', linewidth=0.8)
-        plt.gca().spines['top'].set_visible(False)
-        plt.gca().spines['right'].set_visible(False)
-        plt.gca().spines['left'].set_color('#E2E8F0')
-        plt.gca().spines['bottom'].set_color('#E2E8F0')
-        plt.tight_layout()
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
-        buf.seek(0)
-        trend_chart = base64.b64encode(buf.getvalue()).decode()
-        plt.close()
+        if len(counts) > 0:
+            plt.figure(figsize=(10, 4.5), facecolor='white')
+            plt.plot(dates, counts, marker='o', linewidth=3, markersize=10, 
+                    color='#0F4C5C', markerfacecolor='#C0843D', markeredgewidth=2, markeredgecolor='#0F4C5C')
+            plt.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
+            plt.xlabel('Day', fontsize=11, color='#64748B', fontweight='500')
+            plt.ylabel('Tokens Booked', fontsize=11, color='#64748B', fontweight='500')
+            plt.title('Queue Activity - Last 7 Days', fontsize=13, fontweight='600', color='#1E293B', pad=15)
+            plt.grid(True, alpha=0.15, linestyle='--', linewidth=0.8)
+            plt.gca().spines['top'].set_visible(False)
+            plt.gca().spines['right'].set_visible(False)
+            plt.gca().spines['left'].set_color('#E2E8F0')
+            plt.gca().spines['bottom'].set_color('#E2E8F0')
+            plt.ylim(bottom=0)
+            plt.tight_layout()
+            
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+            buf.seek(0)
+            trend_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close()
     except Exception as e:
         print(f"⚠️ Error generating trend chart: {e}")
+        import traceback
+        traceback.print_exc()
     
     try:
         # 2. Bar Chart - Status Breakdown
@@ -2351,7 +2356,6 @@ def admin_analytics():
             
             bars = plt.bar(statuses, values, color=colors, alpha=0.85, edgecolor='white', linewidth=2)
             
-            # Add value labels on bars
             for bar in bars:
                 height = bar.get_height()
                 plt.text(bar.get_x() + bar.get_width()/2., height,
@@ -2364,6 +2368,7 @@ def admin_analytics():
             plt.gca().spines['right'].set_visible(False)
             plt.gca().spines['left'].set_color('#E2E8F0')
             plt.gca().spines['bottom'].set_color('#E2E8F0')
+            plt.ylim(bottom=0)
             plt.tight_layout()
             
             buf = io.BytesIO()
@@ -2373,6 +2378,8 @@ def admin_analytics():
             plt.close()
     except Exception as e:
         print(f"⚠️ Error generating status chart: {e}")
+        import traceback
+        traceback.print_exc()
     
     try:
         # 3. Doughnut Chart - Online vs Walk-in (Small)
@@ -2386,7 +2393,6 @@ def admin_analytics():
                     startangle=90, textprops={'fontsize': 11, 'fontweight': '600', 'color': '#1E293B'},
                     wedgeprops={'edgecolor': 'white', 'linewidth': 3})
             
-            # Draw circle for doughnut
             centre_circle = plt.Circle((0,0), 0.65, fc='white', linewidth=0)
             plt.gca().add_artist(centre_circle)
             
@@ -2405,6 +2411,8 @@ def admin_analytics():
             plt.close()
     except Exception as e:
         print(f"⚠️ Error generating booking chart: {e}")
+        import traceback
+        traceback.print_exc()
     
     analytics = {
         'daily_customers': daily_customers,
