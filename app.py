@@ -1533,11 +1533,16 @@ def admin_history():
     
     center_id = session['admin_center_id']
     center = ServiceCenter.query.get(center_id)
-    tokens = Token.query.filter_by(service_center_id=center_id).filter(
-        Token.status.in_(['Completed', 'Expired'])
-    ).order_by(Token.created_time.desc()).limit(100).all()
     
-    return render_template('admin_history.html', center=center, tokens=tokens, IST=IST)
+    try:
+        tokens = Token.query.filter_by(service_center_id=center_id).filter(
+            Token.status.in_(['Completed', 'Expired'])
+        ).order_by(Token.created_time.desc()).limit(100).all()
+    except Exception as e:
+        print(f"❌ Error fetching history: {e}")
+        tokens = []
+    
+    return render_template('admin_history.html', center=center, tokens=tokens, IST=IST, datetime=datetime)
 
 @app.route('/admin/profile', methods=['GET', 'POST'])
 def admin_profile():
@@ -1727,9 +1732,12 @@ def add_walkin():
         name = request.form.get('name', 'Walk-in Customer').strip()
         mobile = request.form.get('mobile', '').strip()
         
-        if get_walkin_queue_count(center_id) >= 15:
-            flash('Walk-in queue is full!', 'warning')
-            return redirect(url_for('admin_dashboard'))
+        try:
+            if get_walkin_queue_count(center_id) >= 15:
+                flash('Walk-in queue is full!', 'warning')
+                return redirect(url_for('admin_dashboard'))
+        except:
+            pass
         
         # Create or get user
         if mobile and len(mobile) == 10:
@@ -1737,13 +1745,13 @@ def add_walkin():
             if not user:
                 user = User(name=name, mobile=mobile, password=generate_password_hash('walkin123'))
                 db.session.add(user)
-                db.session.commit()
+                db.session.flush()
         else:
-            # Anonymous walk-in - use get_ist_now()
+            # Anonymous walk-in
             timestamp = int(get_ist_now().timestamp())
             user = User(name=name, mobile=f'W{timestamp}', email=f'walkin{timestamp}@queueflow.com', password=generate_password_hash('walkin123'))
             db.session.add(user)
-            db.session.commit()
+            db.session.flush()
         
         # Generate token with W prefix
         today = get_ist_now().date()
@@ -1758,6 +1766,7 @@ def add_walkin():
             service_center_id=center_id,
             token_number=token_number,
             status='Active',
+            created_time=get_ist_now(),
             is_walkin=True
         )
         db.session.add(token)
