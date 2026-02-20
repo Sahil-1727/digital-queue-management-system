@@ -576,6 +576,13 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
     travel_time = (distance / 30) * 60  # Convert to minutes
     return int(travel_time)
 
+def get_user_location(user):
+    """Safely get user location, handling missing columns"""
+    try:
+        return getattr(user, 'latitude', None), getattr(user, 'longitude', None)
+    except:
+        return None, None
+
 def expire_old_tokens():
     """Automatically expire tokens that are past their grace period"""
     current_time_utc = get_ist_now()  # UTC for DB comparison
@@ -647,7 +654,8 @@ def recalculate_queue_times(center_id):
                 if not user:
                     continue
                 
-                travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+                user_lat, user_lon = get_user_location(user)
+                travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
                 
                 # Earliest possible arrival
                 earliest_leave = token.created_time + timedelta(minutes=10)
@@ -1091,7 +1099,8 @@ def payment(token_id):
             position += 1
         
         # Calculate travel time
-        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+        user_lat, user_lon = get_user_location(user)
+        travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
         
         # Calculate and STORE fixed times
         if position <= 1:
@@ -1111,7 +1120,8 @@ def payment(token_id):
                 # Start from first person
                 first_token = previous_tokens[0]
                 first_user = User.query.get(first_token.user_id)
-                first_travel = calculate_travel_time(first_user.latitude, first_user.longitude, center.latitude, center.longitude)
+                first_user_lat, first_user_lon = get_user_location(first_user)
+                first_travel = calculate_travel_time(first_user_lat, first_user_lon, center.latitude, center.longitude)
                 
                 # First person's arrival time
                 first_leave = first_token.created_time + timedelta(minutes=10)
@@ -1198,7 +1208,8 @@ def queue_status(token_id):
     
     user = User.query.get(session['user_id'])
     center = ServiceCenter.query.get(token.service_center_id)
-    travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+    user_lat, user_lon = get_user_location(user)
+    travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
     
     # ONLY use stored times from database (calculated at payment)
     leave_time = token.leave_time
@@ -1300,8 +1311,11 @@ def user_profile():
         lat = request.form.get('latitude')
         lon = request.form.get('longitude')
         if lat and lon:
-            user.latitude = float(lat)
-            user.longitude = float(lon)
+            try:
+                user.latitude = float(lat)
+                user.longitude = float(lon)
+            except AttributeError:
+                pass  # Columns don't exist yet
         
         db.session.commit()
         flash('Profile updated successfully!', 'success')
