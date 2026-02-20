@@ -2283,6 +2283,8 @@ def admin_analytics():
         db.func.date(Token.created_time) == today
     ).count()
     
+    print(f"📊 Analytics Debug: daily_customers={daily_customers}")
+    
     # Last 7 days data
     last_7_days = []
     dates = []
@@ -2296,6 +2298,8 @@ def admin_analytics():
         last_7_days.append({'date': date.strftime('%a'), 'count': count})
         dates.append(date.strftime('%a'))
         counts.append(count)
+    
+    print(f"📊 Analytics Debug: dates={dates}, counts={counts}")
     
     # Status breakdown
     completed = Token.query.filter_by(service_center_id=center_id, status='Completed').count()
@@ -2312,6 +2316,9 @@ def admin_analytics():
         walkin_tokens = 0
         online_tokens = total_tokens
     
+    print(f"📊 Analytics Debug: total={total_tokens}, online={online_tokens}, walkin={walkin_tokens}")
+    print(f"📊 Analytics Debug: completed={completed}, expired={expired}, active={active}")
+    
     # Generate charts
     trend_chart = None
     status_chart = None
@@ -2321,6 +2328,7 @@ def admin_analytics():
     try:
         # 1. Line Chart - 7-Day Trend (Primary)
         if len(counts) > 0:
+            print(f"✅ Generating trend chart with {len(counts)} data points")
             plt.figure(figsize=(10, 4.5), facecolor='white')
             plt.plot(dates, counts, marker='o', linewidth=3, markersize=10, 
                     color='#0F4C5C', markerfacecolor='#C0843D', markeredgewidth=2, markeredgecolor='#0F4C5C')
@@ -2341,6 +2349,7 @@ def admin_analytics():
             buf.seek(0)
             trend_chart = base64.b64encode(buf.getvalue()).decode()
             plt.close()
+            print(f"✅ Trend chart generated successfully, size={len(trend_chart)} chars")
     except Exception as e:
         print(f"⚠️ Error generating trend chart: {e}")
         import traceback
