@@ -69,7 +69,8 @@
                                     <th class="px-4 py-3">Token</th>
                                     <th>Customer Name</th>
                                     <th>Mobile</th>
-                                    <th>Date & Time</th>
+                                    <th>Booked At</th>
+                                    <th>Event Time</th>
                                     <th>Status</th>
                                     <th>Notes</th>
                                 </tr>
@@ -83,12 +84,22 @@
                                     <td class="fw-semibold">{{ token.user.name }}</td>
                                     <td>{{ token.user.mobile }}</td>
                                     <td>
-                                        {% if token.status == 'Completed' and token.completed_time %}
-                                            <div>{{ token.completed_time.strftime('%d %b %Y') }}</div>
-                                            <small class="text-muted">{{ token.completed_time.strftime('%I:%M %p') }} IST</small>
-                                        {% elif token.created_time %}
+                                        {% if token.created_time %}
                                             <div>{{ token.created_time.strftime('%d %b %Y') }}</div>
                                             <small class="text-muted">{{ token.created_time.strftime('%I:%M %p') }} IST</small>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if token.status == 'Completed' and token.completed_time %}
+                                            <div class="text-success fw-semibold">Completed At</div>
+                                            <div>{{ token.completed_time.strftime('%d %b %Y') }}</div>
+                                            <small class="text-muted">{{ token.completed_time.strftime('%I:%M %p') }} IST</small>
+                                        {% elif token.status == 'Expired' and token.no_show_time %}
+                                            <div class="text-danger fw-semibold">No Show At</div>
+                                            <div>{{ token.no_show_time.strftime('%d %b %Y') }}</div>
+                                            <small class="text-muted">{{ token.no_show_time.strftime('%I:%M %p') }} IST</small>
                                         {% else %}
                                             <span class="text-muted">-</span>
                                         {% endif %}
