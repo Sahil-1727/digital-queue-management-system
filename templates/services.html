@@ -14,20 +14,10 @@
     <div class="bg-grid" style="position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.02) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
     
     <div class="content-wrapper" style="position: relative; z-index: 1;">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-            <div class="container">
-                <a class="navbar-brand fw-bold" href="{{ url_for('services') }}">
-                    <span class="gradient-text">Queue</span>Flow
-                </a>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="{{ url_for('user_profile') }}" class="btn btn-sm btn-outline-primary">Profile</a>
-                    <a href="{{ url_for('user_history') }}" class="btn btn-sm btn-outline-primary">History</a>
-                    <span class="text-white d-none d-md-inline">{{ session.user_name }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-primary">Logout</a>
-                </div>
-            </div>
-        </nav>
+        <!-- Premium Internal Navbar -->
+        {% set user_name = session.user_name %}
+        {% set user_type = 'user' %}
+        {% include 'includes/internal_navbar.html' %}
 
         <div class="container py-5">
             <div class="text-center mb-5 fade-in-up">
