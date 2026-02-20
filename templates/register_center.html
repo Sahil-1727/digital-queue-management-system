@@ -13,6 +13,8 @@
         .bg-pattern::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(45, 212, 191, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 212, 191, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent); }
         .content-wrapper { position: relative; z-index: 1; }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
 <body>
     <div class="bg-pattern"></div>
