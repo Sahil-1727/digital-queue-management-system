@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Token QR Code - QueueFlow</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <style>
         body { background: #f8f9fa; padding: 20px; }
         .card { max-width: 400px; margin: 0 auto; border-radius: 15px; }
         .card-header { background: #0F172A; color: white; border-radius: 15px 15px 0 0; }
         .qr-container { background: white; padding: 15px; border-radius: 10px; }
-        .btn-primary { background: #2DD4BF; border: none; color: #0F172A; font-weight: 600; }
-        .btn-primary:hover { background: #14B8A6; color: #0F172A; }
+        .btn-primary { background: var(--primary-color); border: none; color: #0F172A; font-weight: 600; }
+        .btn-primary:hover { background: var(--primary-dark); color: #0F172A; }
         @media print {
             body { background: white; padding: 0; }
             .no-print { display: none !important; }
@@ -22,13 +23,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body>
-    <div class="card">
+<body class="page-content">
+    <div class="card hover-lift fade-in-up">
         <div class="card-header text-center py-2">
             <h5 class="mb-0">📲 Walk-In Token</h5>
         </div>
         <div class="card-body text-center p-3">
-            <h2 style="color: #2DD4BF; font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
+            <h2 style="color: var(--primary-color); font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
             <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ token.service_center.name }}</p>
             
             <div class="qr-container mx-auto" style="max-width: 250px;">
@@ -45,5 +46,6 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
 </body>
 </html>

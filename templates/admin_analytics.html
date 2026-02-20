@@ -1,62 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - {{ center.name }}</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            min-height: 100vh;
-        }
-        .navbar {
-            background: #0F172A !important;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        .navbar-brand { color: #2DD4BF !important; }
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(45, 212, 191, 0.2);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-        }
-        .card-header {
-            background: #0F172A !important;
-            color: white !important;
-            border-radius: 15px 15px 0 0 !important;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(45, 212, 191, 0.3);
-        }
-        .stat-card h2 {
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .progress-bar {
-            background: #2DD4BF !important;
-        }
-        .badge {
-            background: #2DD4BF !important;
-            color: #0F172A !important;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body>
+<body class="page-content">
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('admin_dashboard') }}" style="color: #2DD4BF;">QueueFlow</a>
+            <a class="navbar-brand fw-bold" href="{{ url_for('admin_dashboard') }}" style="color: var(--primary-color);">QueueFlow</a>
             <div class="ms-auto">
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">Dashboard</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm" style="background: var(--primary-color); color: #0F172A;">Dashboard</a>
                 <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-light ms-2">Logout</a>
             </div>
         </div>
@@ -101,7 +59,7 @@
         <div class="row">
             <!-- Last 7 Days -->
             <div class="col-md-12 mb-4">
-                <div class="card">
+                <div class="card hover-lift fade-in-up">
                     <div class="card-header" style="background: #F8FAFC;">
                         <h5 class="mb-0">📅 Last 7 Days Trend</h5>
                     </div>
@@ -127,7 +85,7 @@
                             {% for hour, count in analytics.peak_hours %}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span>{{ '%02d:00 - %02d:00'|format(hour, hour+1) }}</span>
-                                <span class="badge" style="background: #2DD4BF; color: #0F172A;">{{ count }} customers</span>
+                                <span class="badge" style="background: var(--primary-color); color: #0F172A;">{{ count }} customers</span>
                             </div>
                             {% endfor %}
                         {% else %}
@@ -138,7 +96,7 @@
             </div>
 
             <div class="col-md-6">
-                <div class="card">
+                <div class="card hover-lift fade-in-up">
                     <div class="card-header" style="background: #F8FAFC;">
                         <h5 class="mb-0">📊 Online vs Walk-In</h5>
                     </div>
@@ -155,5 +113,8 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;">🌙</button>
 </body>
 </html>

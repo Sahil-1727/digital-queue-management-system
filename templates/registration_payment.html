@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Payment - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
@@ -51,7 +52,7 @@
                             <div class="card-body text-center py-4">
                                 <h6 class="text-muted mb-2">Registration Fee</h6>
                                 <h1 class="display-4 fw-bold text-success mb-2">₹{{ registration.registration_fee }}</h1>
-                                <span class="badge bg-success-subtle text-success">100% Refundable</span>
+                                <span class="badge badge-success-subtle text-success">100% Refundable</span>
                             </div>
                         </div>
 
@@ -122,5 +123,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
 </body>
 </html>

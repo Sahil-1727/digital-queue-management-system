@@ -5,37 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-    <meta http-equiv="refresh" content="15">
-    <style>
-        body { background: #F8FAFC; }
-        .admin-header { 
-            background: #0F172A; 
-            color: white; 
-            padding: 1.5rem 0; 
-            border-bottom: 2px solid #2DD4BF;
-        }
-        .counter-card { border-left: 4px solid #2DD4BF; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
-        .counter-card.walkin { border-left-color: #2DD4BF; }
-        .token-display { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
+    <meta http-equiv="refresh" content="15">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body>
-    <div class="admin-header">
+<body class="page-content">
+    <!-- Premium Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">🛠️ <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ center.name }}</span></h4>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_analytics') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">📈 Analytics</a>
-                    <a href="{{ url_for('add_walkin') }}" class="btn btn-light btn-sm">🚶 Add Walk-In</a>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            ⚙️ Profile
-                        </button>
+            <a class="navbar-brand" href="#">
+                <span class="gradient-text">{{ center.name }}</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <li class="nav-item"><a href="{{ url_for('admin_analytics') }}" class="btn btn-sm btn-primary">📈 Analytics</a></li>
+                    <li class="nav-item"><a href="{{ url_for('add_walkin') }}" class="btn btn-sm btn-outline-primary">🚶 Add Walk-In</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">⚙️ Menu</a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('admin_profile') }}">👤 Profile</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin_history') }}">📜 History</a></li>
@@ -47,18 +37,18 @@
                                 </form>
                             </li>
                         </ul>
-                    </div>
-                    <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
-                </div>
+                    </li>
+                    <li class="nav-item"><a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-primary">Logout</a></li>
+                </ul>
             </div>
         </div>
-    </div>
+    </nav>
 
     <div class="container-fluid px-4 py-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show fade-in-up" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -69,12 +59,12 @@
         <div class="row g-4">
             <!-- Counter 1: Online Queue -->
             <div class="col-lg-6">
-                <div class="card counter-card mb-3">
+                <div class="card hover-lift mb-3" style="border-left: 4px solid var(--primary-color);">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3" style="color: #2DD4BF;">💻 Counter 1: Online Queue</h5>
+                        <h5 class="fw-bold mb-4" style="color: var(--primary-color);">💻 Counter 1: Online Queue</h5>
                         {% if serving_token %}
                             <div class="text-center mb-3">
-                                <div class="token-display">{{ serving_token.token_number }}</div>
+                                <div class="token-display" style="font-size: 5rem;">{{ serving_token.token_number }}</div>
                                 <h6 class="mt-2 fw-semibold">{{ serving_token.user.name }}</h6>
                                 <p class="text-muted text-sm mb-3">📱 {{ serving_token.user.mobile }}</p>
                                 <div class="d-grid gap-2">
@@ -92,14 +82,14 @@
                 </div>
 
                 {% if can_call_next %}
-                    <a href="{{ url_for('call_next') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next: {{ next_eligible_token.token_number if next_eligible_token else 'Ready' }}</a>
+                    <a href="{{ url_for('call_next') }}" class="btn btn-call-next w-100 mb-3">📢 Call Next: {{ next_eligible_token.token_number if next_eligible_token else 'Ready' }}</a>
                 {% else %}
-                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 14px; font-size: 1.1rem;">⏳ Waiting for User Arrival</button>
+                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 18px; font-size: 1.25rem; border-radius: var(--radius-lg);">⏳ Waiting for User Arrival</button>
                 {% endif %}
 
                 <div class="card">
-                    <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
-                        <h6 class="mb-0 fw-semibold">📋 Waiting ({{ waiting_tokens|length }})</h6>
+                    <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; font-weight: 700;">
+                        <h6 class="mb-0">📋 Waiting Queue ({{ waiting_tokens|length }})</h6>
                     </div>
                     <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
                         {% if waiting_tokens %}
@@ -139,12 +129,12 @@
 
             <!-- Counter 2: Walk-In Queue -->
             <div class="col-lg-6">
-                <div class="card counter-card walkin mb-3">
+                <div class="card hover-lift mb-3" style="border-left: 4px solid var(--primary-color);">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3" style="color: #2DD4BF;">🚶 Counter 2: Walk-In Queue</h5>
+                        <h5 class="fw-bold mb-4" style="color: var(--primary-color);">🚶 Counter 2: Walk-In Queue</h5>
                         {% if walkin_serving_token %}
                             <div class="text-center mb-3">
-                                <div class="token-display" style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ walkin_serving_token.token_number }}</div>
+                                <div class="token-display" style="font-size: 5rem;">{{ walkin_serving_token.token_number }}</div>
                                 <h6 class="mt-2 fw-semibold">{{ walkin_serving_token.user.name }}</h6>
                                 <p class="text-muted text-sm mb-3">📱 {{ walkin_serving_token.user.mobile }}</p>
                                 <div class="d-grid gap-2">
@@ -161,11 +151,11 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('call_next_walkin') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next (Walk-In)</a>
+                <a href="{{ url_for('call_next_walkin') }}" class="btn btn-call-next w-100 mb-3">📢 Call Next (Walk-In)</a>
 
                 <div class="card">
-                    <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
-                        <h6 class="mb-0 fw-semibold">📋 Waiting ({{ walkin_waiting_tokens|length }})</h6>
+                    <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; font-weight: 700;">
+                        <h6 class="mb-0">📋 Waiting Queue ({{ walkin_waiting_tokens|length }})</h6>
                     </div>
                     <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
                         {% if walkin_waiting_tokens %}
@@ -201,6 +191,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;">🌙</button>
 </body>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ center.name }} - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <style>
         :root[data-theme="dark"] {
             --bg-primary: #0F172A;
@@ -13,9 +14,9 @@
             --text-primary: #F1F5F9;
             --text-secondary: #CBD5E1;
             --text-muted: #94A3B8;
-            --accent: #2DD4BF;
-            --accent-hover: #14B8A6;
-            --border: rgba(45, 212, 191, 0.2);
+            --accent: var(--primary-color);
+            --accent-hover: var(--primary-dark);
+            --border: rgba(79, 70, 229, 0.2);
             --shadow: rgba(0, 0, 0, 0.3);
         }
         
@@ -38,8 +39,8 @@
             inset: 0;
             z-index: 0;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(45, 212, 191, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(45, 212, 191, 0.05) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
         }
         
         .content-wrapper {
@@ -62,7 +63,7 @@
         
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, rgba(45, 212, 191, 0.1), rgba(20, 184, 166, 0.05));
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(20, 184, 166, 0.05));
             border-bottom: 1px solid var(--border);
             padding: 3rem 0;
             margin-bottom: 2rem;
@@ -72,8 +73,8 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(45, 212, 191, 0.1);
-            border: 1px solid rgba(45, 212, 191, 0.3);
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.3);
             padding: 0.5rem 1rem;
             border-radius: 50px;
             color: var(--accent);
@@ -202,14 +203,14 @@
         }
         
         .info-item:hover {
-            background: rgba(45, 212, 191, 0.05);
+            background: rgba(79, 70, 229, 0.05);
             transform: translateX(4px);
         }
         
         .info-icon {
             width: 36px;
             height: 36px;
-            background: rgba(45, 212, 191, 0.1);
+            background: rgba(79, 70, 229, 0.1);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -246,7 +247,7 @@
         }
         
         .feature-list li:hover {
-            background: rgba(45, 212, 191, 0.05);
+            background: rgba(79, 70, 229, 0.05);
             transform: translateX(4px);
         }
         
@@ -254,7 +255,7 @@
             content: "✓";
             width: 24px;
             height: 24px;
-            background: rgba(45, 212, 191, 0.2);
+            background: rgba(79, 70, 229, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -280,7 +281,7 @@
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(45, 212, 191, 0.3);
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
             color: var(--bg-primary);
         }
         
@@ -312,7 +313,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body>
+<body class="page-content">
     <div class="bg-pattern"></div>
     
     <div class="content-wrapper">
@@ -500,5 +501,6 @@
     </div>
     
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
 </body>
 </html>

@@ -1,52 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <style>
-        body { background: #F8FAFC; }
-        .profile-header { 
-            background: #0F172A; 
-            color: white; 
-            padding: 1.5rem 0; 
-            border-bottom: 2px solid #2DD4BF;
-        }
-        .card { 
-            border: none; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); 
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%);
-            color: #0F172A;
-            font-weight: 700;
-            border: none;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-            color: #0F172A;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body>
-    <div class="profile-header">
+<body class="page-content">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">👤 <span style="background: linear-gradient(135deg, #2DD4BF, #14B8A6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">My Profile</span></h4>
-                <a href="{{ url_for('services') }}" class="btn btn-sm" style="background: #2DD4BF; color: #0F172A;">← Back</a>
-            </div>
+            <a class="navbar-brand fw-bold" href="{{ url_for('services') }}">
+                <span class="gradient-text">👤 My Profile</span>
+            </a>
+            <a href="{{ url_for('services') }}" class="btn btn-sm btn-primary">← Back</a>
         </div>
-    </div>
+    </nav>
 
     <div class="container py-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" style="border-radius: 15px;">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show fade-in-up">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -54,9 +31,9 @@
             {% endif %}
         {% endwith %}
 
-        <div class="card">
-            <div class="card-header" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; border-radius: 16px 16px 0 0;">
-                <h5 class="mb-0 fw-semibold">📝 Edit Profile</h5>
+        <div class="card hover-lift">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A;">
+                <h5 class="mb-0 fw-bold">📝 Edit Profile</h5>
             </div>
             <div class="card-body p-4">
                 <form method="POST">
@@ -86,29 +63,29 @@
                             <div id="location-status" class="mt-2"></div>
                         </div>
                         <div class="col-12 mt-4">
-                            <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">Save Profile</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Save Profile</button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header" style="background: #0F172A; color: white; border-radius: 16px 16px 0 0;">
-                <h5 class="mb-0 fw-semibold">📊 Account Stats</h5>
+        <div class="card mt-4 hover-lift">
+            <div class="card-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border);">
+                <h5 class="mb-0 fw-bold">📊 Account Stats</h5>
             </div>
             <div class="card-body">
                 <div class="row text-center g-3">
                     <div class="col-6">
-                        <div class="p-3" style="background: rgba(45, 212, 191, 0.1); border-radius: 12px;">
-                            <h3 class="mb-1" style="color: #2DD4BF;">{{ user.tokens|length }}</h3>
-                            <small class="text-muted">Total Tokens</small>
+                        <div class="stat-card">
+                            <h3 class="mb-1">{{ user.tokens|length }}</h3>
+                            <small class="fw-semibold">Total Tokens</small>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-3" style="background: rgba(45, 212, 191, 0.1); border-radius: 12px;">
-                            <h3 class="mb-1" style="color: #2DD4BF;">{{ user.no_show_count }}</h3>
-                            <small class="text-muted">No-Shows</small>
+                        <div class="stat-card">
+                            <h3 class="mb-1">{{ user.no_show_count }}</h3>
+                            <small class="fw-semibold">No-Shows</small>
                         </div>
                     </div>
                 </div>
@@ -117,6 +94,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
     <script>
         function getLocation() {
             const statusDiv = document.getElementById('location-status');

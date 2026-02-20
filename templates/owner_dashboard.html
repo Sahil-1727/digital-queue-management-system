@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Status - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    
     <style>
         .status-badge-large {
             font-size: 1.25rem;
@@ -61,10 +62,10 @@
                         <!-- Status Badge -->
                         <div class="text-center mb-5">
                             {% if registration.status == 'Pending' %}
-                                <span class="badge bg-warning status-badge-large">⏳ Pending Review</span>
+                                <span class="badge badge-warning status-badge-large">⏳ Pending Review</span>
                                 <p class="text-muted mt-3">Your application is under review. We'll notify you within 24-48 hours.</p>
                             {% elif registration.status == 'Approved' %}
-                                <span class="badge bg-success status-badge-large">✅ Approved</span>
+                                <span class="badge badge-success status-badge-large">✅ Approved</span>
                                 <p class="text-success mt-3 fw-semibold">Congratulations! Your service center has been approved.</p>
                                 <div class="alert alert-success mt-3">
                                     <h6 class="fw-bold mb-3">🎉 Your Service Center is Now Live!</h6>
@@ -79,7 +80,7 @@
                                     <p class="mb-0 small text-muted">⚠️ Save these credentials securely. Use them to login to the admin portal and manage your queue.</p>
                                 </div>
                             {% elif registration.status == 'Rejected' %}
-                                <span class="badge bg-danger status-badge-large">❌ Rejected</span>
+                                <span class="badge badge-danger status-badge-large">❌ Rejected</span>
                                 <p class="text-danger mt-3">Unfortunately, your application was not approved at this time.</p>
                                 <div class="alert alert-danger mt-3">
                                     Please contact us at support@queueflow.com for more information.
@@ -180,9 +181,9 @@
                                     <div class="info-label">Payment Status</div>
                                     <div class="info-value">
                                         {% if registration.payment_status == 'Completed' %}
-                                            <span class="badge bg-success">✓ Paid ₹{{ registration.registration_fee }}</span>
+                                            <span class="badge badge-success">✓ Paid ₹{{ registration.registration_fee }}</span>
                                         {% else %}
-                                            <span class="badge bg-warning">Pending</span>
+                                            <span class="badge badge-warning">Pending</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -223,5 +224,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
 </body>
 </html>

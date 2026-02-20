@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - QueueFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
     <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 </head>
-<body class="auth-page" style="background: #0F172A; position: relative; overflow: hidden;">
+<body class="auth-page page-content" style="background: var(--bg-primary); position: relative; overflow: hidden;">
     <!-- Animated Background -->
     <div style="position: fixed; inset: 0; z-index: 0;">
         <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(45, 212, 191, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(45, 212, 191, 0.1) 0%, transparent 50%);"></div>
@@ -19,10 +18,10 @@
     <div class="container" style="position: relative; z-index: 1;">
         <div class="row justify-content-center align-items-center min-vh-100 py-5">
             <div class="col-md-5">
-                <div class="card auth-card slide-up" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(45, 212, 191, 0.2); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                <div class="card glass-effect hover-lift fade-in-up" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); box-shadow: var(--shadow-2xl);">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
-                            <div class="auth-icon mb-3">🎫</div>
+                            <div style="font-size: 4rem; margin-bottom: 1rem;">🎫</div>
                             <h2 class="gradient-text mb-2">Welcome Back</h2>
                             <p class="text-muted">Login to book tokens or track registration</p>
                         </div>
@@ -30,7 +29,7 @@
                         {% with messages = get_flashed_messages(with_categories=true) %}
                             {% if messages %}
                                 {% for category, message in messages %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show fade-in-up" role="alert">
                                         {{ message }}
                                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                     </div>
@@ -54,7 +53,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">Sign In</button>
                         </form>
                         
                         <div class="text-center mb-3">
@@ -94,6 +93,7 @@
         }
     </script>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/premium-animations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" style="position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #2DD4BF, #14B8A6); border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; z-index: 9999; transition: all 0.3s ease;">🌙</button>
 </body>
