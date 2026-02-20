@@ -1414,14 +1414,27 @@ def call_next():
     ).order_by(Token.estimated_service_start).first()
     
     if next_token:
-        # Step 3: Calculate call_time = max(current_time, estimated_arrival_time)
-        estimated_arrival = next_token.reach_time or current_time
-        if estimated_arrival.tzinfo is None:
-            estimated_arrival = IST.localize(estimated_arrival)
+        # Step 3: Check if user has reached (with 5 min buffer)
+        estimated_arrival = next_token.reach_time
         
-        call_time = max(current_time, estimated_arrival)
+        if estimated_arrival:
+            # Convert to IST if needed
+            if estimated_arrival.tzinfo is None:
+                estimated_arrival = pytz.utc.localize(estimated_arrival).astimezone(IST)
+            else:
+                estimated_arrival = estimated_arrival.astimezone(IST)
+            
+            # Allow calling 5 minutes before arrival (buffer)
+            call_allowed_from = estimated_arrival - timedelta(minutes=5)
+            
+            if current_time < call_allowed_from:
+                minutes_left = int((call_allowed_from - current_time).total_seconds() / 60)
+                flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {estimated_arrival.strftime("%I:%M %p")}', 'warning')
+                return redirect(url_for('admin_dashboard'))
         
-        # Step 4: Update token with actual times
+        # Step 4: Calculate call_time and update token
+        call_time = current_time
+        
         next_token.status = 'Serving'
         next_token.actual_service_start = call_time
         next_token.actual_service_end = call_time + timedelta(minutes=center.avg_service_time)
