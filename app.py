@@ -1350,41 +1350,24 @@ def admin_dashboard():
         # Currently Serving Token
         serving_token = get_serving_token(center_id)
         
-        # Get all active tokens sorted by estimated_service_start
+        # Get all active tokens - try with is_walkin first, fallback without
+        waiting_tokens = []
         try:
             waiting_tokens = Token.query.filter_by(
                 service_center_id=center_id, 
                 status='Active',
                 is_walkin=False
-            ).order_by(Token.estimated_service_start).all()
-        except:
+            ).order_by(Token.id).all()
+        except Exception as e:
+            print(f"⚠️ is_walkin column error: {e}")
             waiting_tokens = Token.query.filter_by(
                 service_center_id=center_id, 
                 status='Active'
             ).order_by(Token.id).all()
         
-        # Find next eligible token (arrived and counter free)
+        # Find next eligible token
         next_eligible_token = None
         can_call_next = False
-        
-        if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
-            # Counter is free, find next arrived token
-            for token in waiting_tokens:
-                try:
-                    if token.reach_time:
-                        reach_time = token.reach_time
-                        if reach_time.tzinfo is None:
-                            reach_time = IST.localize(reach_time)
-                        else:
-                            reach_time = reach_time.astimezone(IST)
-                        
-                        # Allow calling 5 min before arrival
-                        if current_time >= (reach_time - timedelta(minutes=5)):
-                            next_eligible_token = token
-                            can_call_next = True
-                            break
-                except:
-                    continue
         
         # Enrich tokens with status badges
         enriched_tokens = []
@@ -1392,38 +1375,17 @@ def admin_dashboard():
             try:
                 token_data = {
                     'token': token,
-                    'status_badge': 'Travelling',
+                    'status_badge': 'Waiting',
                     'is_late': False
                 }
-                
-                if token.reach_time:
-                    reach_time = token.reach_time
-                    if reach_time.tzinfo is None:
-                        reach_time = IST.localize(reach_time)
-                    else:
-                        reach_time = reach_time.astimezone(IST)
-                    
-                    if current_time >= reach_time:
-                        token_data['status_badge'] = 'Arrived'
-                        # Check if late (15 min grace period)
-                        if current_time > (reach_time + timedelta(minutes=15)):
-                            token_data['status_badge'] = 'Late'
-                            token_data['is_late'] = True
-                
                 enriched_tokens.append(token_data)
-            except:
+            except Exception as e:
+                print(f"⚠️ Token enrichment error: {e}")
                 continue
         
-        # Walk-in Queue
-        walkin_serving_token = get_walkin_serving_token(center_id)
-        try:
-            walkin_waiting_tokens = Token.query.filter_by(
-                service_center_id=center_id,
-                status='Active',
-                is_walkin=True
-            ).order_by(Token.id).all()
-        except:
-            walkin_waiting_tokens = []
+        # Walk-in Queue - simplified
+        walkin_serving_token = None
+        walkin_waiting_tokens = []
         
         return render_template('admin_dashboard.html', 
                              center=center,
@@ -1436,8 +1398,10 @@ def admin_dashboard():
                              current_time=current_time,
                              datetime=datetime)
     except Exception as e:
+        import traceback
         print(f"❌ Admin dashboard error: {e}")
-        flash('Error loading dashboard. Please try again.', 'danger')
+        print(traceback.format_exc())
+        flash(f'Error loading dashboard: {str(e)}', 'danger')
         return redirect(url_for('admin_login'))
 
 @app.route('/admin/queue-state')
