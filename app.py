@@ -1746,7 +1746,8 @@ def call_next():
     expire_old_tokens()
     
     center_id = session['admin_center_id']
-    current_time = get_ist_now()
+    current_time = get_ist_now()  # UTC for DB
+    current_time_aware = get_ist_now_aware()  # IST aware for comparisons
     
     try:
         serving_token = get_serving_token(center_id)
@@ -1770,13 +1771,13 @@ def call_next():
         # Check if token has arrived (at arrival time, not after buffer)
         if next_token.reach_time:
             reach_time = utc_to_ist(next_token.reach_time)
-            if current_time < reach_time:
+            if current_time_aware < reach_time:
                 db.session.commit()
                 flash(f'Token {next_token.token_number} has not arrived yet. Expected at {reach_time.strftime("%I:%M %p")}', 'warning')
                 return redirect(url_for('admin_dashboard'))
             
             # Auto-skip if > 15 min late
-            if current_time > (reach_time + timedelta(minutes=15)):
+            if current_time_aware > (reach_time + timedelta(minutes=15)):
                 next_token.status = 'Expired'
                 next_token.no_show_reason = 'Auto-skipped: More than 15 minutes late'
                 next_token.no_show_time = current_time
