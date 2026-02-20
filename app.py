@@ -545,7 +545,7 @@ def expire_old_tokens():
         if token.reach_time:
             reach_time = token.reach_time
             if reach_time.tzinfo is None:
-                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                reach_time = IST.localize(reach_time)
             else:
                 reach_time = reach_time.astimezone(IST)
             
@@ -584,7 +584,7 @@ def recalculate_queue_times(center_id):
             # Counter busy, start from when it becomes free
             service_end_time = serving_token.actual_service_end
             if service_end_time.tzinfo is None:
-                service_end_time = pytz.utc.localize(service_end_time).astimezone(IST)
+                service_end_time = IST.localize(service_end_time)
             else:
                 service_end_time = service_end_time.astimezone(IST)
         else:
@@ -1114,13 +1114,13 @@ def queue_status(token_id):
     # Convert UTC to IST (database stores in UTC)
     if leave_time:
         if leave_time.tzinfo is None:
-            leave_time = pytz.utc.localize(leave_time).astimezone(IST)
+            leave_time = IST.localize(leave_time)
         else:
             leave_time = leave_time.astimezone(IST)
     
     if reach_counter_time:
         if reach_counter_time.tzinfo is None:
-            reach_counter_time = pytz.utc.localize(reach_counter_time).astimezone(IST)
+            reach_counter_time = IST.localize(reach_counter_time)
         else:
             reach_counter_time = reach_counter_time.astimezone(IST)
     
@@ -1366,7 +1366,7 @@ def admin_dashboard():
             if token.reach_time:
                 reach_time = token.reach_time
                 if reach_time.tzinfo is None:
-                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                    reach_time = IST.localize(reach_time)
                 else:
                     reach_time = reach_time.astimezone(IST)
                 
@@ -1388,7 +1388,7 @@ def admin_dashboard():
         if token.reach_time:
             reach_time = token.reach_time
             if reach_time.tzinfo is None:
-                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                reach_time = IST.localize(reach_time)
             else:
                 reach_time = reach_time.astimezone(IST)
             
@@ -1452,7 +1452,7 @@ def admin_queue_state():
                 service_end = serving_token.actual_service_end
                 if service_end:
                     if service_end.tzinfo is None:
-                        service_end = pytz.utc.localize(service_end).astimezone(IST)
+                        service_end = IST.localize(service_end)
                     else:
                         service_end = service_end.astimezone(IST)
                     remaining_seconds = int((service_end - current_time).total_seconds())
@@ -1474,7 +1474,7 @@ def admin_queue_state():
                     if token.reach_time:
                         reach_time = token.reach_time
                         if reach_time.tzinfo is None:
-                            reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                            reach_time = IST.localize(reach_time)
                         else:
                             reach_time = reach_time.astimezone(IST)
                         
@@ -1495,7 +1495,7 @@ def admin_queue_state():
                 reach_time = token.reach_time
                 if reach_time:
                     if reach_time.tzinfo is None:
-                        reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                        reach_time = IST.localize(reach_time)
                     else:
                         reach_time = reach_time.astimezone(IST)
                     
