@@ -2319,109 +2319,93 @@ def admin_analytics():
     print(f"📊 Analytics Debug: total={total_tokens}, online={online_tokens}, walkin={walkin_tokens}")
     print(f"📊 Analytics Debug: completed={completed}, expired={expired}, active={active}")
     
-    # Generate charts
+    # Generate charts with simplified approach to avoid Python 3.14 deepcopy issue
     trend_chart = None
     status_chart = None
     booking_chart = None
     
-    # Always generate charts even with zero data
     try:
-        # 1. Line Chart - 7-Day Trend (Primary)
+        # 1. Line Chart - 7-Day Trend
         if len(counts) > 0:
             print(f"✅ Generating trend chart with {len(counts)} data points")
-            plt.figure(figsize=(10, 4.5), facecolor='white')
-            plt.plot(dates, counts, marker='o', linewidth=3, markersize=10, 
-                    color='#0F4C5C', markerfacecolor='#C0843D', markeredgewidth=2, markeredgecolor='#0F4C5C')
-            plt.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
-            plt.xlabel('Day', fontsize=11, color='#64748B', fontweight='500')
-            plt.ylabel('Tokens Booked', fontsize=11, color='#64748B', fontweight='500')
-            plt.title('Queue Activity - Last 7 Days', fontsize=13, fontweight='600', color='#1E293B', pad=15)
-            plt.grid(True, alpha=0.15, linestyle='--', linewidth=0.8)
-            plt.gca().spines['top'].set_visible(False)
-            plt.gca().spines['right'].set_visible(False)
-            plt.gca().spines['left'].set_color('#E2E8F0')
-            plt.gca().spines['bottom'].set_color('#E2E8F0')
-            plt.ylim(bottom=0)
-            plt.tight_layout()
+            fig, ax = plt.subplots(figsize=(10, 4.5), facecolor='white')
+            ax.plot(dates, counts, marker='o', linewidth=2.5, markersize=8, color='#0F4C5C')
+            ax.fill_between(range(len(counts)), counts, alpha=0.1, color='#0F4C5C')
+            ax.set_xlabel('Day', fontsize=11, color='#64748B')
+            ax.set_ylabel('Tokens Booked', fontsize=11, color='#64748B')
+            ax.set_title('Queue Activity - Last 7 Days', fontsize=13, color='#1E293B', pad=15)
+            ax.grid(True, alpha=0.15, linestyle='--')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.set_ylim(bottom=0)
+            fig.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
             buf.seek(0)
             trend_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close()
-            print(f"✅ Trend chart generated successfully, size={len(trend_chart)} chars")
+            plt.close(fig)
+            print(f"✅ Trend chart generated")
     except Exception as e:
         print(f"⚠️ Error generating trend chart: {e}")
-        import traceback
-        traceback.print_exc()
     
     try:
         # 2. Bar Chart - Status Breakdown
         if completed + expired + active > 0:
-            plt.figure(figsize=(8, 4.5), facecolor='white')
+            fig, ax = plt.subplots(figsize=(8, 4.5), facecolor='white')
             statuses = ['Completed', 'Expired', 'Active']
             values = [completed, expired, active]
             colors = ['#2BB673', '#B91C1C', '#D97706']
             
-            bars = plt.bar(statuses, values, color=colors, alpha=0.85, edgecolor='white', linewidth=2)
+            bars = ax.bar(statuses, values, color=colors, alpha=0.85)
             
             for bar in bars:
                 height = bar.get_height()
-                plt.text(bar.get_x() + bar.get_width()/2., height,
-                        f'{int(height)}',
-                        ha='center', va='bottom', fontsize=11, fontweight='600', color='#1E293B')
+                ax.text(bar.get_x() + bar.get_width()/2., height, f'{int(height)}',
+                       ha='center', va='bottom', fontsize=11, color='#1E293B')
             
-            plt.ylabel('Token Count', fontsize=11, color='#64748B', fontweight='500')
-            plt.title('Token Status Distribution', fontsize=13, fontweight='600', color='#1E293B', pad=15)
-            plt.gca().spines['top'].set_visible(False)
-            plt.gca().spines['right'].set_visible(False)
-            plt.gca().spines['left'].set_color('#E2E8F0')
-            plt.gca().spines['bottom'].set_color('#E2E8F0')
-            plt.ylim(bottom=0)
-            plt.tight_layout()
+            ax.set_ylabel('Token Count', fontsize=11, color='#64748B')
+            ax.set_title('Token Status Distribution', fontsize=13, color='#1E293B', pad=15)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.set_ylim(bottom=0)
+            fig.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
             buf.seek(0)
             status_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close()
+            plt.close(fig)
     except Exception as e:
         print(f"⚠️ Error generating status chart: {e}")
-        import traceback
-        traceback.print_exc()
     
     try:
-        # 3. Doughnut Chart - Online vs Walk-in (Small)
+        # 3. Doughnut Chart - Online vs Walk-in
         if total_tokens > 0:
-            plt.figure(figsize=(5, 5), facecolor='white')
+            fig, ax = plt.subplots(figsize=(5, 5), facecolor='white')
             labels = ['Online', 'Walk-in']
             sizes = [online_tokens, walkin_tokens]
             colors = ['#0F4C5C', '#C0843D']
             
-            wedges, texts, autotexts = plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
-                    startangle=90, textprops={'fontsize': 11, 'fontweight': '600', 'color': '#1E293B'},
-                    wedgeprops={'edgecolor': 'white', 'linewidth': 3})
+            wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                    startangle=90, textprops={'fontsize': 11, 'color': '#1E293B'})
             
-            centre_circle = plt.Circle((0,0), 0.65, fc='white', linewidth=0)
-            plt.gca().add_artist(centre_circle)
+            centre_circle = plt.Circle((0,0), 0.65, fc='white')
+            ax.add_artist(centre_circle)
             
             for autotext in autotexts:
                 autotext.set_color('white')
-                autotext.set_fontweight('700')
             
-            plt.title('Booking Type Split', fontsize=13, fontweight='600', color='#1E293B', pad=15)
-            plt.axis('equal')
-            plt.tight_layout()
+            ax.set_title('Booking Type Split', fontsize=13, color='#1E293B', pad=15)
+            fig.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=120, bbox_inches='tight', facecolor='white')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
             buf.seek(0)
             booking_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close()
+            plt.close(fig)
     except Exception as e:
         print(f"⚠️ Error generating booking chart: {e}")
-        import traceback
-        traceback.print_exc()
     
     analytics = {
         'daily_customers': daily_customers,
