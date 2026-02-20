@@ -28,6 +28,11 @@
   --text-secondary: #64748B;
   --text-muted: #94A3B8;
   --text-inverse: #FFFFFF;
+  
+  /* === NAVBAR === */
+  --navbar-text: #FFFFFF;
+  --navbar-button: #FFFFFF;
+  --navbar-button-hover: #2DD4BF;
 
   /* === BORDERS === */
   --border-soft: rgba(15, 76, 92, 0.08);
@@ -163,6 +168,21 @@ body {
 .btn-outline-primary:hover {
   background: var(--color-primary);
   color: var(--text-inverse);
+}
+
+/* Navbar specific buttons - high contrast */
+.navbar .btn-outline-primary,
+.navbar .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.8);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.navbar .btn-outline-primary:hover,
+.navbar .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
 }
 
 /* === CARDS === */
