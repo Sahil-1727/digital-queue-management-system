@@ -970,15 +970,17 @@ def payment(token_id):
                 
                 # Calculate for each person in between
                 for prev_token in previous_tokens[1:]:
-                    # Each person arrives when previous service ends
-                    # Service ends after avg_service_time
                     service_end_time = service_end_time + timedelta(minutes=center.avg_service_time)
                 
-                # Current person arrives when previous service ends
-                reach_time = service_end_time
+                # Current person's earliest possible arrival
+                earliest_leave = get_ist_now() + timedelta(minutes=10)
+                earliest_arrival = earliest_leave + timedelta(minutes=travel_time)
+                
+                # Reach time = max(counter free time, earliest arrival time)
+                reach_time = max(service_end_time, earliest_arrival)
                 leave_time = reach_time - timedelta(minutes=travel_time)
                 
-                # If leave time is in past, set to now
+                # If leave time is in past, adjust
                 if leave_time < get_ist_now():
                     leave_time = get_ist_now()
                     reach_time = leave_time + timedelta(minutes=travel_time)
