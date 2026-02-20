@@ -829,19 +829,57 @@ def index():
 
 @app.route('/register-center', methods=['GET', 'POST'])
 def register_center():
-    if request.method == 'POST':
-        phone = request.form.get('phone')
-        password = request.form.get('password')
+    try:
+        if request.method == 'POST':
+            phone = request.form.get('phone')
+            password = request.form.get('password')
+            
+            if ServiceCenterRegistration.query.filter_by(phone=phone).first():
+                flash('Phone number already registered!', 'danger')
+                return redirect(url_for('register_center'))
+            
+            # Get avg_service_time safely
+            try:
+                avg_service_time = int(request.form.get('avg_service_time', 20))
+            except (ValueError, TypeError):
+                avg_service_time = 20
+            
+            registration = ServiceCenterRegistration(
+                center_name=request.form.get('center_name'),
+                organization_type=request.form.get('organization_type'),
+                owner_name=request.form.get('owner_name'),
+                email=request.form.get('email'),
+                phone=phone,
+                password=generate_password_hash(password),
+                alternate_phone=request.form.get('alternate_phone'),
+                city=request.form.get('city'),
+                state=request.form.get('state'),
+                pincode=request.form.get('pincode'),
+                address=request.form.get('address'),
+                latitude=float(request.form.get('latitude')) if request.form.get('latitude') else None,
+                longitude=float(request.form.get('longitude')) if request.form.get('longitude') else None,
+                business_hours=request.form.get('business_hours'),
+                counters=request.form.get('counters') or None,
+                daily_customers=request.form.get('daily_customers') or None,
+                years_in_business=request.form.get('years_in_business') or None,
+                avg_service_time=avg_service_time,
+                gst_number=request.form.get('gst_number'),
+                website=request.form.get('website'),
+                additional_info=request.form.get('additional_info'),
+                status='Pending',
+                payment_status='Pending'
+            )
+            db.session.add(registration)
+            db.session.commit()
+            
+            return redirect(url_for('registration_payment', reg_id=registration.id))
         
-        if ServiceCenterRegistration.query.filter_by(phone=phone).first():
-            flash('Phone number already registered!', 'danger')
-            return redirect(url_for('register_center'))
-        
-        # Get avg_service_time safely
-        try:
-            avg_service_time = int(request.form.get('avg_service_time', 20))
-        except (ValueError, TypeError):
-            avg_service_time = 20
+        return render_template('register_center.html')
+    except Exception as e:
+        print(f"❌ Register center error: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<h1>Error loading center registration</h1><pre>{str(e)}</pre>", 500
         
         registration = ServiceCenterRegistration(
             center_name=request.form.get('center_name'),
@@ -899,72 +937,84 @@ def registration_payment(reg_id):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        try:
-            name = request.form.get('name', '').strip()
-            mobile = request.form.get('mobile', '').strip()
-            email = request.form.get('email', '').strip()
-            password = request.form.get('password', '')
-            
-            print(f"📝 Registration attempt: name={name}, mobile={mobile}, email={email}")
-            
-            if not all([name, mobile, email, password]):
-                flash('All fields are required!', 'danger')
+    try:
+        if request.method == 'POST':
+            try:
+                name = request.form.get('name', '').strip()
+                mobile = request.form.get('mobile', '').strip()
+                email = request.form.get('email', '').strip()
+                password = request.form.get('password', '')
+                
+                print(f"📝 Registration attempt: name={name}, mobile={mobile}, email={email}")
+                
+                if not all([name, mobile, email, password]):
+                    flash('All fields are required!', 'danger')
+                    return redirect(url_for('register'))
+                
+                # Check if mobile already exists
+                existing_user = User.query.filter_by(mobile=mobile).first()
+                if existing_user:
+                    flash('Mobile number already registered!', 'danger')
+                    return redirect(url_for('register'))
+                
+                # Create new user
+                user = User(
+                    name=name, 
+                    mobile=mobile, 
+                    email=email, 
+                    password=generate_password_hash(password)
+                )
+                db.session.add(user)
+                db.session.commit()
+                
+                print(f"✅ User registered successfully: {mobile}")
+                flash('Registration successful! Please login.', 'success')
+                return redirect(url_for('login'))
+                
+            except Exception as e:
+                db.session.rollback()
+                print(f"❌ Registration error: {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                flash(f'Registration failed: {str(e)}', 'danger')
                 return redirect(url_for('register'))
-            
-            # Check if mobile already exists
-            existing_user = User.query.filter_by(mobile=mobile).first()
-            if existing_user:
-                flash('Mobile number already registered!', 'danger')
-                return redirect(url_for('register'))
-            
-            # Create new user
-            user = User(
-                name=name, 
-                mobile=mobile, 
-                email=email, 
-                password=generate_password_hash(password)
-            )
-            db.session.add(user)
-            db.session.commit()
-            
-            print(f"✅ User registered successfully: {mobile}")
-            flash('Registration successful! Please login.', 'success')
-            return redirect(url_for('login'))
-            
-        except Exception as e:
-            db.session.rollback()
-            print(f"❌ Registration error: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            flash(f'Registration failed: {str(e)}', 'danger')
-            return redirect(url_for('register'))
-    
-    return render_template('register.html')
+        
+        return render_template('register.html')
+    except Exception as e:
+        print(f"❌ Register page error: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<h1>Error loading registration page</h1><pre>{str(e)}</pre>", 500
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        mobile = request.form['mobile']
-        password = request.form['password']
+    try:
+        if request.method == 'POST':
+            mobile = request.form['mobile']
+            password = request.form['password']
+            
+            # Check if service center owner
+            owner = ServiceCenterRegistration.query.filter_by(phone=mobile).first()
+            if owner and check_password_hash(owner.password, password):
+                session['owner_id'] = owner.id
+                session['owner_name'] = owner.owner_name
+                return redirect(url_for('owner_dashboard'))
+            
+            # Check if regular user
+            user = User.query.filter_by(mobile=mobile).first()
+            if user and check_password_hash(user.password, password):
+                session['user_id'] = user.id
+                session['user_name'] = user.name
+                return redirect(url_for('services'))
+            
+            flash('Invalid credentials!', 'danger')
         
-        # Check if service center owner
-        owner = ServiceCenterRegistration.query.filter_by(phone=mobile).first()
-        if owner and check_password_hash(owner.password, password):
-            session['owner_id'] = owner.id
-            session['owner_name'] = owner.owner_name
-            return redirect(url_for('owner_dashboard'))
-        
-        # Check if regular user
-        user = User.query.filter_by(mobile=mobile).first()
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            session['user_name'] = user.name
-            return redirect(url_for('services'))
-        
-        flash('Invalid credentials!', 'danger')
-    
-    return render_template('login.html')
+        return render_template('login.html')
+    except Exception as e:
+        print(f"❌ Login page error: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<h1>Error loading login page</h1><pre>{str(e)}</pre>", 500
 
 @app.route('/services')
 def services():
