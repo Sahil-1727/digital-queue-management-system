@@ -11,38 +11,11 @@
     <meta http-equiv="refresh" content="15">
     </head>
 <body class="page-content">
-    <!-- Premium Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand" href="#">
-                <span class="gradient-text">{{ center.name }}</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-2">
-                    <li class="nav-item"><a href="{{ url_for('admin_analytics') }}" class="btn btn-sm btn-primary">📈 Analytics</a></li>
-                    <li class="nav-item"><a href="{{ url_for('add_walkin') }}" class="btn btn-sm btn-outline-primary">🚶 Add Walk-In</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">⚙️ Menu</a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('admin_profile') }}">👤 Profile</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_history') }}">📜 History</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="POST" action="{{ url_for('admin_delete_center') }}" style="margin: 0;"
-                                      onsubmit="return confirm('Are you sure you want to delete your service center? This action cannot be undone!')">
-                                    <button type="submit" class="dropdown-item text-danger">🗑️ Delete Center</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-primary">Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- Premium Internal Navbar -->
+    {% set user_name = center.name %}
+    {% set user_type = 'admin' %}
+    {% set breadcrumb = ['Dashboard', 'Queue Management'] %}
+    {% include 'includes/internal_navbar.html' %}
 
     <div class="container-fluid px-4 py-4">
         {% with messages = get_flashed_messages(with_categories=true) %}

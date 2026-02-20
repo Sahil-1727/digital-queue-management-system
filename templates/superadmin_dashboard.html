@@ -34,19 +34,11 @@
     
     </head>
 <body class="page-content">
-    <div class="superadmin-header">
-        <div class="container-fluid px-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h4 class="mb-0 fw-bold">👑 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Super Admin</span></h4>
-                <div class="d-flex gap-2 flex-wrap">
-                    <span class="text-white d-none d-md-inline">{{ session.superadmin_username }}</span>
-                    <a href="{{ url_for('superadmin_manage_centers') }}" class="btn btn-sm" style="background: var(--primary-color); color: #0F172A;">Centers</a>
-                    <a href="{{ url_for('superadmin_admins') }}" class="btn btn-sm" style="background: var(--primary-color); color: #0F172A;">Admins</a>
-                    <a href="{{ url_for('superadmin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Premium Internal Navbar -->
+    {% set user_name = session.superadmin_username %}
+    {% set user_type = 'superadmin' %}
+    {% set breadcrumb = ['Super Admin', 'Registrations'] %}
+    {% include 'includes/internal_navbar.html' %}
 
     <div class="container-fluid px-4 py-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
