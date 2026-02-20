@@ -559,56 +559,72 @@ def expire_old_tokens():
 
 def recalculate_queue_times(center_id):
     """Recalculate estimated times for all active tokens after cancellation/skip"""
-    center = ServiceCenter.query.get(center_id)
-    current_time = get_ist_now()
-    
-    # Get all active tokens sorted by ID (booking order)
-    active_tokens = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Active',
-        is_walkin=False
-    ).order_by(Token.id).all()
-    
-    if not active_tokens:
-        return
-    
-    # Check if there's a serving token
-    serving_token = get_serving_token(center_id)
-    
-    if serving_token and serving_token.actual_service_end:
-        # Counter busy, start from when it becomes free
-        service_end_time = serving_token.actual_service_end
-        if service_end_time.tzinfo is None:
-            service_end_time = pytz.utc.localize(service_end_time).astimezone(IST)
+    try:
+        center = ServiceCenter.query.get(center_id)
+        if not center:
+            print(f"❌ Center {center_id} not found")
+            return
+        
+        current_time = get_ist_now()
+        
+        # Get all active tokens sorted by ID (booking order)
+        active_tokens = Token.query.filter_by(
+            service_center_id=center_id,
+            status='Active',
+            is_walkin=False
+        ).order_by(Token.id).all()
+        
+        if not active_tokens:
+            return
+        
+        # Check if there's a serving token
+        serving_token = get_serving_token(center_id)
+        
+        if serving_token and serving_token.actual_service_end:
+            # Counter busy, start from when it becomes free
+            service_end_time = serving_token.actual_service_end
+            if service_end_time.tzinfo is None:
+                service_end_time = pytz.utc.localize(service_end_time).astimezone(IST)
+            else:
+                service_end_time = service_end_time.astimezone(IST)
         else:
-            service_end_time = service_end_time.astimezone(IST)
-    else:
-        # Counter free now
-        service_end_time = current_time
-    
-    # Recalculate for each token
-    for token in active_tokens:
-        user = User.query.get(token.user_id)
-        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+            # Counter free now
+            service_end_time = current_time
         
-        # Earliest possible arrival
-        earliest_leave = token.created_time + timedelta(minutes=10)
-        earliest_arrival = earliest_leave + timedelta(minutes=travel_time)
+        # Recalculate for each token
+        for token in active_tokens:
+            try:
+                user = User.query.get(token.user_id)
+                if not user:
+                    continue
+                
+                travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+                
+                # Earliest possible arrival
+                earliest_leave = token.created_time + timedelta(minutes=10)
+                earliest_arrival = earliest_leave + timedelta(minutes=travel_time)
+                
+                # Reach time = max(counter free, earliest arrival)
+                reach_time = max(service_end_time, earliest_arrival)
+                leave_time = reach_time - timedelta(minutes=travel_time)
+                
+                # Update token
+                token.leave_time = leave_time
+                token.reach_time = reach_time
+                token.estimated_service_start = reach_time
+                token.estimated_service_end = reach_time + timedelta(minutes=center.avg_service_time)
+                
+                # Next token starts after this one ends
+                service_end_time = token.estimated_service_end
+            except Exception as e:
+                print(f"❌ Error recalculating token {token.id}: {e}")
+                continue
         
-        # Reach time = max(counter free, earliest arrival)
-        reach_time = max(service_end_time, earliest_arrival)
-        leave_time = reach_time - timedelta(minutes=travel_time)
-        
-        # Update token
-        token.leave_time = leave_time
-        token.reach_time = reach_time
-        token.estimated_service_start = reach_time
-        token.estimated_service_end = reach_time + timedelta(minutes=center.avg_service_time)
-        
-        # Next token starts after this one ends
-        service_end_time = token.estimated_service_end
-    
-    db.session.commit()
+        db.session.commit()
+        print(f"✅ Recalculated {len(active_tokens)} tokens for center {center_id}")
+    except Exception as e:
+        print(f"❌ Error in recalculate_queue_times: {e}")
+        db.session.rollback()
 
 def send_reset_email(email, reset_link, user_type="User"):
     """Send password reset email using Brevo API (free 300 emails/day)"""
@@ -1410,86 +1426,101 @@ def admin_queue_state():
     if 'admin_id' not in session:
         return {'error': 'Unauthorized'}, 401
     
-    center_id = session['admin_center_id']
-    current_time = get_ist_now()
-    
-    serving_token = get_serving_token(center_id)
-    waiting_tokens = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Active',
-        is_walkin=False
-    ).order_by(Token.estimated_service_start).all()
-    
-    # Build response
-    response = {
-        'current_time': current_time.isoformat(),
-        'serving': None,
-        'next_eligible': None,
-        'can_call_next': False,
-        'queue': []
-    }
-    
-    # Serving token data
-    if serving_token:
-        service_end = serving_token.actual_service_end
-        if service_end:
-            if service_end.tzinfo is None:
-                service_end = pytz.utc.localize(service_end).astimezone(IST)
-            else:
-                service_end = service_end.astimezone(IST)
-            remaining_seconds = int((service_end - current_time).total_seconds())
-        else:
-            remaining_seconds = 0
+    try:
+        center_id = session['admin_center_id']
+        current_time = get_ist_now()
         
-        response['serving'] = {
-            'token_number': serving_token.token_number,
-            'user_name': serving_token.user.name,
-            'remaining_seconds': max(0, remaining_seconds)
+        serving_token = get_serving_token(center_id)
+        waiting_tokens = Token.query.filter_by(
+            service_center_id=center_id,
+            status='Active',
+            is_walkin=False
+        ).order_by(Token.estimated_service_start).all()
+        
+        # Build response
+        response = {
+            'current_time': current_time.isoformat(),
+            'serving': None,
+            'next_eligible': None,
+            'can_call_next': False,
+            'queue': []
         }
-    
-    # Check if can call next
-    if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
-        for token in waiting_tokens:
-            if token.reach_time:
-                reach_time = token.reach_time
-                if reach_time.tzinfo is None:
-                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+        
+        # Serving token data
+        if serving_token:
+            try:
+                service_end = serving_token.actual_service_end
+                if service_end:
+                    if service_end.tzinfo is None:
+                        service_end = pytz.utc.localize(service_end).astimezone(IST)
+                    else:
+                        service_end = service_end.astimezone(IST)
+                    remaining_seconds = int((service_end - current_time).total_seconds())
                 else:
-                    reach_time = reach_time.astimezone(IST)
+                    remaining_seconds = 0
                 
-                if current_time >= (reach_time - timedelta(minutes=5)):
-                    response['can_call_next'] = True
-                    response['next_eligible'] = {
+                response['serving'] = {
+                    'token_number': serving_token.token_number,
+                    'user_name': serving_token.user.name if serving_token.user else 'Unknown',
+                    'remaining_seconds': max(0, remaining_seconds)
+                }
+            except Exception as e:
+                print(f"❌ Error processing serving token: {e}")
+        
+        # Check if can call next
+        if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
+            for token in waiting_tokens:
+                try:
+                    if token.reach_time:
+                        reach_time = token.reach_time
+                        if reach_time.tzinfo is None:
+                            reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                        else:
+                            reach_time = reach_time.astimezone(IST)
+                        
+                        if current_time >= (reach_time - timedelta(minutes=5)):
+                            response['can_call_next'] = True
+                            response['next_eligible'] = {
+                                'token_number': token.token_number,
+                                'user_name': token.user.name if token.user else 'Unknown'
+                            }
+                            break
+                except Exception as e:
+                    print(f"❌ Error checking token eligibility: {e}")
+                    continue
+        
+        # Queue list
+        for token in waiting_tokens:
+            try:
+                reach_time = token.reach_time
+                if reach_time:
+                    if reach_time.tzinfo is None:
+                        reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                    else:
+                        reach_time = reach_time.astimezone(IST)
+                    
+                    arrival_seconds = int((reach_time - current_time).total_seconds())
+                    status = 'Travelling'
+                    
+                    if current_time >= reach_time:
+                        status = 'Arrived'
+                        if current_time > (reach_time + timedelta(minutes=15)):
+                            status = 'Late'
+                    
+                    response['queue'].append({
                         'token_number': token.token_number,
-                        'user_name': token.user.name
-                    }
-                    break
-    
-    # Queue list
-    for token in waiting_tokens:
-        reach_time = token.reach_time
-        if reach_time:
-            if reach_time.tzinfo is None:
-                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
-            else:
-                reach_time = reach_time.astimezone(IST)
-            
-            arrival_seconds = int((reach_time - current_time).total_seconds())
-            status = 'Travelling'
-            
-            if current_time >= reach_time:
-                status = 'Arrived'
-                if current_time > (reach_time + timedelta(minutes=15)):
-                    status = 'Late'
-            
-            response['queue'].append({
-                'token_number': token.token_number,
-                'user_name': token.user.name,
-                'arrival_seconds': arrival_seconds,
-                'status': status
-            })
-    
-    return response
+                        'user_name': token.user.name if token.user else 'Unknown',
+                        'arrival_seconds': arrival_seconds,
+                        'status': status
+                    })
+            except Exception as e:
+                print(f"❌ Error processing queue token: {e}")
+                continue
+        
+        return response
+    except Exception as e:
+        print(f"❌ Error in admin_queue_state: {e}")
+        return {'error': 'Internal server error'}, 500
 
 @app.route('/admin/history')
 def admin_history():
@@ -1558,75 +1589,85 @@ def call_next():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
-    center_id = session['admin_center_id']
-    center = ServiceCenter.query.get(center_id)
-    current_time = get_ist_now()
-    
-    # Transaction safety: Check serving token with lock
-    serving_token = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Serving',
-        is_walkin=False
-    ).with_for_update().first()
-    
-    if serving_token:
-        # Check if service_end_time has passed
-        if serving_token.actual_service_end:
-            service_end = serving_token.actual_service_end
-            if service_end.tzinfo is None:
-                service_end = pytz.utc.localize(service_end).astimezone(IST)
-            else:
-                service_end = service_end.astimezone(IST)
-            
-            if service_end <= current_time:
-                # Auto-complete
-                serving_token.status = 'Completed'
-                serving_token.completed_time = current_time
-            else:
-                # Counter still busy - backend enforcement
-                flash('Counter is busy. Please wait for current service to complete.', 'warning')
-                db.session.commit()
-                return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Counter is busy.', 'warning')
-            db.session.commit()
+    try:
+        center_id = session['admin_center_id']
+        center = ServiceCenter.query.get(center_id)
+        
+        if not center:
+            flash('Service center not found.', 'danger')
             return redirect(url_for('admin_dashboard'))
-    
-    # Fetch next token ordered by estimated_service_start
-    next_token = Token.query.filter_by(
-        service_center_id=center_id,
-        status='Active',
-        is_walkin=False
-    ).order_by(Token.estimated_service_start).first()
-    
-    if next_token:
-        # Backend enforcement: Check arrival time
-        if next_token.reach_time:
-            reach_time = next_token.reach_time
-            if reach_time.tzinfo is None:
-                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+        
+        current_time = get_ist_now()
+        
+        # Transaction safety: Check serving token with lock
+        serving_token = Token.query.filter_by(
+            service_center_id=center_id,
+            status='Serving',
+            is_walkin=False
+        ).with_for_update().first()
+        
+        if serving_token:
+            # Check if service_end_time has passed
+            if serving_token.actual_service_end:
+                service_end = serving_token.actual_service_end
+                if service_end.tzinfo is None:
+                    service_end = pytz.utc.localize(service_end).astimezone(IST)
+                else:
+                    service_end = service_end.astimezone(IST)
+                
+                if service_end <= current_time:
+                    # Auto-complete
+                    serving_token.status = 'Completed'
+                    serving_token.completed_time = current_time
+                else:
+                    # Counter still busy - backend enforcement
+                    flash('Counter is busy. Please wait for current service to complete.', 'warning')
+                    db.session.commit()
+                    return redirect(url_for('admin_dashboard'))
             else:
-                reach_time = reach_time.astimezone(IST)
-            
-            # 5 min buffer
-            call_allowed_from = reach_time - timedelta(minutes=5)
-            
-            if current_time < call_allowed_from:
-                minutes_left = int((call_allowed_from - current_time).total_seconds() / 60)
-                flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {reach_time.strftime("%I:%M %p")}', 'warning')
+                flash('Counter is busy.', 'warning')
                 db.session.commit()
                 return redirect(url_for('admin_dashboard'))
         
-        # All checks passed - serve token
-        next_token.status = 'Serving'
-        next_token.actual_service_start = current_time
-        next_token.actual_service_end = current_time + timedelta(minutes=center.avg_service_time)
+        # Fetch next token ordered by estimated_service_start
+        next_token = Token.query.filter_by(
+            service_center_id=center_id,
+            status='Active',
+            is_walkin=False
+        ).order_by(Token.estimated_service_start).first()
         
-        db.session.commit()
-        flash(f'Token {next_token.token_number} is now being served.', 'success')
-    else:
-        db.session.commit()
-        flash('No tokens in queue.', 'info')
+        if next_token:
+            # Backend enforcement: Check arrival time
+            if next_token.reach_time:
+                reach_time = next_token.reach_time
+                if reach_time.tzinfo is None:
+                    reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+                else:
+                    reach_time = reach_time.astimezone(IST)
+                
+                # 5 min buffer
+                call_allowed_from = reach_time - timedelta(minutes=5)
+                
+                if current_time < call_allowed_from:
+                    minutes_left = int((call_allowed_from - current_time).total_seconds() / 60)
+                    flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {reach_time.strftime("%I:%M %p")}', 'warning')
+                    db.session.commit()
+                    return redirect(url_for('admin_dashboard'))
+            
+            # All checks passed - serve token
+            next_token.status = 'Serving'
+            next_token.actual_service_start = current_time
+            next_token.actual_service_end = current_time + timedelta(minutes=center.avg_service_time)
+            
+            db.session.commit()
+            flash(f'Token {next_token.token_number} is now being served.', 'success')
+        else:
+            db.session.commit()
+            flash('No tokens in queue.', 'info')
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error in call_next: {e}")
+        flash('An error occurred. Please try again.', 'danger')
     
     return redirect(url_for('admin_dashboard'))
 

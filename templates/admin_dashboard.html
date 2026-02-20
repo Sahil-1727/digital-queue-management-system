@@ -90,9 +90,9 @@
                 </div>
 
                 {% if can_call_next %}
-                    <a href="{{ url_for('call_next') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next (Online)</a>
+                    <a href="{{ url_for('call_next') }}" class="btn w-100 mb-3" style="background: linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%); color: #0F172A; font-weight: 700; padding: 14px; font-size: 1.1rem; border: none;">📢 Call Next: {{ next_eligible_token.token_number if next_eligible_token else 'Ready' }}</a>
                 {% else %}
-                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 14px; font-size: 1.1rem;">⏳ Wait {{ ((next_call_time - datetime.now()).total_seconds() / 60)|int }} min</button>
+                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 14px; font-size: 1.1rem;">⏳ Waiting for User Arrival</button>
                 {% endif %}
 
                 <div class="card">
@@ -110,11 +110,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for token in waiting_tokens %}
+                                    {% for item in waiting_tokens %}
                                     <tr>
-                                        <td><span class="fw-bold" style="color: #2DD4BF;">{{ token.token_number }}</span></td>
-                                        <td class="fw-semibold">{{ token.user.name }}</td>
-                                        <td><a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
+                                        <td>
+                                            <span class="fw-bold" style="color: #2DD4BF;">{{ item.token.token_number }}</span>
+                                            {% if item.status_badge == 'Travelling' %}
+                                                <span class="badge bg-info ms-2">🚗 Travelling</span>
+                                            {% elif item.status_badge == 'Arrived' %}
+                                                <span class="badge bg-success ms-2">✅ Arrived</span>
+                                            {% elif item.status_badge == 'Late' %}
+                                                <span class="badge bg-danger ms-2">⚠️ Late</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-semibold">{{ item.token.user.name }}</td>
+                                        <td><a href="{{ url_for('no_show', token_id=item.token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
