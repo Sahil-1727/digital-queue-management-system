@@ -453,6 +453,25 @@ def get_ist_now():
     """Get current time in IST timezone"""
     return datetime.now(IST)
 
+def utc_to_ist(utc_time):
+    """Convert UTC datetime to IST - SINGLE SOURCE OF TRUTH for timezone conversion
+    
+    Args:
+        utc_time: datetime object (with or without timezone info)
+    
+    Returns:
+        datetime object in IST timezone
+    """
+    if not utc_time:
+        return None
+    
+    if utc_time.tzinfo is None:
+        # Database stores in UTC without timezone - localize as UTC first, then convert
+        return pytz.utc.localize(utc_time).astimezone(IST)
+    else:
+        # Already has timezone info - just convert
+        return utc_time.astimezone(IST)
+
 def get_active_token_for_user(user_id):
     try:
         return Token.query.filter_by(user_id=user_id).filter(
@@ -543,11 +562,7 @@ def expire_old_tokens():
     active_tokens = Token.query.filter(Token.status == 'Active').all()
     for token in active_tokens:
         if token.reach_time:
-            reach_time = token.reach_time
-            if reach_time.tzinfo is None:
-                reach_time = IST.localize(reach_time)
-            else:
-                reach_time = reach_time.astimezone(IST)
+            reach_time = utc_to_ist(token.reach_time)
             
             # Auto-skip if 15 min late
             if current_time > (reach_time + timedelta(minutes=15)):
@@ -582,11 +597,7 @@ def recalculate_queue_times(center_id):
         
         if serving_token and serving_token.actual_service_end:
             # Counter busy, start from when it becomes free
-            service_end_time = serving_token.actual_service_end
-            if service_end_time.tzinfo is None:
-                service_end_time = IST.localize(service_end_time)
-            else:
-                service_end_time = service_end_time.astimezone(IST)
+            service_end_time = utc_to_ist(serving_token.actual_service_end)
         else:
             # Counter free now
             service_end_time = current_time
@@ -691,16 +702,9 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
         print("⚠️ Brevo API key not configured")
         return False
     
-    # Convert to IST if not already
-    if leave_time.tzinfo is None:
-        leave_time = IST.localize(leave_time)
-    else:
-        leave_time = leave_time.astimezone(IST)
-    
-    if reach_time.tzinfo is None:
-        reach_time = IST.localize(reach_time)
-    else:
-        reach_time = reach_time.astimezone(IST)
+    # Convert to IST using centralized helper
+    leave_time = utc_to_ist(leave_time)
+    reach_time = utc_to_ist(reach_time)
     
     try:
         response = requests.post(
@@ -1117,20 +1121,9 @@ def queue_status(token_id):
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
     
-    # Convert UTC to IST (database stores in UTC without timezone)
-    if leave_time:
-        if leave_time.tzinfo is None:
-            # Database stores in UTC without timezone info - must use pytz.utc.localize first
-            leave_time = pytz.utc.localize(leave_time).astimezone(IST)
-        else:
-            leave_time = leave_time.astimezone(IST)
-    
-    if reach_counter_time:
-        if reach_counter_time.tzinfo is None:
-            # Database stores in UTC without timezone info - must use pytz.utc.localize first
-            reach_counter_time = pytz.utc.localize(reach_counter_time).astimezone(IST)
-        else:
-            reach_counter_time = reach_counter_time.astimezone(IST)
+    # Convert UTC to IST using centralized helper
+    leave_time = utc_to_ist(leave_time)
+    reach_counter_time = utc_to_ist(reach_counter_time)
     
     return render_template('queue_status.html', 
                          token=token, 
@@ -1196,13 +1189,9 @@ def user_history():
             time_to_show = token.created_time
             time_label = 'Booked'
         
-        # Convert to IST
+        # Convert to IST using centralized helper
         if time_to_show:
-            if time_to_show.tzinfo is None:
-                time_ist = pytz.utc.localize(time_to_show).astimezone(IST)
-            else:
-                time_ist = time_to_show.astimezone(IST)
-            token_data['display_time'] = time_ist
+            token_data['display_time'] = utc_to_ist(time_to_show)
             token_data['time_label'] = time_label
         else:
             token_data['display_time'] = None
@@ -1477,12 +1466,8 @@ def admin_queue_state():
         # Serving token data
         if serving_token:
             try:
-                service_end = serving_token.actual_service_end
+                service_end = utc_to_ist(serving_token.actual_service_end)
                 if service_end:
-                    if service_end.tzinfo is None:
-                        service_end = IST.localize(service_end)
-                    else:
-                        service_end = service_end.astimezone(IST)
                     remaining_seconds = int((service_end - current_time).total_seconds())
                 else:
                     remaining_seconds = 0
@@ -1500,11 +1485,7 @@ def admin_queue_state():
             for token in waiting_tokens:
                 try:
                     if token.reach_time:
-                        reach_time = token.reach_time
-                        if reach_time.tzinfo is None:
-                            reach_time = IST.localize(reach_time)
-                        else:
-                            reach_time = reach_time.astimezone(IST)
+                        reach_time = utc_to_ist(token.reach_time)
                         
                         if current_time >= (reach_time - timedelta(minutes=5)):
                             response['can_call_next'] = True
@@ -1520,13 +1501,8 @@ def admin_queue_state():
         # Queue list
         for token in waiting_tokens:
             try:
-                reach_time = token.reach_time
+                reach_time = utc_to_ist(token.reach_time)
                 if reach_time:
-                    if reach_time.tzinfo is None:
-                        reach_time = IST.localize(reach_time)
-                    else:
-                        reach_time = reach_time.astimezone(IST)
-                    
                     arrival_seconds = int((reach_time - current_time).total_seconds())
                     status = 'Travelling'
                     
