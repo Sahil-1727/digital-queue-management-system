@@ -539,24 +539,74 @@ def expire_old_tokens():
     for token in expired_tokens:
         token.status = 'Expired'
     
-    # Auto-expire active tokens if reach_time + service_time has passed
+    # Auto-skip late users (15 min grace period after arrival)
     active_tokens = Token.query.filter(Token.status == 'Active').all()
     for token in active_tokens:
-        if token.reach_time and token.estimated_service_end:
-            # Make timezone-aware if needed
+        if token.reach_time:
             reach_time = token.reach_time
-            service_end = token.estimated_service_end
-            
             if reach_time.tzinfo is None:
-                reach_time = IST.localize(reach_time)
-            if service_end.tzinfo is None:
-                service_end = IST.localize(service_end)
+                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
+            else:
+                reach_time = reach_time.astimezone(IST)
             
-            # Expire if estimated service end time has passed
-            if current_time > service_end:
+            # Auto-skip if 15 min late
+            if current_time > (reach_time + timedelta(minutes=15)):
                 token.status = 'Expired'
-                token.no_show_reason = 'Auto-expired: Did not arrive within expected time window'
+                token.no_show_reason = 'Auto-skipped: User did not arrive within grace period'
                 token.no_show_time = current_time
+    
+    db.session.commit()
+
+def recalculate_queue_times(center_id):
+    """Recalculate estimated times for all active tokens after cancellation/skip"""
+    center = ServiceCenter.query.get(center_id)
+    current_time = get_ist_now()
+    
+    # Get all active tokens sorted by ID (booking order)
+    active_tokens = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Active',
+        is_walkin=False
+    ).order_by(Token.id).all()
+    
+    if not active_tokens:
+        return
+    
+    # Check if there's a serving token
+    serving_token = get_serving_token(center_id)
+    
+    if serving_token and serving_token.actual_service_end:
+        # Counter busy, start from when it becomes free
+        service_end_time = serving_token.actual_service_end
+        if service_end_time.tzinfo is None:
+            service_end_time = pytz.utc.localize(service_end_time).astimezone(IST)
+        else:
+            service_end_time = service_end_time.astimezone(IST)
+    else:
+        # Counter free now
+        service_end_time = current_time
+    
+    # Recalculate for each token
+    for token in active_tokens:
+        user = User.query.get(token.user_id)
+        travel_time = calculate_travel_time(user.latitude, user.longitude, center.latitude, center.longitude)
+        
+        # Earliest possible arrival
+        earliest_leave = token.created_time + timedelta(minutes=10)
+        earliest_arrival = earliest_leave + timedelta(minutes=travel_time)
+        
+        # Reach time = max(counter free, earliest arrival)
+        reach_time = max(service_end_time, earliest_arrival)
+        leave_time = reach_time - timedelta(minutes=travel_time)
+        
+        # Update token
+        token.leave_time = leave_time
+        token.reach_time = reach_time
+        token.estimated_service_start = reach_time
+        token.estimated_service_end = reach_time + timedelta(minutes=center.avg_service_time)
+        
+        # Next token starts after this one ends
+        service_end_time = token.estimated_service_end
     
     db.session.commit()
 
@@ -1077,9 +1127,16 @@ def cancel_token(token_id):
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('services'))
     
-    if token.status == 'PendingPayment':
+    if token.status in ['PendingPayment', 'Active']:
+        center_id = token.service_center_id
         token.status = 'Expired'
+        token.no_show_reason = 'Cancelled by user'
+        token.no_show_time = get_ist_now()
         db.session.commit()
+        
+        # Recalculate queue times for remaining tokens
+        recalculate_queue_times(center_id)
+        
         flash('Token cancelled successfully.', 'info')
     
     return redirect(url_for('services'))
@@ -1505,21 +1562,37 @@ def call_next():
     center = ServiceCenter.query.get(center_id)
     current_time = get_ist_now()
     
-    # Step 1: Check if counter is free
-    serving_token = get_serving_token(center_id)
+    # Transaction safety: Check serving token with lock
+    serving_token = Token.query.filter_by(
+        service_center_id=center_id,
+        status='Serving',
+        is_walkin=False
+    ).with_for_update().first()
     
     if serving_token:
         # Check if service_end_time has passed
-        if serving_token.actual_service_end and serving_token.actual_service_end <= current_time:
-            # Auto-complete the serving token
-            serving_token.status = 'Completed'
-            serving_token.completed_time = current_time
+        if serving_token.actual_service_end:
+            service_end = serving_token.actual_service_end
+            if service_end.tzinfo is None:
+                service_end = pytz.utc.localize(service_end).astimezone(IST)
+            else:
+                service_end = service_end.astimezone(IST)
+            
+            if service_end <= current_time:
+                # Auto-complete
+                serving_token.status = 'Completed'
+                serving_token.completed_time = current_time
+            else:
+                # Counter still busy - backend enforcement
+                flash('Counter is busy. Please wait for current service to complete.', 'warning')
+                db.session.commit()
+                return redirect(url_for('admin_dashboard'))
         else:
-            # Counter still busy
-            flash('Counter is busy. Please wait for current service to complete.', 'warning')
+            flash('Counter is busy.', 'warning')
+            db.session.commit()
             return redirect(url_for('admin_dashboard'))
     
-    # Step 2: Fetch next token ordered by estimated_service_start
+    # Fetch next token ordered by estimated_service_start
     next_token = Token.query.filter_by(
         service_center_id=center_id,
         status='Active',
@@ -1527,30 +1600,27 @@ def call_next():
     ).order_by(Token.estimated_service_start).first()
     
     if next_token:
-        # Step 3: Check if user has reached (with 5 min buffer)
-        estimated_arrival = next_token.reach_time
-        
-        if estimated_arrival:
-            # Convert to IST if needed
-            if estimated_arrival.tzinfo is None:
-                estimated_arrival = pytz.utc.localize(estimated_arrival).astimezone(IST)
+        # Backend enforcement: Check arrival time
+        if next_token.reach_time:
+            reach_time = next_token.reach_time
+            if reach_time.tzinfo is None:
+                reach_time = pytz.utc.localize(reach_time).astimezone(IST)
             else:
-                estimated_arrival = estimated_arrival.astimezone(IST)
+                reach_time = reach_time.astimezone(IST)
             
-            # Allow calling 5 minutes before arrival (buffer)
-            call_allowed_from = estimated_arrival - timedelta(minutes=5)
+            # 5 min buffer
+            call_allowed_from = reach_time - timedelta(minutes=5)
             
             if current_time < call_allowed_from:
                 minutes_left = int((call_allowed_from - current_time).total_seconds() / 60)
-                flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {estimated_arrival.strftime("%I:%M %p")}', 'warning')
+                flash(f'User is still travelling. Please wait {minutes_left} more minutes. Expected arrival: {reach_time.strftime("%I:%M %p")}', 'warning')
+                db.session.commit()
                 return redirect(url_for('admin_dashboard'))
         
-        # Step 4: Calculate call_time and update token
-        call_time = current_time
-        
+        # All checks passed - serve token
         next_token.status = 'Serving'
-        next_token.actual_service_start = call_time
-        next_token.actual_service_end = call_time + timedelta(minutes=center.avg_service_time)
+        next_token.actual_service_start = current_time
+        next_token.actual_service_end = current_time + timedelta(minutes=center.avg_service_time)
         
         db.session.commit()
         flash(f'Token {next_token.token_number} is now being served.', 'success')
@@ -1619,14 +1689,19 @@ def no_show(token_id):
         if notes:
             full_reason += f" - {notes}"
         
+        center_id = token.service_center_id
         token.status = 'Expired'
         token.no_show_reason = full_reason
-        token.no_show_time = datetime.now()
+        token.no_show_time = get_ist_now()
         
         user = User.query.get(token.user_id)
         user.no_show_count += 1
         
         db.session.commit()
+        
+        # Recalculate queue times for remaining tokens
+        recalculate_queue_times(center_id)
+        
         flash('Token marked as no-show with reason recorded.', 'warning')
         return redirect(url_for('admin_dashboard'))
     
