@@ -1398,15 +1398,25 @@ def admin_dashboard():
                 status='Active'
             ).order_by(Token.id).all()
         
-        # Find next eligible token and check if can call
+        # Find next eligible token - can call at arrival time
         next_eligible_token = None
         can_call_next = False
         
         if not serving_token:
-            # Counter is free, find first token
-            if waiting_tokens:
-                next_eligible_token = waiting_tokens[0]
-                can_call_next = True
+            # Counter is free, find first arrived token
+            for token in waiting_tokens:
+                if token.reach_time:
+                    reach_time = utc_to_ist(token.reach_time)
+                    # Can call at arrival time (no buffer blocking)
+                    if current_time >= reach_time:
+                        next_eligible_token = token
+                        can_call_next = True
+                        break
+                else:
+                    # No reach_time, can call immediately
+                    next_eligible_token = token
+                    can_call_next = True
+                    break
         
         # Enrich tokens with status badges
         enriched_tokens = []
@@ -1414,17 +1424,35 @@ def admin_dashboard():
             try:
                 token_data = {
                     'token': token,
-                    'status_badge': 'Waiting',
+                    'status_badge': 'Travelling',
                     'is_late': False
                 }
+                
+                if token.reach_time:
+                    reach_time = utc_to_ist(token.reach_time)
+                    if current_time >= reach_time:
+                        token_data['status_badge'] = 'Arrived'
+                        # Late if > 5 min after arrival
+                        if current_time > (reach_time + timedelta(minutes=5)):
+                            token_data['status_badge'] = 'Late'
+                            token_data['is_late'] = True
+                
                 enriched_tokens.append(token_data)
             except Exception as e:
                 print(f"⚠️ Token enrichment error: {e}")
                 continue
         
-        # Walk-in Queue - simplified
-        walkin_serving_token = None
+        # Walk-in Queue
+        walkin_serving_token = get_walkin_serving_token(center_id)
         walkin_waiting_tokens = []
+        try:
+            walkin_waiting_tokens = Token.query.filter_by(
+                service_center_id=center_id,
+                status='Active',
+                is_walkin=True
+            ).order_by(Token.id).all()
+        except:
+            pass
         
         return render_template('admin_dashboard.html', 
                              center=center,
@@ -1486,20 +1514,28 @@ def admin_queue_state():
             except Exception as e:
                 print(f"❌ Error processing serving token: {e}")
         
-        # Check if can call next
+        # Check if can call next - at arrival time, not after buffer
         if not serving_token or (serving_token.actual_service_end and serving_token.actual_service_end <= current_time):
             for token in waiting_tokens:
                 try:
                     if token.reach_time:
                         reach_time = utc_to_ist(token.reach_time)
-                        
-                        if current_time >= (reach_time - timedelta(minutes=5)):
+                        # Can call at arrival time (no buffer blocking)
+                        if current_time >= reach_time:
                             response['can_call_next'] = True
                             response['next_eligible'] = {
                                 'token_number': token.token_number,
                                 'user_name': token.user.name if token.user else 'Unknown'
                             }
                             break
+                    else:
+                        # No reach_time, can call immediately
+                        response['can_call_next'] = True
+                        response['next_eligible'] = {
+                            'token_number': token.token_number,
+                            'user_name': token.user.name if token.user else 'Unknown'
+                        }
+                        break
                 except Exception as e:
                     print(f"❌ Error checking token eligibility: {e}")
                     continue
@@ -1514,7 +1550,8 @@ def admin_queue_state():
                     
                     if current_time >= reach_time:
                         status = 'Arrived'
-                        if current_time > (reach_time + timedelta(minutes=15)):
+                        # Late if > 5 min after arrival
+                        if current_time > (reach_time + timedelta(minutes=5)):
                             status = 'Late'
                     
                     response['queue'].append({
@@ -1605,7 +1642,7 @@ def call_next():
         return redirect(url_for('admin_login'))
     
     center_id = session['admin_center_id']
-    center = ServiceCenter.query.get(center_id)
+    current_time = get_ist_now()
     
     try:
         serving_token = get_serving_token(center_id)
@@ -1614,7 +1651,7 @@ def call_next():
     
     if serving_token:
         serving_token.status = 'Completed'
-        serving_token.completed_time = get_ist_now()
+        serving_token.completed_time = current_time
     
     try:
         next_token = Token.query.filter_by(
@@ -1626,7 +1663,26 @@ def call_next():
         next_token = None
     
     if next_token:
+        # Check if token has arrived (at arrival time, not after buffer)
+        if next_token.reach_time:
+            reach_time = utc_to_ist(next_token.reach_time)
+            if current_time < reach_time:
+                db.session.commit()
+                flash(f'Token {next_token.token_number} has not arrived yet. Expected at {reach_time.strftime("%I:%M %p")}', 'warning')
+                return redirect(url_for('admin_dashboard'))
+            
+            # Auto-skip if > 15 min late
+            if current_time > (reach_time + timedelta(minutes=15)):
+                next_token.status = 'Expired'
+                next_token.no_show_reason = 'Auto-skipped: More than 15 minutes late'
+                next_token.no_show_time = current_time
+                db.session.commit()
+                flash(f'Token {next_token.token_number} auto-skipped (>15 min late). Calling next token...', 'warning')
+                return redirect(url_for('call_next'))
+        
         next_token.status = 'Serving'
+        next_token.actual_service_start = current_time
+        next_token.actual_service_end = current_time + timedelta(minutes=ServiceCenter.query.get(center_id).avg_service_time)
         db.session.commit()
         flash(f'Token {next_token.token_number} is now being served.', 'success')
     else:
