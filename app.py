@@ -577,30 +577,38 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
     return int(travel_time)
 
 def expire_old_tokens():
-    current_time = get_ist_now()
+    """Automatically expire tokens that are past their grace period"""
+    current_time_utc = get_ist_now()  # UTC for DB comparison
+    current_time_aware = get_ist_now_aware()  # IST aware for timezone comparisons
     
     # Expire pending payment tokens after 2 hours
-    expiry_time = current_time - timedelta(hours=2)
+    expiry_time = current_time_utc - timedelta(hours=2)
     expired_tokens = Token.query.filter(
         Token.status == 'PendingPayment',
         Token.created_time < expiry_time
     ).all()
     for token in expired_tokens:
         token.status = 'Expired'
+        token.no_show_reason = 'Payment timeout'
+        token.no_show_time = current_time_utc
     
-    # Auto-skip late users (15 min grace period after arrival)
+    # Auto-expire late users (15 min grace period after expected arrival)
     active_tokens = Token.query.filter(Token.status == 'Active').all()
     for token in active_tokens:
         if token.reach_time:
-            reach_time = utc_to_ist(token.reach_time)
+            # Convert UTC reach_time to IST for comparison
+            reach_time_ist = utc_to_ist(token.reach_time)
             
-            # Auto-skip if 15 min late
-            if current_time > (reach_time + timedelta(minutes=15)):
+            # Auto-expire if > 15 min past expected arrival
+            if current_time_aware > (reach_time_ist + timedelta(minutes=15)):
                 token.status = 'Expired'
-                token.no_show_reason = 'Auto-skipped: User did not arrive within grace period'
-                token.no_show_time = current_time
+                token.no_show_reason = 'Auto-expired: Did not arrive within 15 minutes of expected time'
+                token.no_show_time = current_time_utc
+                print(f"⏰ Auto-expired token {token.token_number} - Expected: {reach_time_ist.strftime('%I:%M %p')}, Current: {current_time_aware.strftime('%I:%M %p')}")
     
-    db.session.commit()
+    if expired_tokens or any(t.status == 'Expired' for t in active_tokens):
+        db.session.commit()
+        print(f"✅ Expired {len(expired_tokens)} pending + {sum(1 for t in active_tokens if t.status == 'Expired')} late tokens")
 
 def recalculate_queue_times(center_id):
     """Recalculate estimated times for all active tokens after cancellation/skip"""
@@ -752,7 +760,7 @@ def send_timing_alert(email, user_name, token_number, center_name, leave_time, r
                   <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                       <h2 style="color: #10B981;">✅ Token Confirmed!</h2>
-                      <p>Hello {user_name},</p>
+                      <p>Helerlo {user_name},</p>
                       <p>Your token has been confirmed at <strong>{center_name}</strong>.</p>
                       
                       <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -1121,6 +1129,9 @@ def queue_status(token_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
+    # Auto-expire late tokens before checking status
+    expire_old_tokens()
+    
     token = Token.query.get_or_404(token_id)
     if token.user_id != session['user_id']:
         flash('Unauthorized access!', 'danger')
@@ -1406,6 +1417,9 @@ def admin_dashboard():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
+    # Auto-expire late tokens before loading dashboard
+    expire_old_tokens()
+    
     try:
         center_id = session['admin_center_id']
         center = ServiceCenter.query.get(center_id)
@@ -1671,6 +1685,9 @@ def service_detail(center_id):
 def call_next():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
+    
+    # Auto-expire late tokens before calling next
+    expire_old_tokens()
     
     center_id = session['admin_center_id']
     current_time = get_ist_now()
@@ -2195,6 +2212,12 @@ def admin_analytics():
     if not center:
         flash('Service center not found', 'danger')
         return redirect(url_for('admin_dashboard'))
+    
+    # Auto-expire late tokens before analytics
+    try:
+        expire_old_tokens()
+    except Exception as e:
+        print(f"⚠️ Error expiring tokens: {e}")
     
     today = datetime.now().date()
     
