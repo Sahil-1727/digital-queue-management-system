@@ -85,21 +85,36 @@
                                     <td>{{ token.user.mobile }}</td>
                                     <td>
                                         {% if token.created_time %}
-                                            <div>{{ token.created_time.strftime('%d %b %Y') }}</div>
-                                            <small class="text-muted">{{ token.created_time.strftime('%I:%M %p') }} IST</small>
+                                            {% set created_ist = token.created_time|utc_to_ist if token.created_time else None %}
+                                            {% if created_ist %}
+                                                <div>{{ created_ist.strftime('%d %b %Y') }}</div>
+                                                <small class="text-muted">{{ created_ist.strftime('%I:%M %p') }} IST</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
                                         {% else %}
                                             <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if token.status == 'Completed' and token.completed_time %}
-                                            <div class="text-success fw-semibold">Completed At</div>
-                                            <div>{{ token.completed_time.strftime('%d %b %Y') }}</div>
-                                            <small class="text-muted">{{ token.completed_time.strftime('%I:%M %p') }} IST</small>
+                                            {% set completed_ist = token.completed_time|utc_to_ist if token.completed_time else None %}
+                                            {% if completed_ist %}
+                                                <div class="text-success fw-semibold">Completed At</div>
+                                                <div>{{ completed_ist.strftime('%d %b %Y') }}</div>
+                                                <small class="text-muted">{{ completed_ist.strftime('%I:%M %p') }} IST</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
                                         {% elif token.status == 'Expired' and token.no_show_time %}
-                                            <div class="text-danger fw-semibold">No Show At</div>
-                                            <div>{{ token.no_show_time.strftime('%d %b %Y') }}</div>
-                                            <small class="text-muted">{{ token.no_show_time.strftime('%I:%M %p') }} IST</small>
+                                            {% set noshow_ist = token.no_show_time|utc_to_ist if token.no_show_time else None %}
+                                            {% if noshow_ist %}
+                                                <div class="text-danger fw-semibold">No Show At</div>
+                                                <div>{{ noshow_ist.strftime('%d %b %Y') }}</div>
+                                                <small class="text-muted">{{ noshow_ist.strftime('%I:%M %p') }} IST</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
                                         {% else %}
                                             <span class="text-muted">-</span>
                                         {% endif %}

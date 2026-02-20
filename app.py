@@ -450,8 +450,16 @@ def init_db():
 
 # Helper functions
 def get_ist_now():
-    """Get current time in IST timezone"""
-    return datetime.now(IST)
+    """Get current time in UTC (for database storage)"""
+    return datetime.utcnow()
+
+def ist_to_utc(ist_time):
+    """Convert IST datetime to UTC for database storage"""
+    if not ist_time:
+        return None
+    if ist_time.tzinfo is None:
+        ist_time = IST.localize(ist_time)
+    return ist_time.astimezone(pytz.utc).replace(tzinfo=None)
 
 def utc_to_ist(utc_time):
     """Convert UTC datetime to IST - SINGLE SOURCE OF TRUTH for timezone conversion
@@ -469,8 +477,10 @@ def utc_to_ist(utc_time):
         # Database stores in UTC without timezone - localize as UTC first, then convert
         return pytz.utc.localize(utc_time).astimezone(IST)
     else:
-        # Already has timezone info - just convert
         return utc_time.astimezone(IST)
+
+# Register as Jinja filter
+app.jinja_env.filters['utc_to_ist'] = utc_to_ist
 
 def get_active_token_for_user(user_id):
     try:
