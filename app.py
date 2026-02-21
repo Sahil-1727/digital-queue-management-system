@@ -566,7 +566,11 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
         print("❌ ORS API key not configured - cannot calculate travel time")
         return None
     
-    print(f"🔍 DEBUG: Calculating travel time from ({user_lat}, {user_lon}) to ({center_lat}, {center_lon})")
+    print(f"\n{'='*60}")
+    print(f"🔍 CALCULATE_TRAVEL_TIME CALLED")
+    print(f"User Coordinates: ({user_lat}, {user_lon})")
+    print(f"Center Coordinates: ({center_lat}, {center_lon})")
+    print(f"{'='*60}")
     
     try:
         url = 'https://api.openrouteservice.org/v2/directions/driving-car'
@@ -575,27 +579,43 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
             'coordinates': [[user_lon, user_lat], [center_lon, center_lat]]
         }
         
-        print(f"🔍 DEBUG: Sending request to ORS API...")
+        print(f"📤 Sending to ORS API:")
+        print(f"   URL: {url}")
+        print(f"   Coordinates: [[{user_lon}, {user_lat}], [{center_lon}, {center_lat}]]")
+        
         response = requests.post(url, json=body, headers=headers, timeout=15)
         
-        print(f"🔍 DEBUG: ORS API response status: {response.status_code}")
+        print(f"📥 ORS API Response:")
+        print(f"   Status Code: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
+            
+            # Print FULL API response for debugging
+            print(f"\n📊 FULL API RESPONSE:")
+            print(f"   {data}")
+            
             duration_seconds = data['routes'][0]['summary']['duration']
+            distance_meters = data['routes'][0]['summary']['distance']
             travel_time_minutes = round(duration_seconds / 60)
             
-            print(f"✅ ORS API SUCCESS: Duration={duration_seconds}s, Travel Time={travel_time_minutes} min")
-            print(f"🔍 DEBUG: Returning travel time: {travel_time_minutes} minutes")
+            print(f"\n✅ ORS API SUCCESS:")
+            print(f"   Duration: {duration_seconds} seconds")
+            print(f"   Distance: {distance_meters} meters ({distance_meters/1000:.2f} km)")
+            print(f"   Travel Time: {travel_time_minutes} minutes")
+            print(f"   Calculation: {duration_seconds} / 60 = {duration_seconds/60:.2f} → rounded to {travel_time_minutes}")
+            print(f"{'='*60}\n")
             
             return travel_time_minutes
         else:
             print(f"❌ ORS API error {response.status_code}: {response.text}")
+            print(f"{'='*60}\n")
             return None
     except Exception as e:
         print(f"❌ ORS API exception: {e}")
         import traceback
         traceback.print_exc()
+        print(f"{'='*60}\n")
         return None
 
 def get_user_location(user):
@@ -1240,15 +1260,46 @@ def queue_status(token_id):
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
     
+    # DEBUG: Print stored times
+    print(f"\n{'='*60}")
+    print(f"🔎 QUEUE_STATUS DEBUG - Token #{token.token_number}")
+    print(f"   Leave Time (UTC): {token.leave_time}")
+    print(f"   Reach Time (UTC): {token.reach_time}")
+    
     # Convert UTC to IST using centralized helper
     leave_time = utc_to_ist(leave_time)
     reach_counter_time = utc_to_ist(reach_counter_time)
+    
+    print(f"   Leave Time (IST): {leave_time}")
+    print(f"   Reach Time (IST): {reach_counter_time}")
     
     # Calculate travel time from stored times (NOT from API again)
     travel_time = None
     if leave_time and reach_counter_time:
         travel_time = int((reach_counter_time - leave_time).total_seconds() / 60)
-        print(f"🔍 DEBUG: Calculated travel time from stored times: {travel_time} minutes")
+        print(f"   Calculated Travel Time: {travel_time} minutes")
+    
+    # STEP 2: Force realtime API check for comparison
+    user = User.query.get(session['user_id'])
+    center = ServiceCenter.query.get(token.service_center_id)
+    user_lat, user_lon = get_user_location(user)
+    
+    print(f"\n🚀 REALTIME API CHECK (for comparison):")
+    print(f"   User Location: ({user_lat}, {user_lon})")
+    print(f"   Center Location: ({center.latitude}, {center.longitude})")
+    
+    fresh_travel_time = None
+    if user_lat and user_lon and center.latitude and center.longitude:
+        fresh_travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
+        print(f"   Fresh API Result: {fresh_travel_time} minutes")
+    else:
+        print(f"   ⚠️ Missing coordinates for fresh API call")
+    
+    print(f"\n📊 COMPARISON:")
+    print(f"   DB Stored Travel Time: {travel_time} minutes")
+    print(f"   Fresh API Travel Time: {fresh_travel_time} minutes")
+    print(f"   Match: {'✅ YES' if travel_time == fresh_travel_time else '❌ NO'}")
+    print(f"{'='*60}\n")
     
     return render_template('queue_status.html', 
                          token=token, 
@@ -2498,33 +2549,34 @@ def test_ors_api():
         return f"<h2>ORS API Test</h2><p>❌ OPENROUTESERVICE_API_KEY not configured in environment variables</p>"
     
     try:
-        # Test route: Nagpur Railway Station to Civil Lines (approx 5-7 km)
-        user_lat, user_lon = 21.1466, 79.0882  # Nagpur Railway Station
-        center_lat, center_lon = 21.1458, 79.0882  # Civil Lines
+        # Test with YOUR EXACT coordinates
+        user_lat, user_lon = 21.110168, 79.087917
+        center_lat, center_lon = 20.9125252, 79.1210646
+        
+        print(f"\n{'='*60}")
+        print(f"🧪 TESTING WITH YOUR EXACT COORDINATES")
+        print(f"User: ({user_lat}, {user_lon})")
+        print(f"Center: ({center_lat}, {center_lon})")
+        print(f"{'='*60}\n")
         
         travel_time = calculate_travel_time(user_lat, user_lon, center_lat, center_lon)
         
         if travel_time:
             return f"""
-            <h2>ORS API Test</h2>
+            <h2>ORS API Test - YOUR COORDINATES</h2>
             <p>✅ <strong>SUCCESS!</strong></p>
-            <p><strong>Test Route:</strong> Nagpur Railway Station → Civil Lines</p>
+            <p><strong>User Location:</strong> {user_lat}, {user_lon}</p>
+            <p><strong>Center Location:</strong> {center_lat}, {center_lon}</p>
             <p><strong>Travel Time:</strong> {travel_time} minutes</p>
-            <p><strong>API Status:</strong> Working correctly</p>
+            <p><strong>Expected (Google Maps):</strong> 55-60 minutes</p>
             <hr>
-            <p><em>The API is configured and responding properly.</em></p>
+            <p><em>Check server logs for detailed API response</em></p>
             """
         else:
             return f"""
             <h2>ORS API Test</h2>
             <p>❌ <strong>FAILED</strong></p>
             <p>API returned None (check server logs for details)</p>
-            <p>Possible issues:</n            <ul>
-                <li>Invalid API key</li>
-                <li>Rate limit exceeded</li>
-                <li>Network connectivity issue</li>
-            </ul>
-            </p>
             """
     except Exception as e:
         return f"<h2>ORS API Test</h2><p>❌ ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
