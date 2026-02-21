@@ -2335,18 +2335,20 @@ def admin_analytics():
             print(f"✅ Generating trend chart with {len(counts)} data points")
             fig, ax = plt.subplots(figsize=(10, 4.5), facecolor='white')
             ax.plot(dates, counts, marker='o', linewidth=2.5, markersize=8, color='#0F4C5C')
-            ax.fill_between(range(len(counts)), counts, alpha=0.1, color='#0F4C5C')
+            ax.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
             ax.set_xlabel('Day', fontsize=11, color='#64748B')
             ax.set_ylabel('Tokens Booked', fontsize=11, color='#64748B')
-            ax.set_title('Queue Activity - Last 7 Days', fontsize=13, color='#1E293B', pad=15)
-            ax.grid(True, alpha=0.15, linestyle='--')
+            ax.set_title('Queue Activity - Last 7 Days', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
+            ax.grid(True, alpha=0.15, linestyle='--', color='#CBD5E1')
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_color('#E2E8F0')
+            ax.spines['bottom'].set_color('#E2E8F0')
             ax.set_ylim(bottom=0)
             fig.tight_layout()
             
             buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
             buf.seek(0)
             trend_chart = base64.b64encode(buf.getvalue()).decode()
             plt.close(fig)
@@ -2362,21 +2364,62 @@ def admin_analytics():
             values = [completed, expired, active]
             colors = ['#2BB673', '#B91C1C', '#D97706']
             
-            bars = ax.bar(statuses, values, color=colors, alpha=0.85)
+            bars = ax.bar(statuses, values, color=colors, alpha=0.85, width=0.6)
             
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height, f'{int(height)}',
-                       ha='center', va='bottom', fontsize=11, color='#1E293B')
+                if height > 0:
+                    ax.text(bar.get_x() + bar.get_width()/2., height, f'{int(height)}',
+                           ha='center', va='bottom', fontsize=11, fontweight='bold', color='#1E293B')
             
             ax.set_ylabel('Token Count', fontsize=11, color='#64748B')
-            ax.set_title('Token Status Distribution', fontsize=13, color='#1E293B', pad=15)
+            ax.set_title('Token Status Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_color('#E2E8F0')
+            ax.spines['bottom'].set_color('#E2E8F0')
             ax.set_ylim(bottom=0)
             fig.tight_layout()
             
             buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            buf.seek(0)
+            status_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close(fig)
+            print(f"✅ Status chart generated")
+    except Exception as e:
+        print(f"⚠️ Error generating status chart: {e}")
+    
+    try:
+        # 3. Pie Chart - Online vs Walk-in
+        if total_tokens > 0:
+            fig, ax = plt.subplots(figsize=(7, 5), facecolor='white')
+            labels = ['Online Booking', 'Walk-in']
+            sizes = [online_tokens, walkin_tokens]
+            colors = ['#0F4C5C', '#C0843D']
+            explode = (0.05, 0)
+            
+            wedges, texts, autotexts = ax.pie(sizes, explode=explode, labels=labels, colors=colors, 
+                    autopct='%1.1f%%', shadow=False, startangle=90,
+                    textprops={'fontsize': 11, 'color': '#1E293B'})
+            
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
+                autotext.set_fontsize(12)
+            
+            ax.set_title('Booking Type Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
+            ax.axis('equal')
+            fig.tight_layout()
+            
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            buf.seek(0)
+            booking_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close(fig)
+            print(f"✅ Booking chart generated")
+    except Exception as e:
+        print(f"⚠️ Error generating booking chart: {e}")
             fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
             buf.seek(0)
             status_chart = base64.b64encode(buf.getvalue()).decode()
