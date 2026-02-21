@@ -1973,6 +1973,7 @@ def track_token():
 @app.route('/track/<token_number>')
 def track_status(token_number):
     token = Token.query.filter_by(token_number=token_number).first_or_404()
+    center = ServiceCenter.query.get(token.service_center_id)
     
     if token.is_walkin:
         serving_token = get_walkin_serving_token(token.service_center_id)
@@ -1999,8 +2000,12 @@ def track_status(token_number):
             if serving_token:
                 position += 1
     
+    # Calculate wait time based on position
     wait_time = calculate_wait_time(token.service_center_id, position)
-    reach_counter_time = datetime.now() + timedelta(minutes=wait_time)
+    
+    # Use IST timezone-aware current time
+    current_time_ist = get_ist_now_aware()
+    reach_counter_time = current_time_ist + timedelta(minutes=wait_time)
     
     return render_template('track_status.html',
                          token=token,
