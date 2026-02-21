@@ -555,67 +555,61 @@ def calculate_wait_time(center_id, token_position):
     # Cap maximum wait time at 3 hours (180 minutes)
     return min(wait_minutes, 180)
 
+def get_traffic_multiplier():
+    """Get traffic multiplier based on current time (IST)"""
+    current_time = get_ist_now_aware()
+    hour = current_time.hour
+    
+    # Peak hours: 9-11 AM and 4-8 PM (×2.0)
+    if (9 <= hour < 11) or (16 <= hour < 20):
+        return 2.0
+    # Night hours: 10 PM - 6 AM (×1.2)
+    elif hour >= 22 or hour < 6:
+        return 1.2
+    # Normal hours: rest of the day (×1.8)
+    else:
+        return 1.8
+
 def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
-    """Calculate travel time using OpenRouteService API for real road-based routing"""
+    """Calculate travel time using ORS API + smart traffic adjustment"""
     if not all([user_lat, user_lon, center_lat, center_lon]):
         print("⚠️ Missing coordinates for travel time calculation")
         return None
     
     ors_api_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
     if not ors_api_key:
-        print("❌ ORS API key not configured - cannot calculate travel time")
+        print("❌ ORS API key not configured")
         return None
-    
-    print(f"\n{'='*60}")
-    print(f"🔍 CALCULATE_TRAVEL_TIME CALLED")
-    print(f"User Coordinates: ({user_lat}, {user_lon})")
-    print(f"Center Coordinates: ({center_lat}, {center_lon})")
-    print(f"{'='*60}")
     
     try:
         url = 'https://api.openrouteservice.org/v2/directions/driving-car'
         headers = {'Authorization': ors_api_key}
-        body = {
-            'coordinates': [[user_lon, user_lat], [center_lon, center_lat]]
-        }
-        
-        print(f"📤 Sending to ORS API:")
-        print(f"   URL: {url}")
-        print(f"   Coordinates: [[{user_lon}, {user_lat}], [{center_lon}, {center_lat}]]")
+        body = {'coordinates': [[user_lon, user_lat], [center_lon, center_lat]]}
         
         response = requests.post(url, json=body, headers=headers, timeout=15)
         
-        print(f"📥 ORS API Response:")
-        print(f"   Status Code: {response.status_code}")
-        
         if response.status_code == 200:
             data = response.json()
+            base_duration_seconds = data['routes'][0]['summary']['duration']
+            base_time_minutes = base_duration_seconds / 60
             
-            # Print FULL API response for debugging
-            print(f"\n📊 FULL API RESPONSE:")
-            print(f"   {data}")
+            # Apply traffic multiplier
+            traffic_multiplier = get_traffic_multiplier()
+            adjusted_time_minutes = round(base_time_minutes * traffic_multiplier)
             
-            duration_seconds = data['routes'][0]['summary']['duration']
-            distance_meters = data['routes'][0]['summary']['distance']
-            travel_time_minutes = round(duration_seconds / 60)
+            current_time = get_ist_now_aware()
+            print(f"✅ ORS + Traffic Adjustment:")
+            print(f"   Base time: {base_time_minutes:.1f} min")
+            print(f"   Time: {current_time.strftime('%I:%M %p')} (Hour: {current_time.hour})")
+            print(f"   Traffic multiplier: {traffic_multiplier}x")
+            print(f"   Adjusted time: {adjusted_time_minutes} min")
             
-            print(f"\n✅ ORS API SUCCESS:")
-            print(f"   Duration: {duration_seconds} seconds")
-            print(f"   Distance: {distance_meters} meters ({distance_meters/1000:.2f} km)")
-            print(f"   Travel Time: {travel_time_minutes} minutes")
-            print(f"   Calculation: {duration_seconds} / 60 = {duration_seconds/60:.2f} → rounded to {travel_time_minutes}")
-            print(f"{'='*60}\n")
-            
-            return travel_time_minutes
+            return adjusted_time_minutes
         else:
-            print(f"❌ ORS API error {response.status_code}: {response.text}")
-            print(f"{'='*60}\n")
+            print(f"❌ ORS API error {response.status_code}")
             return None
     except Exception as e:
         print(f"❌ ORS API exception: {e}")
-        import traceback
-        traceback.print_exc()
-        print(f"{'='*60}\n")
         return None
 
 def get_user_location(user):
@@ -1260,46 +1254,14 @@ def queue_status(token_id):
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
     
-    # DEBUG: Print stored times
-    print(f"\n{'='*60}")
-    print(f"🔎 QUEUE_STATUS DEBUG - Token #{token.token_number}")
-    print(f"   Leave Time (UTC): {token.leave_time}")
-    print(f"   Reach Time (UTC): {token.reach_time}")
-    
-    # Convert UTC to IST using centralized helper
+    # Convert UTC to IST
     leave_time = utc_to_ist(leave_time)
     reach_counter_time = utc_to_ist(reach_counter_time)
     
-    print(f"   Leave Time (IST): {leave_time}")
-    print(f"   Reach Time (IST): {reach_counter_time}")
-    
-    # Calculate travel time from stored times (NOT from API again)
+    # Calculate travel time from stored times
     travel_time = None
     if leave_time and reach_counter_time:
         travel_time = int((reach_counter_time - leave_time).total_seconds() / 60)
-        print(f"   Calculated Travel Time: {travel_time} minutes")
-    
-    # STEP 2: Force realtime API check for comparison
-    user = User.query.get(session['user_id'])
-    center = ServiceCenter.query.get(token.service_center_id)
-    user_lat, user_lon = get_user_location(user)
-    
-    print(f"\n🚀 REALTIME API CHECK (for comparison):")
-    print(f"   User Location: ({user_lat}, {user_lon})")
-    print(f"   Center Location: ({center.latitude}, {center.longitude})")
-    
-    fresh_travel_time = None
-    if user_lat and user_lon and center.latitude and center.longitude:
-        fresh_travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
-        print(f"   Fresh API Result: {fresh_travel_time} minutes")
-    else:
-        print(f"   ⚠️ Missing coordinates for fresh API call")
-    
-    print(f"\n📊 COMPARISON:")
-    print(f"   DB Stored Travel Time: {travel_time} minutes")
-    print(f"   Fresh API Travel Time: {fresh_travel_time} minutes")
-    print(f"   Match: {'✅ YES' if travel_time == fresh_travel_time else '❌ NO'}")
-    print(f"{'='*60}\n")
     
     return render_template('queue_status.html', 
                          token=token, 
@@ -2543,43 +2505,43 @@ def test_send_email():
 
 @app.route('/test-ors-api')
 def test_ors_api():
-    """Test endpoint to verify OpenRouteService API is working"""
+    """Test endpoint to verify OpenRouteService API with traffic adjustment"""
     ors_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
     if not ors_key:
-        return f"<h2>ORS API Test</h2><p>❌ OPENROUTESERVICE_API_KEY not configured in environment variables</p>"
+        return f"<h2>ORS API Test</h2><p>❌ OPENROUTESERVICE_API_KEY not configured</p>"
     
     try:
-        # Test with YOUR EXACT coordinates
         user_lat, user_lon = 21.110168, 79.087917
         center_lat, center_lon = 20.9125252, 79.1210646
-        
-        print(f"\n{'='*60}")
-        print(f"🧪 TESTING WITH YOUR EXACT COORDINATES")
-        print(f"User: ({user_lat}, {user_lon})")
-        print(f"Center: ({center_lat}, {center_lon})")
-        print(f"{'='*60}\n")
         
         travel_time = calculate_travel_time(user_lat, user_lon, center_lat, center_lon)
         
         if travel_time:
+            current_time = get_ist_now_aware()
+            multiplier = get_traffic_multiplier()
+            
+            # Calculate what base time would be
+            base_time = round(travel_time / multiplier)
+            
             return f"""
-            <h2>ORS API Test - YOUR COORDINATES</h2>
+            <h2>ORS API Test + Traffic Adjustment</h2>
             <p>✅ <strong>SUCCESS!</strong></p>
-            <p><strong>User Location:</strong> {user_lat}, {user_lon}</p>
-            <p><strong>Center Location:</strong> {center_lat}, {center_lon}</p>
-            <p><strong>Travel Time:</strong> {travel_time} minutes</p>
-            <p><strong>Expected (Google Maps):</strong> 55-60 minutes</p>
+            <p><strong>Current Time:</strong> {current_time.strftime('%I:%M %p')} (Hour: {current_time.hour})</p>
+            <p><strong>Base Time (ORS):</strong> ~{base_time} minutes</p>
+            <p><strong>Traffic Multiplier:</strong> {multiplier}x</p>
+            <p><strong>Adjusted Time:</strong> {travel_time} minutes</p>
             <hr>
-            <p><em>Check server logs for detailed API response</em></p>
+            <p><strong>Traffic Periods:</strong></p>
+            <ul>
+                <li>Peak (9-11 AM, 4-8 PM): ×2.0</li>
+                <li>Normal (11 AM-4 PM, 8-10 PM): ×1.8</li>
+                <li>Night (10 PM-6 AM): ×1.2</li>
+            </ul>
             """
         else:
-            return f"""
-            <h2>ORS API Test</h2>
-            <p>❌ <strong>FAILED</strong></p>
-            <p>API returned None (check server logs for details)</p>
-            """
+            return f"<h2>ORS API Test</h2><p>❌ FAILED - Check logs</p>"
     except Exception as e:
-        return f"<h2>ORS API Test</h2><p>❌ ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
+        return f"<h2>ORS API Test</h2><p>❌ ERROR: {str(e)}</p>"
 
 @app.route('/migrate-db-add-column')
 def migrate_db():
