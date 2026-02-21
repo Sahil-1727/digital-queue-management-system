@@ -1724,6 +1724,14 @@ def admin_profile():
             center.facilities = request.form.get('facilities', '').strip()
             center.avg_service_time = int(request.form.get('avg_service_time', 15))
             
+            # Update location
+            center.location = request.form.get('location', '').strip()
+            lat = request.form.get('latitude', '').strip()
+            lon = request.form.get('longitude', '').strip()
+            if lat and lon:
+                center.latitude = float(lat)
+                center.longitude = float(lon)
+            
             # Update admin email
             admin.email = request.form.get('admin_email', '').strip()
             
