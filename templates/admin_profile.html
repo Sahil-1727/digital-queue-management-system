@@ -1,401 +1,163 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - {{ center.name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    <style>
-        :root[] {
-            --bg-primary: #0F172A;
-            --bg-secondary: #1E293B;
-            --bg-soft: #334155;
-            --text-primary: #F1F5F9;
-            --text-secondary: #CBD5E1;
-            --text-muted: #94A3B8;
-            --accent: var(--color-primary);
-            --accent-hover: var(--color-primary-dark);
-            --border-light: rgba(15, 76, 92, 0.2);
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
-        }
-        
-        /* Animated Background */
-        .bg-pattern {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.05) 0%, transparent 50%);
-        }
-        
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image: 
-                linear-gradient(rgba(15, 76, 92, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(15, 76, 92, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);
-        }
-        
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Navbar */
-        .navbar {
-            background: rgba(15, 23, 42, 0.95) !important;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .navbar-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Card Styles */
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            box-shadow: 0 10px 40px var(--shadow);
-            transition: all 0.3s ease;
-            animation: slideUp 0.5s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 60px var(--shadow);
-        }
-        
-        .form-label {
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .form-control, .form-select {
-            background: var(--bg-soft);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            background: var(--bg-soft);
-            border-color: var(--accent);
-            color: var(--text-primary);
-            box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        /* Buttons */
-        .btn {
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            color: var(--bg-primary);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(15, 76, 92, 0.3);
-            color: var(--bg-primary);
-        }
-        
-        .btn-outline-secondary {
-            background: transparent;
-            border: 1px solid var(--border-light);
-            color: var(--text-secondary);
-        }
-        
-        .btn-outline-secondary:hover {
-            background: var(--bg-soft);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        
-        /* Alert */
-        .alert {
-            border-radius: 12px;
-            border: none;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .alert-success {
-            background: rgba(15, 76, 92, 0.1);
-            color: var(--accent);
-            border: 1px solid rgba(15, 76, 92, 0.3);
-        }
-        
-        .alert-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Section Headers */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        /* Info Badge */
-        .info-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(15, 76, 92, 0.1);
-            border: 1px solid rgba(15, 76, 92, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            color: var(--accent);
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .card {
-                margin-bottom: 1rem;
-            }
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Profile - {{ center.name }}</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
 </head>
 <body class="page-content">
-    <div class="bg-pattern"></div>
-    <div class="bg-grid"></div>
-    
-    <!-- Premium Internal Navbar -->
-    {% set user_name = center.name %}
-    {% set user_type = 'admin' %}
-    {% set breadcrumb = ['Profile', 'Settings'] %}
-    {% include 'includes/internal_navbar.html' %}
-    
-    <div class="content-wrapper">
-        <div class="container py-4">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h1 class="display-6 fw-bold mb-2">Service Center Profile</h1>
-                    <p class="text-muted">Update your service center information visible to customers</p>
-                </div>
-            </div>
-            
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            
-            <form method="POST">
-                <div class="row g-4">
-                    <!-- Basic Information -->
-                    <div class="col-lg-8">
-                        <div class="card p-4">
-                            <div class="section-header">
-                                <div class="section-icon">🏥</div>
-                                <h3 class="section-title">Basic Information</h3>
-                            </div>
-                            
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <div class="info-badge">
-                                        <span>📍</span>
-                                        <span>{{ center.name }} - {{ center.location }}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-12">
-                                    <label class="form-label">Location Address</label>
-                                    <input type="text" class="form-control" name="location" value="{{ center.location or '' }}" placeholder="Civil Lines, Nagpur">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Latitude</label>
-                                    <input type="number" step="0.000001" class="form-control" name="latitude" value="{{ center.latitude or '' }}" placeholder="21.1458">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Longitude</label>
-                                    <input type="number" step="0.000001" class="form-control" name="longitude" value="{{ center.longitude or '' }}" placeholder="79.0882">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="text" class="form-control" name="phone" value="{{ center.phone or '' }}" placeholder="+91 98765 43210">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" class="form-control" name="email" value="{{ center.email or '' }}" placeholder="center@example.com">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Website</label>
-                                    <input type="url" class="form-control" name="website" value="{{ center.website or '' }}" placeholder="https://example.com">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Business Hours</label>
-                                    <input type="text" class="form-control" name="business_hours" value="{{ center.business_hours or '' }}" placeholder="Mon-Sat: 9 AM - 6 PM">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Average Service Time (minutes)</label>
-                                    <input type="number" class="form-control" name="avg_service_time" value="{{ center.avg_service_time }}" min="5" max="120">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Admin Email</label>
-                                    <input type="email" class="form-control" name="admin_email" value="{{ admin.email or '' }}" placeholder="admin@example.com">
-                                </div>
-                                
-                                <div class="col-12">
-                                    <label class="form-label">Description</label>
-                                    <textarea class="form-control" name="description" placeholder="Brief description about your service center...">{{ center.description or '' }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Location & Services -->
-                    <div class="col-lg-4">
-                        <div class="card p-4 mb-4">
-                            <div class="section-header">
-                                <div class="section-icon">📍</div>
-                                <h3 class="section-title">Location Help</h3>
-                            </div>
-                            <p class="text-muted small mb-3">Get coordinates from <a href="https://www.google.com/maps" target="_blank" class="text-decoration-none" style="color: var(--accent);">Google Maps</a>:</p>
-                            <ol class="text-muted small ps-3">
-                                <li>Search your location</li>
-                                <li>Right-click on map</li>
-                                <li>Click coordinates to copy</li>
-                                <li>Paste in fields above</li>
-                            </ol>
-                        </div>
-                        
-                        <div class="card p-4 mb-4">
-                            <div class="section-header">
-                                <div class="section-icon">⚡</div>
-                                <h3 class="section-title">Services</h3>
-                            </div>
-                            <label class="form-label">Services Offered</label>
-                            <textarea class="form-control" name="services_offered" placeholder="• Consultation&#10;• Diagnostics&#10;• Treatment">{{ center.services_offered or '' }}</textarea>
-                        </div>
-                        
-                        <div class="card p-4">
-                            <div class="section-header">
-                                <div class="section-icon">🎯</div>
-                                <h3 class="section-title">Facilities</h3>
-                            </div>
-                            <label class="form-label">Available Facilities</label>
-                            <textarea class="form-control" name="facilities" placeholder="• Parking Available&#10;• AC Waiting Room&#10;• WiFi">{{ center.facilities or '' }}</textarea>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="col-12">
-                        <div class="d-flex gap-3">
-                            <button type="submit" class="btn btn-primary">
-                                <span>💾</span> Save Changes
-                            </button>
-                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <div class="bg-pattern"></div>
+ <div class="bg-grid"></div>
+ 
+ <!-- Premium Internal Navbar -->
+ {% set user_name = center.name %}
+ {% set user_type = 'admin' %}
+ {% set breadcrumb = ['Profile', 'Settings'] %}
+ {% include 'includes/internal_navbar.html' %}
+ 
+ <div class="content-wrapper">
+ <div class="container py-4">
+ <div class="row mb-4">
+ <div class="col-12">
+ <h1 class="display-6 fw-bold mb-2">Service Center Profile</h1>
+ <p class="text-muted">Update your service center information visible to customers</p>
+ </div>
+ </div>
+ 
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ {% for category, message in messages %}
+ <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+ {{ message }}
+ <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+ {% endfor %}
+ {% endif %}
+ {% endwith %}
+ 
+ <form method="POST">
+ <div class="row g-4">
+ <!-- Basic Information -->
+ <div class="col-lg-8">
+ <div class="card p-4">
+ <div class="section-header">
+ <div class="section-icon">🏥</div>
+ <h3 class="section-title">Basic Information</h3>
+ </div>
+ 
+ <div class="row g-3">
+ <div class="col-12">
+ <div class="info-badge">
+ <span>📍</span>
+ <span>{{ center.name }} - {{ center.location }}</span>
+ </div>
+ </div>
+ 
+ <div class="col-12">
+ <label class="form-label">Location Address</label>
+ <input type="text" class="form-control" name="location" value="{{ center.location or '' }}" placeholder="Civil Lines, Nagpur">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Latitude</label>
+ <input type="number" step="0.000001" class="form-control" name="latitude" value="{{ center.latitude or '' }}" placeholder="21.1458">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Longitude</label>
+ <input type="number" step="0.000001" class="form-control" name="longitude" value="{{ center.longitude or '' }}" placeholder="79.0882">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Phone Number</label>
+ <input type="text" class="form-control" name="phone" value="{{ center.phone or '' }}" placeholder="+91 98765 43210">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Email Address</label>
+ <input type="email" class="form-control" name="email" value="{{ center.email or '' }}" placeholder="center@example.com">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Website</label>
+ <input type="url" class="form-control" name="website" value="{{ center.website or '' }}" placeholder="https://example.com">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Business Hours</label>
+ <input type="text" class="form-control" name="business_hours" value="{{ center.business_hours or '' }}" placeholder="Mon-Sat: 9 AM - 6 PM">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Average Service Time (minutes)</label>
+ <input type="number" class="form-control" name="avg_service_time" value="{{ center.avg_service_time }}" min="5" max="120">
+ </div>
+ 
+ <div class="col-md-6">
+ <label class="form-label">Admin Email</label>
+ <input type="email" class="form-control" name="admin_email" value="{{ admin.email or '' }}" placeholder="admin@example.com">
+ </div>
+ 
+ <div class="col-12">
+ <label class="form-label">Description</label>
+ <textarea class="form-control" name="description" placeholder="Brief description about your service center...">{{ center.description or '' }}</textarea>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Location & Services -->
+ <div class="col-lg-4">
+ <div class="card p-4 mb-4">
+ <div class="section-header">
+ <div class="section-icon">📍</div>
+ <h3 class="section-title">Location Help</h3>
+ </div>
+ <p class="text-muted small mb-3">Get coordinates from <a href="https://www.google.com/maps" target="_blank" class="text-decoration-none" style="color: var(--accent);">Google Maps</a>:</p>
+ <ol class="text-muted small ps-3">
+ <li>Search your location</li>
+ <li>Right-click on map</li>
+ <li>Click coordinates to copy</li>
+ <li>Paste in fields above</li>
+ </ol>
+ </div>
+ 
+ <div class="card p-4 mb-4">
+ <div class="section-header">
+ <div class="section-icon">⚡</div>
+ <h3 class="section-title">Services</h3>
+ </div>
+ <label class="form-label">Services Offered</label>
+ <textarea class="form-control" name="services_offered" placeholder="• Consultation&#10;• Diagnostics&#10;• Treatment">{{ center.services_offered or '' }}</textarea>
+ </div>
+ 
+ <div class="card p-4">
+ <div class="section-header">
+ <div class="section-icon">🎯</div>
+ <h3 class="section-title">Facilities</h3>
+ </div>
+ <label class="form-label">Available Facilities</label>
+ <textarea class="form-control" name="facilities" placeholder="• Parking Available&#10;• AC Waiting Room&#10;• WiFi">{{ center.facilities or '' }}</textarea>
+ </div>
+ </div>
+ 
+ <!-- Action Buttons -->
+ <div class="col-12">
+ <div class="d-flex gap-3">
+ <button type="submit" class="btn btn-primary">
+ <span>💾</span> Save Changes
+ </button>
+ <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+ </div>
+ </div>
+ </div>
+ </form>
+ </div>
+ </div>
+ 
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

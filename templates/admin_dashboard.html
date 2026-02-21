@@ -5,67 +5,67 @@
 {% block extra_css %}
 <style>
 .dashboard-container {
-    padding: var(--space-lg);
-    background: var(--bg-main);
-    min-height: 100vh;
+ padding: var(--space-lg);
+ background: var(--bg-main);
+ min-height: 100vh;
 }
 
 .token-display {
-    font-size: 5rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    line-height: 1;
+ font-size: 5rem;
+ font-weight: 700;
+ color: var(--color-primary);
+ line-height: 1;
 }
 
 .counter-card {
-    border-left: 4px solid var(--color-primary);
+ border-left: 4px solid var(--color-primary);
 }
 
 .btn-call-next {
-    padding: 18px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    border-radius: var(--radius-lg);
-    background: var(--color-accent);
-    color: var(--text-inverse);
-    border: none;
-    transition: all var(--transition-fast);
+ padding: 18px;
+ font-size: 1.25rem;
+ font-weight: 600;
+ border-radius: var(--radius-lg);
+ background: var(--color-accent);
+ color: var(--text-inverse);
+ border: none;
+ transition: all var(--transition-fast);
 }
 
 .btn-call-next:hover {
-    background: var(--color-accent-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    color: var(--text-inverse);
+ background: var(--color-accent-hover);
+ transform: translateY(-2px);
+ box-shadow: var(--shadow-md);
+ color: var(--text-inverse);
 }
 
 .queue-table-container {
-    max-height: 400px;
-    overflow-y: auto;
+ max-height: 400px;
+ overflow-y: auto;
 }
 
 .empty-state {
-    padding: var(--space-2xl) 0;
-    text-align: center;
-    color: var(--text-muted);
+ padding: var(--space-2xl) 0;
+ text-align: center;
+ color: var(--text-muted);
 }
 
 .empty-state-icon {
-    font-size: 3rem;
-    opacity: 0.3;
-    margin-bottom: var(--space-md);
+ font-size: 3rem;
+ opacity: 0.3;
+ margin-bottom: var(--space-md);
 }
 
 .status-badge {
-    font-size: 0.8125rem;
-    padding: 4px 10px;
+ font-size: 0.8125rem;
+ padding: 4px 10px;
 }
 
 .auto-refresh-notice {
-    text-align: center;
-    margin-top: var(--space-lg);
-    color: var(--text-muted);
-    font-size: 0.875rem;
+ text-align: center;
+ margin-top: var(--space-lg);
+ color: var(--text-muted);
+ font-size: 0.875rem;
 }
 </style>
 <meta http-equiv="refresh" content="15">
@@ -78,165 +78,165 @@
 {% include 'includes/internal_navbar.html' %}
 
 <div class="dashboard-container">
-    <div class="container-fluid">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+ <div class="container-fluid">
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ {% for category, message in messages %}
+ <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+ {{ message }}
+ <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+ {% endfor %}
+ {% endif %}
+ {% endwith %}
 
-        <div class="row g-4">
-            <!-- Counter 1: Online Queue -->
-            <div class="col-lg-6">
-                <div class="card counter-card mb-3">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-4 text-primary-custom">💻 Counter 1: Online Queue</h5>
-                        {% if serving_token %}
-                            <div class="text-center mb-3">
-                                <div class="token-display">{{ serving_token.token_number }}</div>
-                                <h6 class="mt-2 fw-semibold">{{ serving_token.user.name }}</h6>
-                                <p class="text-muted mb-3">📱 {{ serving_token.user.mobile }}</p>
-                                <div class="d-grid gap-2">
-                                    <a href="{{ url_for('complete_token', token_id=serving_token.id) }}" class="btn btn-success">✓ Complete</a>
-                                    <a href="{{ url_for('no_show', token_id=serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="empty-state">
-                                <div class="empty-state-icon">🚫</div>
-                                <p class="mb-0">No Token Serving</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+ <div class="row g-4">
+ <!-- Counter 1: Online Queue -->
+ <div class="col-lg-6">
+ <div class="card counter-card mb-3">
+ <div class="card-body p-4">
+ <h5 class="fw-bold mb-4 text-primary-custom">💻 Counter 1: Online Queue</h5>
+ {% if serving_token %}
+ <div class="text-center mb-3">
+ <div class="token-display">{{ serving_token.token_number }}</div>
+ <h6 class="mt-2 fw-semibold">{{ serving_token.user.name }}</h6>
+ <p class="text-muted mb-3">📱 {{ serving_token.user.mobile }}</p>
+ <div class="d-grid gap-2">
+ <a href="{{ url_for('complete_token', token_id=serving_token.id) }}" class="btn btn-success">✓ Complete</a>
+ <a href="{{ url_for('no_show', token_id=serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
+ </div>
+ </div>
+ {% else %}
+ <div class="empty-state">
+ <div class="empty-state-icon">🚫</div>
+ <p class="mb-0">No Token Serving</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 
-                {% if can_call_next %}
-                    <a href="{{ url_for('call_next') }}" class="btn btn-call-next w-100 mb-3">
-                        📢 Call Next: {{ next_eligible_token.token_number if next_eligible_token else 'Ready' }}
-                    </a>
-                {% else %}
-                    <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 18px; font-size: 1.25rem; border-radius: var(--radius-lg);">
-                        ⏳ Waiting for User Arrival
-                    </button>
-                {% endif %}
+ {% if can_call_next %}
+ <a href="{{ url_for('call_next') }}" class="btn btn-call-next w-100 mb-3">
+ 📢 Call Next: {{ next_eligible_token.token_number if next_eligible_token else 'Ready' }}
+ </a>
+ {% else %}
+ <button class="btn btn-secondary w-100 mb-3" disabled style="padding: 18px; font-size: 1.25rem; border-radius: var(--radius-lg);">
+ ⏳ Waiting for User Arrival
+ </button>
+ {% endif %}
 
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">📋 Waiting Queue ({{ waiting_tokens|length }})</h6>
-                    </div>
-                    <div class="card-body p-0 queue-table-container">
-                        {% if waiting_tokens %}
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Token</th>
-                                        <th>Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in waiting_tokens %}
-                                    <tr>
-                                        <td>
-                                            <span class="fw-bold text-primary-custom">{{ item.token.token_number }}</span>
-                                            {% if item.status_badge == 'Travelling' %}
-                                                <span class="badge bg-info status-badge ms-2">🚗 Travelling</span>
-                                            {% elif item.status_badge == 'Arrived' %}
-                                                <span class="badge bg-success status-badge ms-2">✅ Arrived</span>
-                                            {% elif item.status_badge == 'Late' %}
-                                                <span class="badge bg-danger status-badge ms-2">⚠️ Late</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="fw-semibold">{{ item.token.user.name }}</td>
-                                        <td>
-                                            <a href="{{ url_for('no_show', token_id=item.token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="empty-state">
-                                <p class="mb-0">No tokens waiting</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+ <div class="card">
+ <div class="card-header">
+ <h6 class="mb-0">📋 Waiting Queue ({{ waiting_tokens|length }})</h6>
+ </div>
+ <div class="card-body p-0 queue-table-container">
+ {% if waiting_tokens %}
+ <table class="table table-hover mb-0">
+ <thead>
+ <tr>
+ <th>Token</th>
+ <th>Name</th>
+ <th>Action</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for item in waiting_tokens %}
+ <tr>
+ <td>
+ <span class="fw-bold text-primary-custom">{{ item.token.token_number }}</span>
+ {% if item.status_badge == 'Travelling' %}
+ <span class="badge bg-info status-badge ms-2">🚗 Travelling</span>
+ {% elif item.status_badge == 'Arrived' %}
+ <span class="badge bg-success status-badge ms-2">✅ Arrived</span>
+ {% elif item.status_badge == 'Late' %}
+ <span class="badge bg-danger status-badge ms-2">⚠️ Late</span>
+ {% endif %}
+ </td>
+ <td class="fw-semibold">{{ item.token.user.name }}</td>
+ <td>
+ <a href="{{ url_for('no_show', token_id=item.token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ {% else %}
+ <div class="empty-state">
+ <p class="mb-0">No tokens waiting</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
 
-            <!-- Counter 2: Walk-In Queue -->
-            <div class="col-lg-6">
-                <div class="card counter-card mb-3">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-4 text-primary-custom">🚶 Counter 2: Walk-In Queue</h5>
-                        {% if walkin_serving_token %}
-                            <div class="text-center mb-3">
-                                <div class="token-display">{{ walkin_serving_token.token_number }}</div>
-                                <h6 class="mt-2 fw-semibold">{{ walkin_serving_token.user.name }}</h6>
-                                <p class="text-muted mb-3">📱 {{ walkin_serving_token.user.mobile }}</p>
-                                <div class="d-grid gap-2">
-                                    <a href="{{ url_for('complete_token', token_id=walkin_serving_token.id) }}" class="btn btn-success">✓ Complete</a>
-                                    <a href="{{ url_for('no_show', token_id=walkin_serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="empty-state">
-                                <div class="empty-state-icon">🚫</div>
-                                <p class="mb-0">No Token Serving</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+ <!-- Counter 2: Walk-In Queue -->
+ <div class="col-lg-6">
+ <div class="card counter-card mb-3">
+ <div class="card-body p-4">
+ <h5 class="fw-bold mb-4 text-primary-custom">🚶 Counter 2: Walk-In Queue</h5>
+ {% if walkin_serving_token %}
+ <div class="text-center mb-3">
+ <div class="token-display">{{ walkin_serving_token.token_number }}</div>
+ <h6 class="mt-2 fw-semibold">{{ walkin_serving_token.user.name }}</h6>
+ <p class="text-muted mb-3">📱 {{ walkin_serving_token.user.mobile }}</p>
+ <div class="d-grid gap-2">
+ <a href="{{ url_for('complete_token', token_id=walkin_serving_token.id) }}" class="btn btn-success">✓ Complete</a>
+ <a href="{{ url_for('no_show', token_id=walkin_serving_token.id) }}" class="btn btn-danger">✗ No Show</a>
+ </div>
+ </div>
+ {% else %}
+ <div class="empty-state">
+ <div class="empty-state-icon">🚫</div>
+ <p class="mb-0">No Token Serving</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 
-                <a href="{{ url_for('call_next_walkin') }}" class="btn btn-call-next w-100 mb-3">📢 Call Next (Walk-In)</a>
-                <a href="{{ url_for('add_walkin') }}" class="btn btn-primary w-100 mb-3" style="padding: 14px; font-size: 1.1rem; border-radius: var(--radius-lg);">
-                    ➕ Add Walk-In Customer
-                </a>
+ <a href="{{ url_for('call_next_walkin') }}" class="btn btn-call-next w-100 mb-3">📢 Call Next (Walk-In)</a>
+ <a href="{{ url_for('add_walkin') }}" class="btn btn-primary w-100 mb-3" style="padding: 14px; font-size: 1.1rem; border-radius: var(--radius-lg);">
+ ➕ Add Walk-In Customer
+ </a>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">📋 Waiting Queue ({{ walkin_waiting_tokens|length }})</h6>
-                    </div>
-                    <div class="card-body p-0 queue-table-container">
-                        {% if walkin_waiting_tokens %}
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Token</th>
-                                        <th>Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for token in walkin_waiting_tokens %}
-                                    <tr>
-                                        <td><span class="fw-bold text-primary-custom">{{ token.token_number }}</span></td>
-                                        <td class="fw-semibold">{{ token.user.name }}</td>
-                                        <td>
-                                            <a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="empty-state">
-                                <p class="mb-0">No walk-in tokens waiting</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+ <div class="card">
+ <div class="card-header">
+ <h6 class="mb-0">📋 Waiting Queue ({{ walkin_waiting_tokens|length }})</h6>
+ </div>
+ <div class="card-body p-0 queue-table-container">
+ {% if walkin_waiting_tokens %}
+ <table class="table table-hover mb-0">
+ <thead>
+ <tr>
+ <th>Token</th>
+ <th>Name</th>
+ <th>Action</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for token in walkin_waiting_tokens %}
+ <tr>
+ <td><span class="fw-bold text-primary-custom">{{ token.token_number }}</span></td>
+ <td class="fw-semibold">{{ token.user.name }}</td>
+ <td>
+ <a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger">No Show</a>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ {% else %}
+ <div class="empty-state">
+ <p class="mb-0">No walk-in tokens waiting</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
+ </div>
 
-        <div class="auto-refresh-notice">
-            <small>⏱️ Page auto-refreshes every 15 seconds</small>
-        </div>
-    </div>
+ <div class="auto-refresh-notice">
+ <small>⏱️ Page auto-refreshes every 15 seconds</small>
+ </div>
+ </div>
 </div>
 {% endblock %}

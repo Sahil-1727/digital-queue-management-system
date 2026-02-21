@@ -1,50 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token QR Code - QueueFlow</title>
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    <style>
-        body { background: #f8f9fa; padding: 20px; }
-        .card { max-width: 400px; margin: 0 auto; border-radius: 15px; }
-        .card-header { background: #0F172A; color: white; border-radius: 15px 15px 0 0; }
-        .qr-container { background: white; padding: 15px; border-radius: 10px; }
-        .btn-primary { background: var(--color-primary); border: none; color: #0F172A; font-weight: 600; }
-        .btn-primary:hover { background: var(--color-primary-dark); color: #0F172A; }
-        @media print {
-            body { background: white; padding: 0; }
-            .no-print { display: none !important; }
-            .card { box-shadow: none; border: none; page-break-inside: avoid; }
-            @page { margin: 0.5cm; size: portrait; }
-        }
-    </style>
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Token QR Code - QueueFlow</title>
+ <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ 
+ </head>
 <body class="page-content">
-    <div class="card hover-lift fade-in-up">
-        <div class="card-header text-center py-2">
-            <h5 class="mb-0">📲 Walk-In Token</h5>
-        </div>
-        <div class="card-body text-center p-3">
-            <h2 style="color: var(--color-primary); font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
-            <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ token.service_center.name }}</p>
-            
-            <div class="qr-container mx-auto" style="max-width: 250px;">
-                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
-            </div>
-            
-            <p class="fw-bold mt-3 mb-1" style="font-size: 0.95rem;">Scan to Track Status</p>
-            <p class="text-muted small mb-3" style="font-size: 0.75rem; word-break: break-all;">{{ track_url }}</p>
-            
-            <div class="d-flex gap-2 justify-content-center no-print">
-                <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print</button>
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-sm">Back</a>
-            </div>
-        </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <div class="card hover-lift fade-in-up">
+ <div class="card-header text-center py-2">
+ <h5 class="mb-0">📲 Walk-In Token</h5>
+ </div>
+ <div class="card-body text-center p-3">
+ <h2 style="color: var(--color-primary); font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
+ <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ token.service_center.name }}</p>
+ 
+ <div class="qr-container mx-auto" style="max-width: 250px;">
+ <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+ </div>
+ 
+ <p class="fw-bold mt-3 mb-1" style="font-size: 0.95rem;">Scan to Track Status</p>
+ <p class="text-muted small mb-3" style="font-size: 0.75rem; word-break: break-all;">{{ track_url }}</p>
+ 
+ <div class="d-flex gap-2 justify-content-center no-print">
+ <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print</button>
+ <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-sm">Back</a>
+ </div>
+ </div>
+ </div>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

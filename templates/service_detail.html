@@ -1,505 +1,202 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ center.name }} - QueueFlow</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    <style>
-        :root[] {
-            --bg-primary: #0F172A;
-            --bg-secondary: #1E293B;
-            --bg-soft: #334155;
-            --text-primary: #F1F5F9;
-            --text-secondary: #CBD5E1;
-            --text-muted: #94A3B8;
-            --accent: var(--color-primary);
-            --accent-hover: var(--color-primary-dark);
-            --border-light: rgba(15, 76, 92, 0.2);
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
-        }
-        
-        /* Animated Background */
-        .bg-pattern {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.05) 0%, transparent 50%);
-        }
-        
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Navbar */
-        .navbar {
-            background: rgba(15, 23, 42, 0.95) !important;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(135deg, rgba(15, 76, 92, 0.1), rgba(20, 184, 166, 0.05));
-            border-bottom: 1px solid var(--border-light);
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-        }
-        
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(15, 76, 92, 0.1);
-            border: 1px solid rgba(15, 76, 92, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            color: var(--accent);
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-        }
-        
-        .hero-location {
-            color: var(--text-muted);
-            font-size: 1.125rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            animation: slideUp 0.5s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px var(--shadow);
-        }
-        
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-        
-        /* Info Cards */
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            box-shadow: 0 10px 40px var(--shadow);
-            transition: all 0.3s ease;
-            animation: slideUp 0.5s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-        }
-        
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-        
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--bg-soft);
-            border-radius: 12px;
-            margin-bottom: 0.75rem;
-            transition: all 0.3s ease;
-        }
-        
-        .info-item:hover {
-            background: rgba(15, 76, 92, 0.05);
-            transform: translateX(4px);
-        }
-        
-        .info-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(15, 76, 92, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .info-content h6 {
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .info-content p {
-            font-size: 1rem;
-            margin: 0;
-        }
-        
-        /* List Styles */
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .feature-list li {
-            padding: 0.75rem;
-            background: var(--bg-soft);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: all 0.3s ease;
-            color: var(--text-primary);
-        }
-        
-        .feature-list li:hover {
-            background: rgba(15, 76, 92, 0.05);
-            transform: translateX(4px);
-        }
-        
-        .feature-list li::before {
-            content: "✓";
-            width: 24px;
-            height: 24px;
-            background: rgba(15, 76, 92, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        
-        /* Buttons */
-        .btn {
-            border-radius: 12px;
-            padding: 1rem 2rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            color: var(--bg-primary);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(15, 76, 92, 0.3);
-            color: var(--bg-primary);
-        }
-        
-        .btn-outline-secondary {
-            background: transparent;
-            border: 1px solid var(--border-light);
-            color: var(--text-secondary);
-        }
-        
-        .btn-outline-secondary:hover {
-            background: var(--bg-soft);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-    </style>
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>{{ center.name }} - QueueFlow</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ 
+ </head>
 <body class="page-content">
-    <div class="bg-pattern"></div>
-    
-    <div class="content-wrapper">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                    <span class="gradient-text">Queue</span>Flow
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        {% if 'user_id' in session %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Services</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('user_profile') }}">Profile</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-                        {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Sign Up</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <div class="container">
-                <div class="hero-badge">
-                    <span>{{ center.category }}</span>
-                </div>
-                <h1 class="hero-title">{{ center.name }}</h1>
-                <p class="hero-location">📍 {{ center.location }}</p>
-                
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">⏱️</div>
-                        <div class="stat-value">~{{ center.avg_service_time }} min</div>
-                        <div class="stat-label">Avg Service Time</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-value">{{ queue_count }}</div>
-                        <div class="stat-label">In Queue</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-value">{% if serving_token %}{{ serving_token.token_number }}{% else %}None{% endif %}</div>
-                        <div class="stat-label">Now Serving</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="container pb-5">
-            <div class="row g-4">
-                <!-- Left Column -->
-                <div class="col-lg-8">
-                    <!-- Description -->
-                    {% if center.description %}
-                    <div class="card p-4 mb-4">
-                        <div class="section-header">
-                            <div class="section-icon">📝</div>
-                            <h3 class="section-title">About</h3>
-                        </div>
-                        <p style="color: var(--text-secondary);" class="mb-0">{{ center.description }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Services Offered -->
-                    {% if center.services_offered %}
-                    <div class="card p-4 mb-4">
-                        <div class="section-header">
-                            <div class="section-icon">⚡</div>
-                            <h3 class="section-title">Services Offered</h3>
-                        </div>
-                        <ul class="feature-list">
-                            {% for service in center.services_offered.split('\n') %}
-                                {% if service.strip() %}
-                                <li style="color: var(--text-primary);">{{ service.strip('• ').strip() }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Facilities -->
-                    {% if center.facilities %}
-                    <div class="card p-4">
-                        <div class="section-header">
-                            <div class="section-icon">🎯</div>
-                            <h3 class="section-title">Facilities</h3>
-                        </div>
-                        <ul class="feature-list">
-                            {% for facility in center.facilities.split('\n') %}
-                                {% if facility.strip() %}
-                                <li style="color: var(--text-primary);">{{ facility.strip('• ').strip() }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Right Column -->
-                <div class="col-lg-4">
-                    <!-- Contact Information -->
-                    <div class="card p-4 mb-4">
-                        <div class="section-header">
-                            <div class="section-icon">📞</div>
-                            <h3 class="section-title">Contact</h3>
-                        </div>
-                        
-                        {% if center.phone %}
-                        <div class="info-item">
-                            <div class="info-icon">📱</div>
-                            <div class="info-content">
-                                <h6 style="color: var(--text-muted);">Phone</h6>
-                                <p style="color: var(--text-primary);">{{ center.phone }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if center.email %}
-                        <div class="info-item">
-                            <div class="info-icon">✉️</div>
-                            <div class="info-content">
-                                <h6 style="color: var(--text-muted);">Email</h6>
-                                <p style="color: var(--text-primary);">{{ center.email }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if center.website %}
-                        <div class="info-item">
-                            <div class="info-icon">🌐</div>
-                            <div class="info-content">
-                                <h6 style="color: var(--text-muted);">Website</h6>
-                                <p style="color: var(--text-primary);"><a href="{{ center.website }}" target="_blank" style="color: var(--accent); text-decoration: none;">Visit Website</a></p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if center.business_hours %}
-                        <div class="info-item">
-                            <div class="info-icon">🕐</div>
-                            <div class="info-content">
-                                <h6 style="color: var(--text-muted);">Business Hours</h6>
-                                <p style="color: var(--text-primary);">{{ center.business_hours }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="card p-4">
-                        <div class="section-header">
-                            <div class="section-icon">🎫</div>
-                            <h3 class="section-title">Book Token</h3>
-                        </div>
-                        
-                        {% if active_token %}
-                            <p class="text-muted mb-3">You already have an active token</p>
-                            <a href="{{ url_for('queue_status', token_id=active_token.id) }}" class="btn btn-outline-secondary w-100">View My Token</a>
-                        {% elif queue_count >= 15 %}
-                            <p class="text-muted mb-3">Queue is currently full</p>
-                            <button class="btn btn-outline-secondary w-100" disabled>Queue Full</button>
-                        {% elif 'user_id' in session %}
-                            <p class="text-muted mb-3">Ready to book your token?</p>
-                            <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary w-100">Book Now</a>
-                        {% else %}
-                            <p class="text-muted mb-3">Please login to book a token</p>
-                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Login to Book</a>
-                        {% endif %}
-                        
-                        <a href="{{ url_for('services') }}" class="btn btn-outline-secondary w-100 mt-2">← Back to Services</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <div class="bg-pattern"></div>
+ 
+ <div class="content-wrapper">
+ <!-- Navbar -->
+ <nav class="navbar navbar-expand-lg navbar-dark">
+ <div class="container">
+ <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+ <span class="gradient-text">Queue</span>Flow
+ </a>
+ <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+ <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse" id="navbarNav">
+ <ul class="navbar-nav ms-auto">
+ {% if 'user_id' in session %}
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Services</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('user_profile') }}">Profile</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+ {% else %}
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Sign Up</a></li>
+ {% endif %}
+ </ul>
+ </div>
+ </div>
+ </nav>
+ 
+ <!-- Hero Section -->
+ <div class="hero-section">
+ <div class="container">
+ <div class="hero-badge">
+ <span>{{ center.category }}</span>
+ </div>
+ <h1 class="hero-title">{{ center.name }}</h1>
+ <p class="hero-location">📍 {{ center.location }}</p>
+ 
+ <!-- Stats Grid -->
+ <div class="stats-grid">
+ <div class="stat-card">
+ <div class="stat-icon">⏱️</div>
+ <div class="stat-value">~{{ center.avg_service_time }} min</div>
+ <div class="stat-label">Avg Service Time</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-icon">👥</div>
+ <div class="stat-value">{{ queue_count }}</div>
+ <div class="stat-label">In Queue</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-icon">🎯</div>
+ <div class="stat-value">{% if serving_token %}{{ serving_token.token_number }}{% else %}None{% endif %}</div>
+ <div class="stat-label">Now Serving</div>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Main Content -->
+ <div class="container pb-5">
+ <div class="row g-4">
+ <!-- Left Column -->
+ <div class="col-lg-8">
+ <!-- Description -->
+ {% if center.description %}
+ <div class="card p-4 mb-4">
+ <div class="section-header">
+ <div class="section-icon">📝</div>
+ <h3 class="section-title">About</h3>
+ </div>
+ <p style="color: var(--text-secondary);" class="mb-0">{{ center.description }}</p>
+ </div>
+ {% endif %}
+ 
+ <!-- Services Offered -->
+ {% if center.services_offered %}
+ <div class="card p-4 mb-4">
+ <div class="section-header">
+ <div class="section-icon">⚡</div>
+ <h3 class="section-title">Services Offered</h3>
+ </div>
+ <ul class="feature-list">
+ {% for service in center.services_offered.split('\n') %}
+ {% if service.strip() %}
+ <li style="color: var(--text-primary);">{{ service.strip('• ').strip() }}</li>
+ {% endif %}
+ {% endfor %}
+ </ul>
+ </div>
+ {% endif %}
+ 
+ <!-- Facilities -->
+ {% if center.facilities %}
+ <div class="card p-4">
+ <div class="section-header">
+ <div class="section-icon">🎯</div>
+ <h3 class="section-title">Facilities</h3>
+ </div>
+ <ul class="feature-list">
+ {% for facility in center.facilities.split('\n') %}
+ {% if facility.strip() %}
+ <li style="color: var(--text-primary);">{{ facility.strip('• ').strip() }}</li>
+ {% endif %}
+ {% endfor %}
+ </ul>
+ </div>
+ {% endif %}
+ </div>
+ 
+ <!-- Right Column -->
+ <div class="col-lg-4">
+ <!-- Contact Information -->
+ <div class="card p-4 mb-4">
+ <div class="section-header">
+ <div class="section-icon">📞</div>
+ <h3 class="section-title">Contact</h3>
+ </div>
+ 
+ {% if center.phone %}
+ <div class="info-item">
+ <div class="info-icon">📱</div>
+ <div class="info-content">
+ <h6 style="color: var(--text-muted);">Phone</h6>
+ <p style="color: var(--text-primary);">{{ center.phone }}</p>
+ </div>
+ </div>
+ {% endif %}
+ 
+ {% if center.email %}
+ <div class="info-item">
+ <div class="info-icon">✉️</div>
+ <div class="info-content">
+ <h6 style="color: var(--text-muted);">Email</h6>
+ <p style="color: var(--text-primary);">{{ center.email }}</p>
+ </div>
+ </div>
+ {% endif %}
+ 
+ {% if center.website %}
+ <div class="info-item">
+ <div class="info-icon">🌐</div>
+ <div class="info-content">
+ <h6 style="color: var(--text-muted);">Website</h6>
+ <p style="color: var(--text-primary);"><a href="{{ center.website }}" target="_blank" style="color: var(--accent); text-decoration: none;">Visit Website</a></p>
+ </div>
+ </div>
+ {% endif %}
+ 
+ {% if center.business_hours %}
+ <div class="info-item">
+ <div class="info-icon">🕐</div>
+ <div class="info-content">
+ <h6 style="color: var(--text-muted);">Business Hours</h6>
+ <p style="color: var(--text-primary);">{{ center.business_hours }}</p>
+ </div>
+ </div>
+ {% endif %}
+ </div>
+ 
+ <!-- Action Buttons -->
+ <div class="card p-4">
+ <div class="section-header">
+ <div class="section-icon">🎫</div>
+ <h3 class="section-title">Book Token</h3>
+ </div>
+ 
+ {% if active_token %}
+ <p class="text-muted mb-3">You already have an active token</p>
+ <a href="{{ url_for('queue_status', token_id=active_token.id) }}" class="btn btn-outline-secondary w-100">View My Token</a>
+ {% elif queue_count >= 15 %}
+ <p class="text-muted mb-3">Queue is currently full</p>
+ <button class="btn btn-outline-secondary w-100" disabled>Queue Full</button>
+ {% elif 'user_id' in session %}
+ <p class="text-muted mb-3">Ready to book your token?</p>
+ <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary w-100">Book Now</a>
+ {% else %}
+ <p class="text-muted mb-3">Please login to book a token</p>
+ <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Login to Book</a>
+ {% endif %}
+ 
+ <a href="{{ url_for('services') }}" class="btn btn-outline-secondary w-100 mt-2">← Back to Services</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

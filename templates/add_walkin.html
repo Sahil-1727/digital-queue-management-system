@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Walk-In - QueueFlow Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Add Walk-In - QueueFlow Admin</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ 
+ </head>
 <body class="auth-page">
-    <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100 py-5">
-            <div class="col-md-6">
-                <div class="card auth-card slide-up">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <div class="auth-icon mb-3" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%)">🚶</div>
-                            <h2 class="gradient-text mb-2">Add Walk-In Customer</h2>
-                            <p class="text-muted">{{ center.name }}</p>
-                        </div>
-                        
-                        <form method="POST">
-                            <div class="mb-3">
-                                <label class="form-label">Customer Name (Optional)</label>
-                                <input type="text" class="form-control" name="name" placeholder="Enter name or leave blank">
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">Mobile Number (Optional)</label>
-                                <input type="text" class="form-control" name="mobile" placeholder="10-digit mobile number" maxlength="10">
-                                <small class="text-muted">If provided, customer can track token online</small>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-success w-100 mb-3">Generate Token</button>
-                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary w-100">Cancel</a>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <div class="container">
+ <div class="row justify-content-center align-items-center min-vh-100 py-5">
+ <div class="col-md-6">
+ <div class="card auth-card slide-up">
+ <div class="card-body p-5">
+ <div class="text-center mb-4">
+ <div class="auth-icon mb-3" >🚶</div>
+ <h2 class="gradient-text mb-2">Add Walk-In Customer</h2>
+ <p class="text-muted">{{ center.name }}</p>
+ </div>
+ 
+ <form method="POST">
+ <div class="mb-3">
+ <label class="form-label">Customer Name (Optional)</label>
+ <input type="text" class="form-control" name="name" placeholder="Enter name or leave blank">
+ </div>
+ 
+ <div class="mb-4">
+ <label class="form-label">Mobile Number (Optional)</label>
+ <input type="text" class="form-control" name="mobile" placeholder="10-digit mobile number" maxlength="10">
+ <small class="text-muted">If provided, customer can track token online</small>
+ </div>
+ 
+ <button type="submit" class="btn btn-success w-100 mb-3">Generate Token</button>
+ <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary w-100">Cancel</a>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

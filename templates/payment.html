@@ -1,59 +1,59 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment - QueueFlow</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Payment - QueueFlow</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ </head>
 <body class="auth-page page-content" style="background: var(--bg-main); position: relative; min-height: 100vh; overflow-y: auto;">
-    <!-- Animated Background -->
-    <div style="position: fixed; inset: 0; z-index: 0;">
-        <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.1) 0%, transparent 50%);"></div>
-        <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
-    </div>
-    <div class="container" style="position: relative; z-index: 1; padding-top: 2rem; padding-bottom: 2rem;">
-        <div class="row justify-content-center py-5">
-            <div class="col-md-6">
-                <div class="card glass-effect hover-lift fade-in-up">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <div style="font-size: 4rem; margin-bottom: 1rem;">💳</div>
-                            <h2 class="gradient-text mb-2">Confirm Payment</h2>
-                            <p class="text-muted">Complete your token booking</p>
-                        </div>
-                        
-                        <div class="token-card mb-4">
-                            <p class="text-muted text-sm mb-2">Your Token Number</p>
-                            <h1 class="token-display mb-2">{{ token.token_number }}</h1>
-                            <p class="text-muted mb-0">{{ token.service_center.name }}</p>
-                        </div>
+ <!-- Animated Background -->
+ <div style="position: fixed; inset: 0; z-index: 0;">
+ <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.1) 0%, transparent 50%);"></div>
+ <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
+ </div>
+ <div class="container" style="position: relative; z-index: 1; padding-top: 2rem; padding-bottom: 2rem;">
+ <div class="row justify-content-center py-5">
+ <div class="col-md-6">
+ <div class="card glass-effect hover-lift fade-in-up">
+ <div class="card-body p-5">
+ <div class="text-center mb-4">
+ <div style="font-size: 4rem; margin-bottom: 1rem;">💳</div>
+ <h2 class="gradient-text mb-2">Confirm Payment</h2>
+ <p class="text-muted">Complete your token booking</p>
+ </div>
+ 
+ <div class="token-card mb-4">
+ <p class="text-muted text-sm mb-2">Your Token Number</p>
+ <h1 class="token-display mb-2">{{ token.token_number }}</h1>
+ <p class="text-muted mb-0">{{ token.service_center.name }}</p>
+ </div>
 
-                        <div class="text-center p-4 mb-4" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: var(--radius-xl);">
-                            <p class="text-sm mb-2">Token Confirmation Fee</p>
-                            <h1 class="display-4 fw-bold mb-0">₹10</h1>
-                        </div>
+ <div class="text-center p-4 mb-4" >
+ <p class="text-sm mb-2">Token Confirmation Fee</p>
+ <h1 class="display-4 fw-bold mb-0">₹10</h1>
+ </div>
 
-                        <div class="alert alert-warning mb-4">
-                            <small><strong>⚠️ Note:</strong> This is a simulated payment. No actual transaction will occur.</small>
-                        </div>
+ <div class="alert alert-warning mb-4">
+ <small><strong>⚠️ Note:</strong> This is a simulated payment. No actual transaction will occur.</small>
+ </div>
 
-                        <form method="POST">
-                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                                👍 Pay Now & Confirm
-                            </button>
-                        </form>
+ <form method="POST">
+ <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+ 👍 Pay Now & Confirm
+ </button>
+ </form>
 
-                        <div class="text-center">
-                            <a href="{{ url_for('services') }}" class="link-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="text-center">
+ <a href="{{ url_for('services') }}" class="link-secondary">Cancel</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>

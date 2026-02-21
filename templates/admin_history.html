@@ -1,157 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction History - QueueFlow Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    
-    <style>
-        body { background: #F8FAFC; }
-        .admin-header { 
-            background: #0F172A; 
-            color: white; 
-            padding: 1.5rem 0; 
-            border-bottom: 2px solid var(--color-primary);
-        }
-        .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
-    </style>
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Transaction History - QueueFlow Admin</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ 
+ 
+ </head>
 <body class="page-content">
-    <div class="admin-header">
-        <div class="container-fluid px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">📊 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Transaction History</span> - {{ center.name }}</h4>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm">← Dashboard</a>
-                    <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="admin-header">
+ <div class="container-fluid px-4">
+ <div class="d-flex justify-content-between align-items-center">
+ <h4 class="mb-0 fw-bold">📊 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Transaction History</span> - {{ center.name }}</h4>
+ <div class="d-flex gap-2">
+ <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm">← Dashboard</a>
+ <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <div class="container-fluid px-4 py-4">
-        
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Completed')|list|length }}</h2>
-                        <p class="mb-0 fw-semibold">Completed</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Expired')|list|length }}</h2>
-                        <p class="mb-0 fw-semibold">No-Show / Expired</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2" style="color: var(--color-primary);">{{ tokens|length }}</h2>
-                        <p class="mb-0 fw-semibold">Total Transactions</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+ <div class="container-fluid px-4 py-4">
+ 
+ <div class="row g-3 mb-4">
+ <div class="col-md-4">
+ <div class="card text-center">
+ <div class="card-body py-4">
+ <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Completed')|list|length }}</h2>
+ <p class="mb-0 fw-semibold">Completed</p>
+ </div>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="card text-center">
+ <div class="card-body py-4">
+ <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Expired')|list|length }}</h2>
+ <p class="mb-0 fw-semibold">No-Show / Expired</p>
+ </div>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="card text-center">
+ <div class="card-body py-4">
+ <h2 class="display-4 fw-bold mb-2" style="color: var(--color-primary);">{{ tokens|length }}</h2>
+ <p class="mb-0 fw-semibold">Total Transactions</p>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        <div class="card hover-lift fade-in-up">
-            <div class="card-body p-0">
-                {% if tokens %}
-                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th class="px-4 py-3">Token</th>
-                                    <th>Customer Name</th>
-                                    <th>Mobile</th>
-                                    <th>Booked At</th>
-                                    <th>Event Time</th>
-                                    <th>Status</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for token in tokens %}
-                                <tr>
-                                    <td class="px-4 py-3">
-                                        <span class="fw-bold" style="font-size: 1.1rem; color: var(--color-primary);">{{ token.token_number }}</span>
-                                    </td>
-                                    <td class="fw-semibold">{{ token.user.name }}</td>
-                                    <td>{{ token.user.mobile }}</td>
-                                    <td>
-                                        {% if token.created_time %}
-                                            {% set created_ist = token.created_time|utc_to_ist if token.created_time else None %}
-                                            {% if created_ist %}
-                                                <div>{{ created_ist.strftime('%d %b %Y') }}</div>
-                                                <small class="text-muted">{{ created_ist.strftime('%I:%M %p') }} IST</small>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if token.status == 'Completed' and token.completed_time %}
-                                            {% set completed_ist = token.completed_time|utc_to_ist if token.completed_time else None %}
-                                            {% if completed_ist %}
-                                                <div class="text-success fw-semibold">Completed At</div>
-                                                <div>{{ completed_ist.strftime('%d %b %Y') }}</div>
-                                                <small class="text-muted">{{ completed_ist.strftime('%I:%M %p') }} IST</small>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        {% elif token.status == 'Expired' and token.no_show_time %}
-                                            {% set noshow_ist = token.no_show_time|utc_to_ist if token.no_show_time else None %}
-                                            {% if noshow_ist %}
-                                                <div class="text-danger fw-semibold">No Show At</div>
-                                                <div>{{ noshow_ist.strftime('%d %b %Y') }}</div>
-                                                <small class="text-muted">{{ noshow_ist.strftime('%I:%M %p') }} IST</small>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="badge {% if token.status == 'Completed' %}badge-success{% else %}bg-secondary{% endif %}">
-                                            {% if token.status == 'Completed' %}✓ Completed{% else %}✗ {{ token.status }}{% endif %}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {% if token.no_show_reason %}
-                                            <small class="text-danger" style="cursor: pointer;" title="{{ token.no_show_reason }}">
-                                                📝 View Reason
-                                            </small>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <div style="font-size: 4rem; opacity: 0.2;">📋</div>
-                        <h4 class="text-muted fw-bold mt-3">No History Yet</h4>
-                        <p class="text-muted">Completed and expired tokens will appear here</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+ <div class="card hover-lift fade-in-up">
+ <div class="card-body p-0">
+ {% if tokens %}
+ <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+ <table class="table table-hover mb-0">
+ <thead class="table-light sticky-top">
+ <tr>
+ <th class="px-4 py-3">Token</th>
+ <th>Customer Name</th>
+ <th>Mobile</th>
+ <th>Booked At</th>
+ <th>Event Time</th>
+ <th>Status</th>
+ <th>Notes</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for token in tokens %}
+ <tr>
+ <td class="px-4 py-3">
+ <span class="fw-bold" style="font-size: 1.1rem; color: var(--color-primary);">{{ token.token_number }}</span>
+ </td>
+ <td class="fw-semibold">{{ token.user.name }}</td>
+ <td>{{ token.user.mobile }}</td>
+ <td>
+ {% if token.created_time %}
+ {% set created_ist = token.created_time|utc_to_ist if token.created_time else None %}
+ {% if created_ist %}
+ <div>{{ created_ist.strftime('%d %b %Y') }}</div>
+ <small class="text-muted">{{ created_ist.strftime('%I:%M %p') }} IST</small>
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ </td>
+ <td>
+ {% if token.status == 'Completed' and token.completed_time %}
+ {% set completed_ist = token.completed_time|utc_to_ist if token.completed_time else None %}
+ {% if completed_ist %}
+ <div class="text-success fw-semibold">Completed At</div>
+ <div>{{ completed_ist.strftime('%d %b %Y') }}</div>
+ <small class="text-muted">{{ completed_ist.strftime('%I:%M %p') }} IST</small>
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ {% elif token.status == 'Expired' and token.no_show_time %}
+ {% set noshow_ist = token.no_show_time|utc_to_ist if token.no_show_time else None %}
+ {% if noshow_ist %}
+ <div class="text-danger fw-semibold">No Show At</div>
+ <div>{{ noshow_ist.strftime('%d %b %Y') }}</div>
+ <small class="text-muted">{{ noshow_ist.strftime('%I:%M %p') }} IST</small>
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ </td>
+ <td>
+ <span class="badge {% if token.status == 'Completed' %}badge-success{% else %}bg-secondary{% endif %}">
+ {% if token.status == 'Completed' %}✓ Completed{% else %}✗ {{ token.status }}{% endif %}
+ </span>
+ </td>
+ <td>
+ {% if token.no_show_reason %}
+ <small class="text-danger" style="cursor: pointer;" title="{{ token.no_show_reason }}">
+ 📝 View Reason
+ </small>
+ {% else %}
+ <span class="text-muted">-</span>
+ {% endif %}
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ <div class="text-center py-5">
+ <div style="font-size: 4rem; opacity: 0.2;">📋</div>
+ <h4 class="text-muted fw-bold mt-3">No History Yet</h4>
+ <p class="text-muted">Completed and expired tokens will appear here</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

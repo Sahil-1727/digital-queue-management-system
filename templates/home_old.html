@@ -1,464 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueueFlow - Smart Queue Management Platform</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-    <style>
-        /* Hero Section */
-        .hero-gradient {
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .hero-gradient::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(45,212,191,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
-        }
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            padding: 6rem 0;
-            color: white;
-        }
-        .hero-title {
-            font-size: 3.75rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-        }
-        .hero-subtitle {
-            font-size: 1.375rem;
-            opacity: 0.95;
-            margin-bottom: 2.5rem;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 750px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
-        }
-        .hero-cta {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-hero-primary {
-            background: var(--color-primary);
-            color: #0F172A;
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(15, 76, 92, 0.3);
-            transition: all 0.3s ease;
-        }
-        .btn-hero-primary:hover {
-            background: var(--color-primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(15, 76, 92, 0.4);
-            color: white;
-        }
-        .btn-hero-secondary {
-            background: rgba(15, 76, 92, 0.1);
-            backdrop-filter: blur(10px);
-            color: var(--color-primary);
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            border-radius: 0.75rem;
-            border: 2px solid rgba(15, 76, 92, 0.3);
-            transition: all 0.3s ease;
-        }
-        .btn-hero-secondary:hover {
-            background: rgba(15, 76, 92, 0.2);
-            border-color: var(--color-primary);
-            transform: translateY(-3px);
-            color: var(--color-primary);
-        }
-        /* Stats */
-        .stats-section {
-            background: white;
-            padding: 3rem 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .stat-card {
-            text-align: center;
-            padding: 2rem 1rem;
-        }
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #0F172A 0%, var(--color-primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .stat-label {
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-        /* Features */
-        .features-section {
-            padding: 6rem 0;
-        }
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 4rem;
-        }
-        .section-title {
-            font-size: 2.75rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            color: #0F172A;
-        }
-        .section-description {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-        }
-        .feature-card {
-            background: white;
-            border-radius: 1.25rem;
-            padding: 2.5rem;
-            height: 100%;
-            border: 1px solid var(--border-light);
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-            border-color: var(--color-primary);
-        }
-        .feature-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-        }
-        .feature-title {
-            font-size: 1.375rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: #0F172A;
-        }
-        .feature-description {
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-            padding: 5rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(15,23,42,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)" /></svg>');
-        }
-        .cta-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            color: #0F172A;
-        }
-        .cta-title {
-            font-size: 2.75rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-        }
-        .cta-description {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            margin-bottom: 2.5rem;
-        }
-        .cta-btn-primary {
-            background: #0F172A;
-            color: white;
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3);
-            transition: all 0.3s ease;
-        }
-        .cta-btn-primary:hover {
-            background: #020617;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.4);
-            color: white;
-        }
-        .cta-btn-secondary {
-            background: white;
-            color: #0F172A;
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            border-radius: 0.75rem;
-            border: 2px solid #0F172A;
-            transition: all 0.3s ease;
-        }
-        .cta-btn-secondary:hover {
-            background: #0F172A;
-            color: white;
-            transform: translateY(-3px);
-        }
-    </style>
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>QueueFlow - Smart Queue Management Platform</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+ <style>
+ /* Hero Section */
+ .hero-gradient {
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+ position: relative;
+ overflow: hidden;
+ }
+ .hero-gradient::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(45,212,191,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
+ }
+ .hero-content {
+ position: relative;
+ z-index: 1;
+ padding: 6rem 0;
+ color: white;
+ }
+ .hero-title {
+ font-size: 3.75rem;
+ font-weight: 900;
+ margin-bottom: 1.5rem;
+ line-height: 1.15;
+ letter-spacing: -0.02em;
+ }
+ .hero-subtitle {
+ font-size: 1.375rem;
+ opacity: 0.95;
+ margin-bottom: 2.5rem;
+ font-weight: 400;
+ color: rgba(255, 255, 255, 0.9);
+ max-width: 750px;
+ margin-left: auto;
+ margin-right: auto;
+ line-height: 1.6;
+ }
+ .hero-cta {
+ display: flex;
+ gap: 1rem;
+ justify-content: center;
+ flex-wrap: wrap;
+ }
+ .btn-hero-primary {
+ background: var(--color-primary);
+ color: var(--text-primary);
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 700;
+ border-radius: 0.75rem;
+ box-shadow: 0 10px 25px rgba(15, 76, 92, 0.3);
+ transition: all 0.3s ease;
+ }
+ .btn-hero-primary:hover {
+ background: var(--color-primary-dark);
+ transform: translateY(-3px);
+ box-shadow: 0 15px 35px rgba(15, 76, 92, 0.4);
+ color: white;
+ }
+ .btn-hero-secondary {
+ background: rgba(15, 76, 92, 0.1);
+ backdrop-filter: blur(10px);
+ color: var(--color-primary);
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 700;
+ border-radius: 0.75rem;
+ border: 2px solid rgba(15, 76, 92, 0.3);
+ transition: all 0.3s ease;
+ }
+ .btn-hero-secondary:hover {
+ background: rgba(15, 76, 92, 0.2);
+ border-color: var(--color-primary);
+ transform: translateY(-3px);
+ color: var(--color-primary);
+ }
+ /* Stats */
+ .stats-section {
+ background: white;
+ padding: 3rem 0;
+ box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+ }
+ .stat-card {
+ text-align: center;
+ padding: 2rem 1rem;
+ }
+ .stat-number {
+ font-size: 3rem;
+ font-weight: 900;
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+ .stat-label {
+ color: var(--text-secondary);
+ font-weight: 600;
+ margin-top: 0.5rem;
+ }
+ /* Features */
+ .features-section {
+ padding: 6rem 0;
+ }
+ .section-header {
+ text-align: center;
+ max-width: 700px;
+ margin: 0 auto 4rem;
+ }
+ .section-title {
+ font-size: 2.75rem;
+ font-weight: 900;
+ margin-bottom: 1rem;
+ color: var(--text-primary);
+ }
+ .section-description {
+ font-size: 1.25rem;
+ color: var(--text-secondary);
+ }
+ .feature-card {
+ background: white;
+ border-radius: 1.25rem;
+ padding: 2.5rem;
+ height: 100%;
+ border: 1px solid var(--border-light);
+ transition: all 0.3s ease;
+ }
+ .feature-card:hover {
+ transform: translateY(-8px);
+ box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+ border-color: var(--color-primary);
+ }
+ .feature-icon {
+ width: 64px;
+ height: 64px;
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+ border-radius: 1rem;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 2rem;
+ margin-bottom: 1.5rem;
+ }
+ .feature-title {
+ font-size: 1.375rem;
+ font-weight: 700;
+ margin-bottom: 1rem;
+ color: var(--text-primary);
+ }
+ .feature-description {
+ color: var(--text-secondary);
+ line-height: 1.7;
+ }
+ /* CTA Section */
+ .cta-section {
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+ padding: 5rem 0;
+ position: relative;
+ overflow: hidden;
+ }
+ .cta-section::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(15,23,42,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)" /></svg>');
+ }
+ .cta-content {
+ position: relative;
+ z-index: 1;
+ text-align: center;
+ color: var(--text-primary);
+ }
+ .cta-title {
+ font-size: 2.75rem;
+ font-weight: 900;
+ margin-bottom: 1rem;
+ }
+ .cta-description {
+ font-size: 1.25rem;
+ opacity: 0.9;
+ margin-bottom: 2.5rem;
+ }
+ .cta-btn-primary {
+ background: var(--color-primary);
+ color: white;
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 700;
+ border-radius: 0.75rem;
+ box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3);
+ transition: all 0.3s ease;
+ }
+ .cta-btn-primary:hover {
+ background: var(--text-primary);
+ transform: translateY(-3px);
+ box-shadow: 0 15px 35px rgba(15, 23, 42, 0.4);
+ color: white;
+ }
+ .cta-btn-secondary {
+ background: white;
+ color: var(--text-primary);
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 700;
+ border-radius: 0.75rem;
+ border: 2px solid var(--color-primary);
+ transition: all 0.3s ease;
+ }
+ .cta-btn-secondary:hover {
+ background: var(--color-primary);
+ color: white;
+ transform: translateY(-3px);
+ }
+ </style>
+ 
+ </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand gradient-text fw-bold" href="{{ url_for('index') }}">QueueFlow</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('track_token') }}">Track Token</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Login
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('login') }}">👤 User Login</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_login') }}">🔒 Service Center Admin</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('superadmin_login') }}">👑 Super Admin</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-sm">Sign Up</a></li>
-                    <li class="nav-item"><a href="{{ url_for('register_center') }}" class="btn btn-primary btn-sm">Register Service Center</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+ <!-- Navbar -->
+ <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+ <div class="container">
+ <a class="navbar-brand gradient-text fw-bold" href="{{ url_for('index') }}">QueueFlow</a>
+ <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+ <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse" id="navbarNav">
+ <ul class="navbar-nav ms-auto align-items-center gap-3">
+ <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('track_token') }}">Track Token</a></li>
+ <li class="nav-item dropdown">
+ <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ Login
+ </a>
+ <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+ <li><a class="dropdown-item" href="{{ url_for('login') }}">👤 User Login</a></li>
+ <li><a class="dropdown-item" href="{{ url_for('admin_login') }}">🔒 Service Center Admin</a></li>
+ <li><hr class="dropdown-divider"></li>
+ <li><a class="dropdown-item" href="{{ url_for('superadmin_login') }}">👑 Super Admin</a></li>
+ </ul>
+ </li>
+ <li class="nav-item"><a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-sm">Sign Up</a></li>
+ <li class="nav-item"><a href="{{ url_for('register_center') }}" class="btn btn-primary btn-sm">Register Service Center</a></li>
+ </ul>
+ </div>
+ </div>
+ </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-gradient">
-        <div class="hero-content">
-            <div class="container">
-                <div class="text-center">
-                    <h1 class="hero-title slide-down">Smart Queue Management<br>for Modern Service Centers</h1>
-                    <p class="hero-subtitle fade-in">Eliminate waiting room chaos. Manage walk-in and online queues seamlessly with real-time tracking, dual counter support, and smart notifications.</p>
-                    <div class="hero-cta slide-up">
-                        <a href="{{ url_for('register_center') }}" class="btn btn-hero-primary">Register Your Service Center</a>
-                        <a href="{{ url_for('track_token') }}" class="btn btn-hero-secondary">Track My Token</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Hero Section -->
+ <section class="hero-gradient">
+ <div class="hero-content">
+ <div class="container">
+ <div class="text-center">
+ <h1 class="hero-title slide-down">Smart Queue Management<br>for Modern Service Centers</h1>
+ <p class="hero-subtitle fade-in">Eliminate waiting room chaos. Manage walk-in and online queues seamlessly with real-time tracking, dual counter support, and smart notifications.</p>
+ <div class="hero-cta slide-up">
+ <a href="{{ url_for('register_center') }}" class="btn btn-hero-primary">Register Your Service Center</a>
+ <a href="{{ url_for('track_token') }}" class="btn btn-hero-secondary">Track My Token</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="stat-number">19</div>
-                        <div class="stat-label">Active Service Centers</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Online & Walk-in Support</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">Token Tracking</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Stats Section -->
+ <section class="stats-section">
+ <div class="container">
+ <div class="row">
+ <div class="col-md-4">
+ <div class="stat-card">
+ <div class="stat-number">19</div>
+ <div class="stat-label">Active Service Centers</div>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="stat-card">
+ <div class="stat-number">100%</div>
+ <div class="stat-label">Online & Walk-in Support</div>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="stat-card">
+ <div class="stat-number">24/7</div>
+ <div class="stat-label">Token Tracking</div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Who Is This For Section -->
-    <section class="features-section" id="for-centers">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Who Is This Platform For?</h2>
-                <p class="section-description">Built for any organization that serves walk-in customers</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-3 col-sm-6">
-                    <div class="feature-card text-center">
-                        <div class="feature-icon mx-auto">🏥</div>
-                        <h5 class="fw-bold">Clinics & Diagnostic Centers</h5>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="feature-card text-center">
-                        <div class="feature-icon mx-auto">📱</div>
-                        <h5 class="fw-bold">Mobile & Electronics Service</h5>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="feature-card text-center">
-                        <div class="feature-icon mx-auto">🏦</div>
-                        <h5 class="fw-bold">Banks & Financial Offices</h5>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="feature-card text-center">
-                        <div class="feature-icon mx-auto">🏛️</div>
-                        <h5 class="fw-bold">Government Service Offices</h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Who Is This For Section -->
+ <section class="features-section" id="for-centers">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">Who Is This Platform For?</h2>
+ <p class="section-description">Built for any organization that serves walk-in customers</p>
+ </div>
+ <div class="row g-4">
+ <div class="col-md-3 col-sm-6">
+ <div class="feature-card text-center">
+ <div class="feature-icon mx-auto">🏥</div>
+ <h5 class="fw-bold">Clinics & Diagnostic Centers</h5>
+ </div>
+ </div>
+ <div class="col-md-3 col-sm-6">
+ <div class="feature-card text-center">
+ <div class="feature-icon mx-auto">📱</div>
+ <h5 class="fw-bold">Mobile & Electronics Service</h5>
+ </div>
+ </div>
+ <div class="col-md-3 col-sm-6">
+ <div class="feature-card text-center">
+ <div class="feature-icon mx-auto">🏦</div>
+ <h5 class="fw-bold">Banks & Financial Offices</h5>
+ </div>
+ </div>
+ <div class="col-md-3 col-sm-6">
+ <div class="feature-card text-center">
+ <div class="feature-icon mx-auto">🏛️</div>
+ <h5 class="fw-bold">Government Service Offices</h5>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- How It Works Section -->
-    <section class="features-section" id="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">How It Works</h2>
-                <p class="section-description">Simple, efficient, and scalable queue management</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">1️⃣</div>
-                        <h3 class="feature-title">Service Center Registers</h3>
-                        <p class="feature-description">Sign up on our platform and get your admin dashboard set up in minutes.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">2️⃣</div>
-                        <h3 class="feature-title">Configure Counters & Rules</h3>
-                        <p class="feature-description">Set up multiple counters, service times, and queue management rules.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">3️⃣</div>
-                        <h3 class="feature-title">Customers Get Tokens</h3>
-                        <p class="feature-description">Walk-in customers get tokens at counter, online users book from website.</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">4️⃣</div>
-                        <h3 class="feature-title">Live Tracking & Notifications</h3>
-                        <p class="feature-description">Real-time queue status updates with smart arrival time suggestions.</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">5️⃣</div>
-                        <h3 class="feature-title">Efficient Queue Management</h3>
-                        <p class="feature-description">Admins manage both online and walk-in queues from a unified dashboard.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- How It Works Section -->
+ <section class="features-section" id="how-it-works">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">How It Works</h2>
+ <p class="section-description">Simple, efficient, and scalable queue management</p>
+ </div>
+ <div class="row g-4">
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">1️⃣</div>
+ <h3 class="feature-title">Service Center Registers</h3>
+ <p class="feature-description">Sign up on our platform and get your admin dashboard set up in minutes.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">2️⃣</div>
+ <h3 class="feature-title">Configure Counters & Rules</h3>
+ <p class="feature-description">Set up multiple counters, service times, and queue management rules.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">3️⃣</div>
+ <h3 class="feature-title">Customers Get Tokens</h3>
+ <p class="feature-description">Walk-in customers get tokens at counter, online users book from website.</p>
+ </div>
+ </div>
+ <div class="col-md-6">
+ <div class="feature-card">
+ <div class="feature-icon">4️⃣</div>
+ <h3 class="feature-title">Live Tracking & Notifications</h3>
+ <p class="feature-description">Real-time queue status updates with smart arrival time suggestions.</p>
+ </div>
+ </div>
+ <div class="col-md-6">
+ <div class="feature-card">
+ <div class="feature-icon">5️⃣</div>
+ <h3 class="feature-title">Efficient Queue Management</h3>
+ <p class="feature-description">Admins manage both online and walk-in queues from a unified dashboard.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Why Choose Section -->
-    <section class="features-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Why Choose Our Platform?</h2>
-                <p class="section-description">Everything you need for modern queue management</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">🔄</div>
-                        <h3 class="feature-title">Unified Queue Handling</h3>
-                        <p class="feature-description">Manage both online and walk-in customers from a single platform with dual counter support.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <h3 class="feature-title">Live Token Tracking</h3>
-                        <p class="feature-description">Customers track their position in real-time without needing to login.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">😌</div>
-                        <h3 class="feature-title">Reduced Waiting Chaos</h3>
-                        <p class="feature-description">Eliminate crowding and confusion with organized digital queue management.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">🎯</div>
-                        <h3 class="feature-title">Simple Admin Dashboard</h3>
-                        <p class="feature-description">Intuitive interface for calling tokens, managing queues, and tracking no-shows.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">📈</div>
-                        <h3 class="feature-title">Scalable for Any Size</h3>
-                        <p class="feature-description">From small clinics to large service centers, our platform scales with you.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">⚡</div>
-                        <h3 class="feature-title">Quick Setup</h3>
-                        <p class="feature-description">Get started in minutes with our easy onboarding process.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Why Choose Section -->
+ <section class="features-section">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">Why Choose Our Platform?</h2>
+ <p class="section-description">Everything you need for modern queue management</p>
+ </div>
+ <div class="row g-4">
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">🔄</div>
+ <h3 class="feature-title">Unified Queue Handling</h3>
+ <p class="feature-description">Manage both online and walk-in customers from a single platform with dual counter support.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">📊</div>
+ <h3 class="feature-title">Live Token Tracking</h3>
+ <p class="feature-description">Customers track their position in real-time without needing to login.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">😌</div>
+ <h3 class="feature-title">Reduced Waiting Chaos</h3>
+ <p class="feature-description">Eliminate crowding and confusion with organized digital queue management.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">🎯</div>
+ <h3 class="feature-title">Simple Admin Dashboard</h3>
+ <p class="feature-description">Intuitive interface for calling tokens, managing queues, and tracking no-shows.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">📈</div>
+ <h3 class="feature-title">Scalable for Any Size</h3>
+ <p class="feature-description">From small clinics to large service centers, our platform scales with you.</p>
+ </div>
+ </div>
+ <div class="col-md-4">
+ <div class="feature-card">
+ <div class="feature-icon">⚡</div>
+ <h3 class="feature-title">Quick Setup</h3>
+ <p class="feature-description">Get started in minutes with our easy onboarding process.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <div class="container">
-                <h2 class="cta-title">Ready to Transform Your Queue Management?</h2>
-                <p class="cta-description">Join service centers across Nagpur using QueueFlow</p>
-                <div class="hero-cta">
-                    <a href="{{ url_for('register_center') }}" class="btn cta-btn-primary">Register Your Service Center</a>
-                    <a href="{{ url_for('track_token') }}" class="btn cta-btn-secondary">Track a Token</a>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- CTA Section -->
+ <section class="cta-section">
+ <div class="cta-content">
+ <div class="container">
+ <h2 class="cta-title">Ready to Transform Your Queue Management?</h2>
+ <p class="cta-description">Join service centers across Nagpur using QueueFlow</p>
+ <div class="hero-cta">
+ <a href="{{ url_for('register_center') }}" class="btn cta-btn-primary">Register Your Service Center</a>
+ <a href="{{ url_for('track_token') }}" class="btn cta-btn-secondary">Track a Token</a>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p class="mb-0">&copy; 2026 QueueFlow. Smart Queue Management Platform for Service Centers.</p>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <p class="mb-0">&copy; 2026 QueueFlow. Smart Queue Management Platform for Service Centers.</p>
+ </div>
+ </footer>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

@@ -1,225 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ center.name }} - QueueFlow</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>{{ center.name }} - QueueFlow</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">QueueFlow</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Services</a></li>
-                    {% if 'user_id' in session %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('user_profile') }}">Profile</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+ <!-- Navbar -->
+ <nav class="navbar navbar-expand-lg navbar-dark">
+ <div class="container">
+ <a class="navbar-brand" href="{{ url_for('index') }}">QueueFlow</a>
+ <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+ <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse" id="navbarNav">
+ <ul class="navbar-nav ms-auto">
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Services</a></li>
+ {% if 'user_id' in session %}
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('user_profile') }}">Profile</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+ {% else %}
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+ <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+ {% endif %}
+ </ul>
+ </div>
+ </div>
+ </nav>
 
-    <!-- Breadcrumb -->
-    <div class="container mt-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('services') }}">Services</a></li>
-                <li class="breadcrumb-item active">{{ center.name }}</li>
-            </ol>
-        </nav>
-    </div>
+ <!-- Breadcrumb -->
+ <div class="container mt-4">
+ <nav aria-label="breadcrumb">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+ <li class="breadcrumb-item"><a href="{{ url_for('services') }}">Services</a></li>
+ <li class="breadcrumb-item active">{{ center.name }}</li>
+ </ol>
+ </nav>
+ </div>
 
-    <!-- Main Content -->
-    <div class="container my-4">
-        <div class="row g-4">
-            <!-- Left Column: Main Content -->
-            <div class="col-lg-8">
-                <!-- Header Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="mb-0">{{ center.name }}</h2>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-2"><span class="badge badge-primary">{{ center.category }}</span></p>
-                        <p class="text-secondary mb-0">📍 {{ center.location }}</p>
-                    </div>
-                </div>
+ <!-- Main Content -->
+ <div class="container my-4">
+ <div class="row g-4">
+ <!-- Left Column: Main Content -->
+ <div class="col-lg-8">
+ <!-- Header Card -->
+ <div class="card mb-4">
+ <div class="card-header">
+ <h2 class="mb-0">{{ center.name }}</h2>
+ </div>
+ <div class="card-body">
+ <p class="mb-2"><span class="badge badge-primary">{{ center.category }}</span></p>
+ <p class="text-secondary mb-0">📍 {{ center.location }}</p>
+ </div>
+ </div>
 
-                <!-- Description -->
-                {% if center.description %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">About This Service Center</h5>
-                        <p class="text-secondary mb-0">{{ center.description }}</p>
-                    </div>
-                </div>
-                {% endif %}
+ <!-- Description -->
+ {% if center.description %}
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">About This Service Center</h5>
+ <p class="text-secondary mb-0">{{ center.description }}</p>
+ </div>
+ </div>
+ {% endif %}
 
-                <!-- Services Offered -->
-                {% if center.services_offered %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">Services Offered</h5>
-                        <div class="text-secondary" style="white-space: pre-line;">{{ center.services_offered }}</div>
-                    </div>
-                </div>
-                {% endif %}
+ <!-- Services Offered -->
+ {% if center.services_offered %}
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">Services Offered</h5>
+ <div class="text-secondary" style="white-space: pre-line;">{{ center.services_offered }}</div>
+ </div>
+ </div>
+ {% endif %}
 
-                <!-- Facilities -->
-                {% if center.facilities %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">Facilities Available</h5>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for facility in center.facilities.split('\n') %}
-                                {% if facility.strip() %}
-                                    <span class="badge badge-info">{{ facility.strip().lstrip('•').strip() }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+ <!-- Facilities -->
+ {% if center.facilities %}
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">Facilities Available</h5>
+ <div class="d-flex flex-wrap gap-2">
+ {% for facility in center.facilities.split('\n') %}
+ {% if facility.strip() %}
+ <span class="badge badge-info">{{ facility.strip().lstrip('•').strip() }}</span>
+ {% endif %}
+ {% endfor %}
+ </div>
+ </div>
+ </div>
+ {% endif %}
 
-                <!-- Location Map -->
-                {% if center.latitude and center.longitude %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">Location</h5>
-                        <div class="ratio ratio-16x9 mb-3">
-                            <iframe 
-                                src="https://maps.google.com/maps?q={{ center.latitude }},{{ center.longitude }}&z=15&output=embed"
-                                style="border:0; border-radius: var(--radius-md);" 
-                                allowfullscreen="" 
-                                loading="lazy">
-                            </iframe>
-                        </div>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ center.latitude }},{{ center.longitude }}" 
-                           target="_blank" 
-                           class="btn btn-primary">
-                            Get Directions
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
+ <!-- Location Map -->
+ {% if center.latitude and center.longitude %}
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">Location</h5>
+ <div class="ratio ratio-16x9 mb-3">
+ <iframe 
+ src="https://maps.google.com/maps?q={{ center.latitude }},{{ center.longitude }}&z=15&output=embed"
+ style="border:0; border-radius: var(--radius-md);" 
+ allowfullscreen="" 
+ loading="lazy">
+ </iframe>
+ </div>
+ <a href="https://www.google.com/maps/dir/?api=1&destination={{ center.latitude }},{{ center.longitude }}" 
+ target="_blank" 
+ class="btn btn-primary">
+ Get Directions
+ </a>
+ </div>
+ </div>
+ {% endif %}
 
-                <!-- Related Services -->
-                {% if related_centers %}
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="mb-3">Related Services</h5>
-                        <div class="row g-3">
-                            {% for related in related_centers %}
-                            <div class="col-md-6">
-                                <a href="{{ url_for('service_detail', center_id=related.id) }}" class="text-decoration-none">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <h6 class="text-primary-custom">{{ related.name }}</h6>
-                                            <p class="text-muted small mb-1">{{ related.category }}</p>
-                                            <p class="text-secondary small mb-0">{{ related.location }}</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
+ <!-- Related Services -->
+ {% if related_centers %}
+ <div class="card">
+ <div class="card-body">
+ <h5 class="mb-3">Related Services</h5>
+ <div class="row g-3">
+ {% for related in related_centers %}
+ <div class="col-md-6">
+ <a href="{{ url_for('service_detail', center_id=related.id) }}" class="text-decoration-none">
+ <div class="card h-100">
+ <div class="card-body">
+ <h6 class="text-primary-custom">{{ related.name }}</h6>
+ <p class="text-muted small mb-1">{{ related.category }}</p>
+ <p class="text-secondary small mb-0">{{ related.location }}</p>
+ </div>
+ </div>
+ </a>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
+ </div>
+ {% endif %}
+ </div>
 
-            <!-- Right Column: Sidebar -->
-            <div class="col-lg-4">
-                <!-- Queue Status Card -->
-                <div class="card mb-4">
-                    <div class="card-body text-center">
-                        <h5 class="mb-3">Current Queue</h5>
-                        <h1 class="text-primary-custom mb-2">{{ queue_count }}</h1>
-                        <p class="text-muted mb-3">people waiting</p>
-                        {% if 'user_id' in session %}
-                            {% if not active_token %}
-                                <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary w-100">Book Token Now</a>
-                            {% else %}
-                                <a href="{{ url_for('queue_status', token_id=active_token.id) }}" class="btn btn-success w-100">View My Token</a>
-                            {% endif %}
-                        {% else %}
-                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Login to Book</a>
-                        {% endif %}
-                    </div>
-                </div>
+ <!-- Right Column: Sidebar -->
+ <div class="col-lg-4">
+ <!-- Queue Status Card -->
+ <div class="card mb-4">
+ <div class="card-body text-center">
+ <h5 class="mb-3">Current Queue</h5>
+ <h1 class="text-primary-custom mb-2">{{ queue_count }}</h1>
+ <p class="text-muted mb-3">people waiting</p>
+ {% if 'user_id' in session %}
+ {% if not active_token %}
+ <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary w-100">Book Token Now</a>
+ {% else %}
+ <a href="{{ url_for('queue_status', token_id=active_token.id) }}" class="btn btn-success w-100">View My Token</a>
+ {% endif %}
+ {% else %}
+ <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Login to Book</a>
+ {% endif %}
+ </div>
+ </div>
 
-                <!-- Contact Information -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">Contact Information</h5>
-                        {% if center.phone %}
-                        <p class="mb-2">
-                            <strong>📞 Phone:</strong><br>
-                            <a href="tel:{{ center.phone }}" class="text-decoration-none">{{ center.phone }}</a>
-                        </p>
-                        {% endif %}
-                        {% if center.email %}
-                        <p class="mb-2">
-                            <strong>📧 Email:</strong><br>
-                            <a href="mailto:{{ center.email }}" class="text-decoration-none">{{ center.email }}</a>
-                        </p>
-                        {% endif %}
-                        {% if center.website %}
-                        <p class="mb-0">
-                            <strong>🌐 Website:</strong><br>
-                            <a href="{{ center.website }}" target="_blank" class="text-decoration-none">Visit Website</a>
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
+ <!-- Contact Information -->
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">Contact Information</h5>
+ {% if center.phone %}
+ <p class="mb-2">
+ <strong>📞 Phone:</strong><br>
+ <a href="tel:{{ center.phone }}" class="text-decoration-none">{{ center.phone }}</a>
+ </p>
+ {% endif %}
+ {% if center.email %}
+ <p class="mb-2">
+ <strong>📧 Email:</strong><br>
+ <a href="mailto:{{ center.email }}" class="text-decoration-none">{{ center.email }}</a>
+ </p>
+ {% endif %}
+ {% if center.website %}
+ <p class="mb-0">
+ <strong>🌐 Website:</strong><br>
+ <a href="{{ center.website }}" target="_blank" class="text-decoration-none">Visit Website</a>
+ </p>
+ {% endif %}
+ </div>
+ </div>
 
-                <!-- Business Hours -->
-                {% if center.business_hours %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="mb-3">Business Hours</h5>
-                        <p class="text-secondary mb-0">{{ center.business_hours }}</p>
-                    </div>
-                </div>
-                {% endif %}
+ <!-- Business Hours -->
+ {% if center.business_hours %}
+ <div class="card mb-4">
+ <div class="card-body">
+ <h5 class="mb-3">Business Hours</h5>
+ <p class="text-secondary mb-0">{{ center.business_hours }}</p>
+ </div>
+ </div>
+ {% endif %}
 
-                <!-- Service Details -->
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="mb-3">Service Details</h5>
-                        <p class="mb-2">
-                            <strong>⏱️ Avg Service Time:</strong><br>
-                            {{ center.avg_service_time }} minutes
-                        </p>
-                        <p class="mb-0">
-                            <strong>📊 Queue Limit:</strong><br>
-                            15 tokens maximum
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ <!-- Service Details -->
+ <div class="card">
+ <div class="card-body">
+ <h5 class="mb-3">Service Details</h5>
+ <p class="mb-2">
+ <strong>⏱️ Avg Service Time:</strong><br>
+ {{ center.avg_service_time }} minutes
+ </p>
+ <p class="mb-0">
+ <strong>📊 Queue Limit:</strong><br>
+ 15 tokens maximum
+ </p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Footer -->
-    <footer class="mt-5 py-4 bg-soft">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2024 QueueFlow. All rights reserved.</p>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer class="mt-5 py-4 bg-soft">
+ <div class="container text-center">
+ <p class="text-muted mb-0">&copy; 2024 QueueFlow. All rights reserved.</p>
+ </div>
+ </footer>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

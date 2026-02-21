@@ -1,736 +1,736 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueueFlow - Smart Queue Management for Modern Service Centers</title>
-    <meta name="description" content="Transform your service center with real-time queue management, smart token tracking, and automated operations.">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    <style>
-        /* Landing Page Specific Styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background: var(--bg-main);
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(192, 132, 61, 0.06) 0%, transparent 50%);
-            z-index: 0;
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.8s ease-out;
-        }
-        
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
-        }
-        
-        .hero-gradient-text {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .hero p {
-            font-size: clamp(1.125rem, 2vw, 1.375rem);
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-            max-width: 600px;
-            line-height: 1.6;
-        }
-        
-        .cta-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn-hero-primary {
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            background: var(--color-primary);
-            color: white;
-            border: none;
-            transition: all var(--transition-fast);
-            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.2);
-        }
-        
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(15, 76, 92, 0.3);
-            background: var(--color-primary-dark);
-        }
-        
-        .btn-hero-secondary {
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            background: transparent;
-            color: var(--color-primary);
-            border: 2px solid var(--color-primary);
-            transition: all var(--transition-fast);
-        }
-        
-        .btn-hero-secondary:hover {
-            background: var(--color-primary);
-            color: white;
-        }
-        
-        /* Trust Section */
-        .trust-section {
-            padding: 4rem 0;
-            background: var(--bg-soft);
-            border-top: 1px solid var(--border-light-soft);
-            border-bottom: 1px solid var(--border-light-soft);
-        }
-        
-        .trust-text {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 2rem;
-        }
-        
-        .trust-logos {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-            opacity: 0.6;
-        }
-        
-        .trust-logo {
-            font-size: 2rem;
-            color: var(--text-secondary);
-        }
-        
-        /* Section Base */
-        .section {
-            padding: 6rem 0;
-        }
-        
-        .section-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-        
-        .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            letter-spacing: -0.02em;
-        }
-        
-        .section-subtitle {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        /* Problem-Solution Cards */
-        .problem-solution {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        
-        .ps-card {
-            background: var(--bg-card);
-            padding: 2.5rem;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft);
-            transition: all var(--transition-fast);
-            border: 1px solid var(--border-light-soft);
-        }
-        
-        .ps-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-        
-        .ps-card-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .problem-icon {
-            background: rgba(185, 28, 28, 0.1);
-        }
-        
-        .solution-icon {
-            background: rgba(43, 182, 115, 0.1);
-        }
-        
-        .ps-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-        
-        .ps-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        
-        /* Feature Grid */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-        
-        .feature-card {
-            background: var(--bg-card);
-            padding: 2rem;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft);
-            transition: all var(--transition-fast);
-            border: 1px solid var(--border-light-soft);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--color-primary);
-        }
-        
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-        
-        .feature-card h4 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-        
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-            line-height: 1.6;
-        }
-        
-        /* Product Preview */
-        .product-preview {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-            padding: 6rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .product-preview::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
-            opacity: 0.3;
-        }
-        
-        .preview-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .preview-mockup {
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        .preview-mockup img {
-            width: 100%;
-            display: block;
-        }
-        
-        /* How It Works */
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-top: 3rem;
-        }
-        
-        .step {
-            text-align: center;
-            position: relative;
-        }
-        
-        .step-number {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0 auto 1.5rem;
-            box-shadow: 0 8px 20px rgba(15, 76, 92, 0.2);
-        }
-        
-        .step h4 {
-            font-size: 1.375rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-        
-        .step p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, rgba(15, 76, 92, 0.05) 0%, rgba(192, 132, 61, 0.05) 100%);
-            padding: 6rem 0;
-            text-align: center;
-        }
-        
-        .cta-section h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-        
-        .cta-section p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-        }
-        
-        /* Footer */
-        .footer {
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-light-soft);
-            padding: 4rem 0 2rem;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-        
-        .footer-brand h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .footer-brand p {
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-        }
-        
-        .footer-links h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-        
-        .footer-links ul {
-            list-style: none;
-        }
-        
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9375rem;
-            transition: color var(--transition-fast);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-        
-        .footer-links a:hover {
-            color: var(--color-primary);
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-light-soft);
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-        
-        /* Theme Toggle (Landing Page Only) */
-        .theme-toggle-landing {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--color-primary);
-            border: none;
-            box-shadow: var(--shadow-hover);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            z-index: 9999;
-            transition: all var(--transition-fast);
-        }
-        
-        .theme-toggle-landing:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-strong);
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero { min-height: auto; padding: 4rem 0; }
-            .section { padding: 4rem 0; }
-            .cta-group { flex-direction: column; }
-            .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; }
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>QueueFlow - Smart Queue Management for Modern Service Centers</title>
+ <meta name="description" content="Transform your service center with real-time queue management, smart token tracking, and automated operations.">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ <style>
+ /* Landing Page Specific Styles */
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+ body {
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+ overflow-x: hidden;
+ }
+ 
+ /* Hero Section */
+ .hero {
+ min-height: 100vh;
+ display: flex;
+ align-items: center;
+ position: relative;
+ overflow: hidden;
+ background: var(--bg-main);
+ }
+ 
+ .hero::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%),
+ radial-gradient(circle at 80% 80%, rgba(192, 132, 61, 0.06) 0%, transparent 50%);
+ z-index: 0;
+ }
+ 
+ .hero-content {
+ position: relative;
+ z-index: 1;
+ animation: fadeInUp 0.8s ease-out;
+ }
+ 
+ .hero h1 {
+ font-size: clamp(2.5rem, 6vw, 4.5rem);
+ font-weight: 700;
+ line-height: 1.1;
+ margin-bottom: 1.5rem;
+ color: var(--text-primary);
+ letter-spacing: -0.02em;
+ }
+ 
+ .hero-gradient-text {
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+ 
+ .hero p {
+ font-size: clamp(1.125rem, 2vw, 1.375rem);
+ color: var(--text-secondary);
+ margin-bottom: 2.5rem;
+ max-width: 600px;
+ line-height: 1.6;
+ }
+ 
+ .cta-group {
+ display: flex;
+ gap: 1rem;
+ flex-wrap: wrap;
+ }
+ 
+ .btn-hero-primary {
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 600;
+ border-radius: var(--radius-md);
+ background: var(--color-primary);
+ color: white;
+ border: none;
+ transition: all var(--transition-fast);
+ box-shadow: 0 4px 12px rgba(15, 76, 92, 0.2);
+ }
+ 
+ .btn-hero-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 20px rgba(15, 76, 92, 0.3);
+ background: var(--color-primary-dark);
+ }
+ 
+ .btn-hero-secondary {
+ padding: 1rem 2.5rem;
+ font-size: 1.125rem;
+ font-weight: 600;
+ border-radius: var(--radius-md);
+ background: transparent;
+ color: var(--color-primary);
+ border: 2px solid var(--color-primary);
+ transition: all var(--transition-fast);
+ }
+ 
+ .btn-hero-secondary:hover {
+ background: var(--color-primary);
+ color: white;
+ }
+ 
+ /* Trust Section */
+ .trust-section {
+ padding: 4rem 0;
+ background: var(--bg-soft);
+ border-top: 1px solid var(--border-light-soft);
+ border-bottom: 1px solid var(--border-light-soft);
+ }
+ 
+ .trust-text {
+ text-align: center;
+ color: var(--text-muted);
+ font-size: 0.875rem;
+ text-transform: uppercase;
+ letter-spacing: 0.1em;
+ margin-bottom: 2rem;
+ }
+ 
+ .trust-logos {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ gap: 3rem;
+ flex-wrap: wrap;
+ opacity: 0.6;
+ }
+ 
+ .trust-logo {
+ font-size: 2rem;
+ color: var(--text-secondary);
+ }
+ 
+ /* Section Base */
+ .section {
+ padding: 6rem 0;
+ }
+ 
+ .section-header {
+ text-align: center;
+ margin-bottom: 4rem;
+ }
+ 
+ .section-title {
+ font-size: clamp(2rem, 4vw, 3rem);
+ font-weight: 700;
+ color: var(--text-primary);
+ margin-bottom: 1rem;
+ letter-spacing: -0.02em;
+ }
+ 
+ .section-subtitle {
+ font-size: 1.25rem;
+ color: var(--text-secondary);
+ max-width: 600px;
+ margin: 0 auto;
+ }
+ 
+ /* Problem-Solution Cards */
+ .problem-solution {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+ gap: 2rem;
+ margin-top: 3rem;
+ }
+ 
+ .ps-card {
+ background: var(--bg-card);
+ padding: 2.5rem;
+ border-radius: var(--radius-lg);
+ box-shadow: var(--shadow-soft);
+ transition: all var(--transition-fast);
+ border: 1px solid var(--border-light-soft);
+ }
+ 
+ .ps-card:hover {
+ transform: translateY(-4px);
+ box-shadow: var(--shadow-hover);
+ }
+ 
+ .ps-card-icon {
+ width: 56px;
+ height: 56px;
+ border-radius: var(--radius-md);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 1.75rem;
+ margin-bottom: 1.5rem;
+ }
+ 
+ .problem-icon {
+ background: rgba(185, 28, 28, 0.1);
+ }
+ 
+ .solution-icon {
+ background: rgba(43, 182, 115, 0.1);
+ }
+ 
+ .ps-card h3 {
+ font-size: 1.5rem;
+ font-weight: 700;
+ margin-bottom: 1rem;
+ color: var(--text-primary);
+ }
+ 
+ .ps-card p {
+ color: var(--text-secondary);
+ line-height: 1.6;
+ }
+ 
+ /* Feature Grid */
+ .feature-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+ gap: 2rem;
+ }
+ 
+ .feature-card {
+ background: var(--bg-card);
+ padding: 2rem;
+ border-radius: var(--radius-lg);
+ box-shadow: var(--shadow-soft);
+ transition: all var(--transition-fast);
+ border: 1px solid var(--border-light-soft);
+ }
+ 
+ .feature-card:hover {
+ transform: translateY(-4px);
+ box-shadow: var(--shadow-hover);
+ border-color: var(--color-primary);
+ }
+ 
+ .feature-icon {
+ width: 48px;
+ height: 48px;
+ border-radius: var(--radius-md);
+ background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 1.5rem;
+ margin-bottom: 1.25rem;
+ }
+ 
+ .feature-card h4 {
+ font-size: 1.25rem;
+ font-weight: 600;
+ margin-bottom: 0.75rem;
+ color: var(--text-primary);
+ }
+ 
+ .feature-card p {
+ color: var(--text-secondary);
+ font-size: 0.9375rem;
+ line-height: 1.6;
+ }
+ 
+ /* Product Preview */
+ .product-preview {
+ background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+ padding: 6rem 0;
+ position: relative;
+ overflow: hidden;
+ }
+ 
+ .product-preview::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+ opacity: 0.3;
+ }
+ 
+ .preview-content {
+ position: relative;
+ z-index: 1;
+ }
+ 
+ .preview-mockup {
+ background: white;
+ border-radius: var(--radius-lg);
+ box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+ overflow: hidden;
+ max-width: 900px;
+ margin: 0 auto;
+ }
+ 
+ .preview-mockup img {
+ width: 100%;
+ display: block;
+ }
+ 
+ /* How It Works */
+ .steps {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+ gap: 3rem;
+ margin-top: 3rem;
+ }
+ 
+ .step {
+ text-align: center;
+ position: relative;
+ }
+ 
+ .step-number {
+ width: 64px;
+ height: 64px;
+ border-radius: 50%;
+ background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+ color: white;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 1.75rem;
+ font-weight: 700;
+ margin: 0 auto 1.5rem;
+ box-shadow: 0 8px 20px rgba(15, 76, 92, 0.2);
+ }
+ 
+ .step h4 {
+ font-size: 1.375rem;
+ font-weight: 600;
+ margin-bottom: 0.75rem;
+ color: var(--text-primary);
+ }
+ 
+ .step p {
+ color: var(--text-secondary);
+ line-height: 1.6;
+ }
+ 
+ /* CTA Section */
+ .cta-section {
+ background: linear-gradient(135deg, rgba(15, 76, 92, 0.05) 0%, rgba(192, 132, 61, 0.05) 100%);
+ padding: 6rem 0;
+ text-align: center;
+ }
+ 
+ .cta-section h2 {
+ font-size: clamp(2rem, 4vw, 3rem);
+ font-weight: 700;
+ margin-bottom: 1.5rem;
+ color: var(--text-primary);
+ }
+ 
+ .cta-section p {
+ font-size: 1.25rem;
+ color: var(--text-secondary);
+ margin-bottom: 2.5rem;
+ }
+ 
+ /* Footer */
+ .footer {
+ background: var(--bg-card);
+ border-top: 1px solid var(--border-light-soft);
+ padding: 4rem 0 2rem;
+ }
+ 
+ .footer-content {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 3rem;
+ margin-bottom: 3rem;
+ }
+ 
+ .footer-brand h3 {
+ font-size: 1.5rem;
+ font-weight: 700;
+ margin-bottom: 0.75rem;
+ background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ }
+ 
+ .footer-brand p {
+ color: var(--text-secondary);
+ font-size: 0.9375rem;
+ }
+ 
+ .footer-links h4 {
+ font-size: 1rem;
+ font-weight: 600;
+ margin-bottom: 1rem;
+ color: var(--text-primary);
+ }
+ 
+ .footer-links ul {
+ list-style: none;
+ }
+ 
+ .footer-links a {
+ color: var(--text-secondary);
+ text-decoration: none;
+ font-size: 0.9375rem;
+ transition: color var(--transition-fast);
+ display: block;
+ margin-bottom: 0.5rem;
+ }
+ 
+ .footer-links a:hover {
+ color: var(--color-primary);
+ }
+ 
+ .footer-bottom {
+ text-align: center;
+ padding-top: 2rem;
+ border-top: 1px solid var(--border-light-soft);
+ color: var(--text-muted);
+ font-size: 0.875rem;
+ }
+ 
+ /* Theme Toggle (Landing Page Only) */
+ .theme-toggle-landing {
+ position: fixed;
+ bottom: 2rem;
+ right: 2rem;
+ width: 56px;
+ height: 56px;
+ border-radius: 50%;
+ background: var(--color-primary);
+ border: none;
+ box-shadow: var(--shadow-hover);
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 1.5rem;
+ z-index: 9999;
+ transition: all var(--transition-fast);
+ }
+ 
+ .theme-toggle-landing:hover {
+ transform: scale(1.1);
+ box-shadow: var(--shadow-strong);
+ }
+ 
+ /* Animations */
+ @keyframes fadeInUp {
+ from {
+ opacity: 0;
+ transform: translateY(30px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+ }
+ 
+ .fade-in {
+ animation: fadeInUp 0.6s ease-out;
+ }
+ 
+ /* Responsive */
+ @media (max-width: 768px) {
+ .hero { min-height: auto; padding: 4rem 0; }
+ .section { padding: 4rem 0; }
+ .cta-group { flex-direction: column; }
+ .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; }
+ }
+ </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 hero-content">
-                    <h1>
-                        Smart Queue Management for
-                        <span class="hero-gradient-text">Modern Service Centers</span>
-                    </h1>
-                    <p>Transform waiting lines into seamless experiences. Real-time tracking, automated operations, and intelligent queue management—all in one platform.</p>
-                    <div class="cta-group">
-                        <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Get Started Free</a>
-                        <a href="{{ url_for('login') }}" class="btn btn-hero-secondary">Sign In</a>
-                    </div>
-                </div>
-                <div class="col-lg-6 d-none d-lg-block">
-                    <div style="font-size: 20rem; text-align: center; opacity: 0.1;">🎫</div>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Hero Section -->
+ <section class="hero">
+ <div class="container">
+ <div class="row align-items-center">
+ <div class="col-lg-6 hero-content">
+ <h1>
+ Smart Queue Management for
+ <span class="hero-gradient-text">Modern Service Centers</span>
+ </h1>
+ <p>Transform waiting lines into seamless experiences. Real-time tracking, automated operations, and intelligent queue management—all in one platform.</p>
+ <div class="cta-group">
+ <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Get Started Free</a>
+ <a href="{{ url_for('login') }}" class="btn btn-hero-secondary">Sign In</a>
+ </div>
+ </div>
+ <div class="col-lg-6 d-none d-lg-block">
+ <div style="font-size: 20rem; text-align: center; opacity: 0.1;">🎫</div>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Trust Section -->
-    <section class="trust-section">
-        <div class="container">
-            <p class="trust-text">Trusted by service centers across Nagpur</p>
-            <div class="trust-logos">
-                <div class="trust-logo">🏥</div>
-                <div class="trust-logo">📱</div>
-                <div class="trust-logo">🏪</div>
-                <div class="trust-logo">🏦</div>
-                <div class="trust-logo">🏢</div>
-            </div>
-        </div>
-    </section>
+ <!-- Trust Section -->
+ <section class="trust-section">
+ <div class="container">
+ <p class="trust-text">Trusted by service centers across Nagpur</p>
+ <div class="trust-logos">
+ <div class="trust-logo">🏥</div>
+ <div class="trust-logo">📱</div>
+ <div class="trust-logo">🏪</div>
+ <div class="trust-logo">🏦</div>
+ <div class="trust-logo">🏢</div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Problem-Solution Section -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">The Problem We Solve</h2>
-                <p class="section-subtitle">Traditional queues are broken. We fix them with modern technology.</p>
-            </div>
-            <div class="problem-solution">
-                <div class="ps-card">
-                    <div class="ps-card-icon problem-icon">❌</div>
-                    <h3>Long Waiting Lines</h3>
-                    <p>Customers waste hours standing in physical queues with no visibility into wait times.</p>
-                </div>
-                <div class="ps-card">
-                    <div class="ps-card-icon solution-icon">✅</div>
-                    <h3>Real-Time Tracking</h3>
-                    <p>Digital tokens with live queue status and accurate ETA—wait from anywhere.</p>
-                </div>
-                <div class="ps-card">
-                    <div class="ps-card-icon problem-icon">❌</div>
-                    <h3>Manual Confusion</h3>
-                    <p>Paper tokens, missed calls, and chaotic queue management frustrate everyone.</p>
-                </div>
-                <div class="ps-card">
-                    <div class="ps-card-icon solution-icon">✅</div>
-                    <h3>Automated Operations</h3>
-                    <p>Smart expiry, automated alerts, and seamless admin dashboard for effortless management.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Problem-Solution Section -->
+ <section class="section">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">The Problem We Solve</h2>
+ <p class="section-subtitle">Traditional queues are broken. We fix them with modern technology.</p>
+ </div>
+ <div class="problem-solution">
+ <div class="ps-card">
+ <div class="ps-card-icon problem-icon">❌</div>
+ <h3>Long Waiting Lines</h3>
+ <p>Customers waste hours standing in physical queues with no visibility into wait times.</p>
+ </div>
+ <div class="ps-card">
+ <div class="ps-card-icon solution-icon">✅</div>
+ <h3>Real-Time Tracking</h3>
+ <p>Digital tokens with live queue status and accurate ETA—wait from anywhere.</p>
+ </div>
+ <div class="ps-card">
+ <div class="ps-card-icon problem-icon">❌</div>
+ <h3>Manual Confusion</h3>
+ <p>Paper tokens, missed calls, and chaotic queue management frustrate everyone.</p>
+ </div>
+ <div class="ps-card">
+ <div class="ps-card-icon solution-icon">✅</div>
+ <h3>Automated Operations</h3>
+ <p>Smart expiry, automated alerts, and seamless admin dashboard for effortless management.</p>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Features Section -->
-    <section class="section" style="background: var(--bg-soft);">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Powerful Features</h2>
-                <p class="section-subtitle">Everything you need to modernize your service center operations.</p>
-            </div>
-            <div class="feature-grid">
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">📊</div>
-                    <h4>Real-Time Queue Tracking</h4>
-                    <p>Live updates on queue position, estimated wait time, and service status.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">⏰</div>
-                    <h4>Smart Token Expiry</h4>
-                    <p>Automatic expiration after 2 hours prevents fake queues and no-shows.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">📈</div>
-                    <h4>Admin Analytics</h4>
-                    <p>Comprehensive dashboard with insights, trends, and performance metrics.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">📱</div>
-                    <h4>QR Code Access</h4>
-                    <p>Instant token access via QR code—no app installation required.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🔔</div>
-                    <h4>Automated Alerts</h4>
-                    <p>Email notifications for timing updates and queue status changes.</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">👥</div>
-                    <h4>Multi-Admin Support</h4>
-                    <p>Manage multiple service centers with dedicated admin accounts.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Features Section -->
+ <section class="section" style="background: var(--bg-soft);">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">Powerful Features</h2>
+ <p class="section-subtitle">Everything you need to modernize your service center operations.</p>
+ </div>
+ <div class="feature-grid">
+ <div class="feature-card fade-in">
+ <div class="feature-icon">📊</div>
+ <h4>Real-Time Queue Tracking</h4>
+ <p>Live updates on queue position, estimated wait time, and service status.</p>
+ </div>
+ <div class="feature-card fade-in">
+ <div class="feature-icon">⏰</div>
+ <h4>Smart Token Expiry</h4>
+ <p>Automatic expiration after 2 hours prevents fake queues and no-shows.</p>
+ </div>
+ <div class="feature-card fade-in">
+ <div class="feature-icon">📈</div>
+ <h4>Admin Analytics</h4>
+ <p>Comprehensive dashboard with insights, trends, and performance metrics.</p>
+ </div>
+ <div class="feature-card fade-in">
+ <div class="feature-icon">📱</div>
+ <h4>QR Code Access</h4>
+ <p>Instant token access via QR code—no app installation required.</p>
+ </div>
+ <div class="feature-card fade-in">
+ <div class="feature-icon">🔔</div>
+ <h4>Automated Alerts</h4>
+ <p>Email notifications for timing updates and queue status changes.</p>
+ </div>
+ <div class="feature-card fade-in">
+ <div class="feature-icon">👥</div>
+ <h4>Multi-Admin Support</h4>
+ <p>Manage multiple service centers with dedicated admin accounts.</p>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Product Preview -->
-    <section class="product-preview">
-        <div class="container preview-content">
-            <div class="section-header" style="color: white;">
-                <h2 class="section-title" style="color: white;">See It In Action</h2>
-                <p class="section-subtitle">Intuitive dashboards designed for efficiency.</p>
-            </div>
-            <div class="preview-mockup">
-                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 4rem; text-align: center;">
-                    <div style="font-size: 8rem; opacity: 0.3;">📊</div>
-                    <p>Dashboard Preview</p>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- Product Preview -->
+ <section class="product-preview">
+ <div class="container preview-content">
+ <div class="section-header" style="color: white;">
+ <h2 class="section-title" style="color: white;">See It In Action</h2>
+ <p class="section-subtitle">Intuitive dashboards designed for efficiency.</p>
+ </div>
+ <div class="preview-mockup">
+ <div >
+ <div style="font-size: 8rem; opacity: 0.3;">📊</div>
+ <p>Dashboard Preview</p>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- How It Works -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">How It Works</h2>
-                <p class="section-subtitle">Get started in three simple steps.</p>
-            </div>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h4>Book Token</h4>
-                    <p>Select your service center, confirm payment, and receive your digital token instantly.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h4>Track Status</h4>
-                    <p>Monitor your queue position in real-time with accurate wait time estimates.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h4>Get Served</h4>
-                    <p>Arrive at the perfect time and skip the waiting line completely.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+ <!-- How It Works -->
+ <section class="section">
+ <div class="container">
+ <div class="section-header">
+ <h2 class="section-title">How It Works</h2>
+ <p class="section-subtitle">Get started in three simple steps.</p>
+ </div>
+ <div class="steps">
+ <div class="step">
+ <div class="step-number">1</div>
+ <h4>Book Token</h4>
+ <p>Select your service center, confirm payment, and receive your digital token instantly.</p>
+ </div>
+ <div class="step">
+ <div class="step-number">2</div>
+ <h4>Track Status</h4>
+ <p>Monitor your queue position in real-time with accurate wait time estimates.</p>
+ </div>
+ <div class="step">
+ <div class="step-number">3</div>
+ <h4>Get Served</h4>
+ <p>Arrive at the perfect time and skip the waiting line completely.</p>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to Modernize Your Service Center?</h2>
-            <p>Join service centers already using QueueFlow to eliminate waiting lines.</p>
-            <div class="cta-group" style="justify-content: center;">
-                <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Start Free Trial</a>
-                <a href="{{ url_for('register_center') }}" class="btn btn-hero-secondary">Register Your Center</a>
-            </div>
-        </div>
-    </section>
+ <!-- CTA Section -->
+ <section class="cta-section">
+ <div class="container">
+ <h2>Ready to Modernize Your Service Center?</h2>
+ <p>Join service centers already using QueueFlow to eliminate waiting lines.</p>
+ <div class="cta-group" style="justify-content: center;">
+ <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Start Free Trial</a>
+ <a href="{{ url_for('register_center') }}" class="btn btn-hero-secondary">Register Your Center</a>
+ </div>
+ </div>
+ </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>QueueFlow</h3>
-                    <p>Smart queue management for modern service centers.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Product</h4>
-                    <ul>
-                        <li><a href="{{ url_for('services') }}">Features</a></li>
-                        <li><a href="{{ url_for('register') }}">Get Started</a></li>
-                        <li><a href="{{ url_for('register_center') }}">For Centers</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Account</h4>
-                    <ul>
-                        <li><a href="{{ url_for('login') }}">User Login</a></li>
-                        <li><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
-                        <li><a href="{{ url_for('superadmin_login') }}">Superadmin</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="{{ url_for('track_status') }}">Track Token</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 QueueFlow. All rights reserved. Built for modern service centers.</p>
-            </div>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer class="footer">
+ <div class="container">
+ <div class="footer-content">
+ <div class="footer-brand">
+ <h3>QueueFlow</h3>
+ <p>Smart queue management for modern service centers.</p>
+ </div>
+ <div class="footer-links">
+ <h4>Product</h4>
+ <ul>
+ <li><a href="{{ url_for('services') }}">Features</a></li>
+ <li><a href="{{ url_for('register') }}">Get Started</a></li>
+ <li><a href="{{ url_for('register_center') }}">For Centers</a></li>
+ </ul>
+ </div>
+ <div class="footer-links">
+ <h4>Account</h4>
+ <ul>
+ <li><a href="{{ url_for('login') }}">User Login</a></li>
+ <li><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
+ <li><a href="{{ url_for('superadmin_login') }}">Superadmin</a></li>
+ </ul>
+ </div>
+ <div class="footer-links">
+ <h4>Support</h4>
+ <ul>
+ <li><a href="{{ url_for('track_status') }}">Track Token</a></li>
+ <li><a href="#">Help Center</a></li>
+ <li><a href="#">Contact Us</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2024 QueueFlow. All rights reserved. Built for modern service centers.</p>
+ </div>
+ </div>
+ </footer>
 
-    <!-- Theme Toggle (Landing Page Only) -->
-    <button class="theme-toggle-landing" onclick="toggleTheme()" aria-label="Toggle theme">
-        🌙
-    </button>
+ <!-- Theme Toggle (Landing Page Only) -->
+ <button class="theme-toggle-landing" onclick="toggleTheme()" aria-label="Toggle theme">
+ 🌙
+ </button>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        // Global theme management - applies to entire site
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'midnight';
-            const newTheme = currentTheme === 'dark' ? 'midnight' : 'dark';
-            
-            // Apply theme globally
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('queueflow-theme', newTheme);
-            
-            // Update button icon
-            const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) {
-                btn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
-            }
-        }
-        
-        // Initialize theme on page load
-        (function() {
-            const savedTheme = localStorage.getItem('queueflow-theme') || 'midnight';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) {
-                btn.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
-            }
-        })();
-        
-        // Scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-        
-        document.querySelectorAll('.feature-card, .ps-card, .step').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'all 0.6s ease-out';
-            observer.observe(el);
-        });
-    </script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script>
+ // Global theme management - applies to entire site
+ function toggleTheme() {
+ const currentTheme = document.documentElement.getAttribute('data-theme') || 'midnight';
+ const newTheme = currentTheme === 'dark' ? 'midnight' : 'dark';
+ 
+ // Apply theme globally
+ document.documentElement.setAttribute('data-theme', newTheme);
+ localStorage.setItem('queueflow-theme', newTheme);
+ 
+ // Update button icon
+ const btn = document.querySelector('.theme-toggle-landing');
+ if (btn) {
+ btn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
+ }
+ }
+ 
+ // Initialize theme on page load
+ (function() {
+ const savedTheme = localStorage.getItem('queueflow-theme') || 'midnight';
+ document.documentElement.setAttribute('data-theme', savedTheme);
+ const btn = document.querySelector('.theme-toggle-landing');
+ if (btn) {
+ btn.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
+ }
+ })();
+ 
+ // Scroll animations
+ const observerOptions = {
+ threshold: 0.1,
+ rootMargin: '0px 0px -50px 0px'
+ };
+ 
+ const observer = new IntersectionObserver((entries) => {
+ entries.forEach(entry => {
+ if (entry.isIntersecting) {
+ entry.target.style.opacity = '1';
+ entry.target.style.transform = 'translateY(0)';
+ }
+ });
+ }, observerOptions);
+ 
+ document.querySelectorAll('.feature-card, .ps-card, .step').forEach(el => {
+ el.style.opacity = '0';
+ el.style.transform = 'translateY(20px)';
+ el.style.transition = 'all 0.6s ease-out';
+ observer.observe(el);
+ });
+ </script>
 </body>
 </html>

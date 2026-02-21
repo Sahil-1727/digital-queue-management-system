@@ -1,132 +1,132 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueueFlow - Eliminate Waiting Lines, Serve More Customers</title>
-    <meta name="description" content="Queue management system trusted by 50+ service centers to reduce wait times by 70%. Free forever. Setup in 2 minutes.">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        /* Spacing System - 4px base */
-        :root {
-            --space-1: 4px;
-            --space-2: 8px;
-            --space-3: 12px;
-            --space-4: 16px;
-            --space-5: 20px;
-            --space-6: 24px;
-            --space-8: 32px;
-            --space-10: 40px;
-            --space-12: 48px;
-            --space-16: 64px;
-            --space-20: 80px;
-        }
-        
-        /* Hero Section - Improved */
-        .hero {
-            min-height: 85vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background: var(--bg-main);
-            padding: var(--space-20) 0 var(--space-16);
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(192, 132, 61, 0.03) 0%, transparent 50%);
-            z-index: 0;
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.7s ease-out;
-        }
-        
-        .urgency-badge {
-            display: inline-block;
-            background: rgba(192, 132, 61, 0.1);
-            color: var(--color-accent);
-            padding: var(--space-2) var(--space-4);
-            border-radius: 100px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: var(--space-6);
-        }
-        
-        .hero h1 {
-            font-size: clamp(2.25rem, 5vw, 3.75rem);
-            font-weight: 700;
-            line-height: 1.15;
-            margin-bottom: var(--space-5);
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
-        }
-        
-        .hero-subheading {
-            font-size: clamp(1.0625rem, 2vw, 1.25rem);
-            color: var(--text-secondary);
-            margin-bottom: var(--space-8);
-            max-width: 560px;
-            line-height: 1.65;
-        }
-        
-        .cta-group {
-            display: flex;
-            gap: var(--space-4);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .btn-hero-primary {
-            padding: 0.875rem 2rem;
-            font-size: 1.0625rem;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            background: var(--color-primary);
-            color: white;
-            border: none;
-            transition: all var(--transition-fast);
-            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.2);
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(15, 76, 92, 0.3);
-            background: var(--color-primary-dark);
-            color: white;
-        }
-        
-        .btn-hero-secondary {
-            padding: 0.875rem 2rem;
-            font-size: 1.0625rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border: none;
-            background: transparent;
-            transition: all var(--transition-fast);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-        }
-        
-        .btn-hero-secondary:hover {
-            color: var(--color-primary);
-        }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>QueueFlow - Eliminate Waiting Lines, Serve More Customers</title>
+ <meta name="description" content="Queue management system trusted by 50+ service centers to reduce wait times by 70%. Free forever. Setup in 2 minutes.">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ <style>
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+ body {
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+ overflow-x: hidden;
+ }
+ 
+ /* Spacing System - 4px base */
+ :root {
+ --space-1: 4px;
+ --space-2: 8px;
+ --space-3: 12px;
+ --space-4: 16px;
+ --space-5: 20px;
+ --space-6: 24px;
+ --space-8: 32px;
+ --space-10: 40px;
+ --space-12: 48px;
+ --space-16: 64px;
+ --space-20: 80px;
+ }
+ 
+ /* Hero Section - Improved */
+ .hero {
+ min-height: 85vh;
+ display: flex;
+ align-items: center;
+ position: relative;
+ overflow: hidden;
+ background: var(--bg-main);
+ padding: var(--space-20) 0 var(--space-16);
+ }
+ 
+ .hero::before {
+ content: '';
+ position: absolute;
+ inset: 0;
+ background: 
+ radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.04) 0%, transparent 50%),
+ radial-gradient(circle at 80% 80%, rgba(192, 132, 61, 0.03) 0%, transparent 50%);
+ z-index: 0;
+ }
+ 
+ .hero-content {
+ position: relative;
+ z-index: 1;
+ animation: fadeInUp 0.7s ease-out;
+ }
+ 
+ .urgency-badge {
+ display: inline-block;
+ background: rgba(192, 132, 61, 0.1);
+ color: var(--color-accent);
+ padding: var(--space-2) var(--space-4);
+ border-radius: 100px;
+ font-size: 0.875rem;
+ font-weight: 600;
+ margin-bottom: var(--space-6);
+ }
+ 
+ .hero h1 {
+ font-size: clamp(2.25rem, 5vw, 3.75rem);
+ font-weight: 700;
+ line-height: 1.15;
+ margin-bottom: var(--space-5);
+ color: var(--text-primary);
+ letter-spacing: -0.02em;
+ }
+ 
+ .hero-subheading {
+ font-size: clamp(1.0625rem, 2vw, 1.25rem);
+ color: var(--text-secondary);
+ margin-bottom: var(--space-8);
+ max-width: 560px;
+ line-height: 1.65;
+ }
+ 
+ .cta-group {
+ display: flex;
+ gap: var(--space-4);
+ flex-wrap: wrap;
+ align-items: center;
+ }
+ 
+ .btn-hero-primary {
+ padding: 0.875rem 2rem;
+ font-size: 1.0625rem;
+ font-weight: 600;
+ border-radius: var(--radius-md);
+ background: var(--color-primary);
+ color: white;
+ border: none;
+ transition: all var(--transition-fast);
+ box-shadow: 0 4px 12px rgba(15, 76, 92, 0.2);
+ text-decoration: none;
+ display: inline-block;
+ }
+ 
+ .btn-hero-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 6px 16px rgba(15, 76, 92, 0.3);
+ background: var(--color-primary-dark);
+ color: white;
+ }
+ 
+ .btn-hero-secondary {
+ padding: 0.875rem 2rem;
+ font-size: 1.0625rem;
+ font-weight: 600;
+ color: var(--text-secondary);
+ border: none;
+ background: transparent;
+ transition: all var(--transition-fast);
+ text-decoration: none;
+ display: inline-flex;
+ align-items: center;
+ gap: var(--space-2);
+ }
+ 
+ .btn-hero-secondary:hover {
+ color: var(--color-primary);
+ }

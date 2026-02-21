@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}QueueFlow{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    {% block extra_css %}{% endblock %}
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>{% block title %}QueueFlow{% endblock %}</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% block content %}{% endblock %}
-    
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    {% block extra_js %}{% endblock %}
+ {% block content %}{% endblock %}
+ 
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ {% block extra_js %}{% endblock %}
 </body>
 </html>

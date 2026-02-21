@@ -1,78 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mark No-Show - QueueFlow</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-    
-    
-    
-    </head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Mark No-Show - QueueFlow</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+ 
+ 
+ 
+ </head>
 <body class="auth-page">
-    <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100 py-5">
-            <div class="col-md-6">
-                <div class="card auth-card slide-up">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <div class="auth-icon mb-3" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">⚠️</div>
-                            <h2 class="gradient-text mb-2">Mark No-Show</h2>
-                        </div>
-                        
-                        <div class="alert alert-warning mb-4">
-                            <h6 class="fw-bold">Token: {{ token.token_number }}</h6>
-                            <p class="mb-0 text-sm">User: {{ token.user.name }} ({{ token.user.mobile }})</p>
-                        </div>
+ <div class="container">
+ <div class="row justify-content-center align-items-center min-vh-100 py-5">
+ <div class="col-md-6">
+ <div class="card auth-card slide-up">
+ <div class="card-body p-5">
+ <div class="text-center mb-4">
+ <div class="auth-icon mb-3" >⚠️</div>
+ <h2 class="gradient-text mb-2">Mark No-Show</h2>
+ </div>
+ 
+ <div class="alert alert-warning mb-4">
+ <h6 class="fw-bold">Token: {{ token.token_number }}</h6>
+ <p class="mb-0 text-sm">User: {{ token.user.name }} ({{ token.user.mobile }})</p>
+ </div>
 
-                        <form method="POST">
-                            <div class="mb-4">
-                                <label class="form-label">Reason for No-Show <span class="text-danger">*</span></label>
-                                <select class="form-select mb-2" name="reason" required>
-                                    <option value="">Select a reason...</option>
-                                    <option value="User did not arrive at scheduled time">User did not arrive at scheduled time</option>
-                                    <option value="User arrived too late">User arrived too late</option>
-                                    <option value="User not responding when called">User not responding when called</option>
-                                    <option value="User cancelled verbally">User cancelled verbally</option>
-                                    <option value="Other">Other (specify below)</option>
-                                </select>
-                                <textarea class="form-control" name="additional_notes" rows="3" placeholder="Additional notes (optional)"></textarea>
-                            </div>
+ <form method="POST">
+ <div class="mb-4">
+ <label class="form-label">Reason for No-Show <span class="text-danger">*</span></label>
+ <select class="form-select mb-2" name="reason" required>
+ <option value="">Select a reason...</option>
+ <option value="User did not arrive at scheduled time">User did not arrive at scheduled time</option>
+ <option value="User arrived too late">User arrived too late</option>
+ <option value="User not responding when called">User not responding when called</option>
+ <option value="User cancelled verbally">User cancelled verbally</option>
+ <option value="Other">Other (specify below)</option>
+ </select>
+ <textarea class="form-control" name="additional_notes" rows="3" placeholder="Additional notes (optional)"></textarea>
+ </div>
 
-                            <div class="alert alert-danger mb-4">
-                                <small><strong>⚠️ Warning:</strong> This action will:
-                                    <ul class="mb-0 mt-2 text-sm">
-                                        <li>Mark token as expired</li>
-                                        <li>Increment user's no-show count</li>
-                                        <li>Record reason in database</li>
-                                        <li>Cannot be undone</li>
-                                    </ul>
-                                </small>
-                            </div>
+ <div class="alert alert-danger mb-4">
+ <small><strong>⚠️ Warning:</strong> This action will:
+ <ul class="mb-0 mt-2 text-sm">
+ <li>Mark token as expired</li>
+ <li>Increment user's no-show count</li>
+ <li>Record reason in database</li>
+ <li>Cannot be undone</li>
+ </ul>
+ </small>
+ </div>
 
-                            <button type="submit" class="btn btn-danger w-100 mb-3">Confirm No-Show</button>
-                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary w-100">Cancel</a>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        // Combine select and textarea
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const select = document.querySelector('select[name="reason"]');
-            const textarea = document.querySelector('textarea[name="additional_notes"]');
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'reason';
-            hiddenInput.value = select.value + (textarea.value ? ' - ' + textarea.value : '');
-            this.appendChild(hiddenInput);
-            select.disabled = true;
-            textarea.disabled = true;
-        });
-    </script>
+ <button type="submit" class="btn btn-danger w-100 mb-3">Confirm No-Show</button>
+ <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary w-100">Cancel</a>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script>
+ // Combine select and textarea
+ document.querySelector('form').addEventListener('submit', function(e) {
+ const select = document.querySelector('select[name="reason"]');
+ const textarea = document.querySelector('textarea[name="additional_notes"]');
+ const hiddenInput = document.createElement('input');
+ hiddenInput.type = 'hidden';
+ hiddenInput.name = 'reason';
+ hiddenInput.value = select.value + (textarea.value ? ' - ' + textarea.value : '');
+ this.appendChild(hiddenInput);
+ select.disabled = true;
+ textarea.disabled = true;
+ });
+ </script>
 </body>
 </html>
