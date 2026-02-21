@@ -1021,18 +1021,24 @@ def register():
 def login():
     try:
         if request.method == 'POST':
-            mobile = request.form['mobile']
+            identifier = request.form['mobile'].strip()
             password = request.form['password']
             
             # Check if service center owner
-            owner = ServiceCenterRegistration.query.filter_by(phone=mobile).first()
+            owner = ServiceCenterRegistration.query.filter(
+                (ServiceCenterRegistration.phone == identifier) | 
+                (ServiceCenterRegistration.email == identifier)
+            ).first()
             if owner and check_password_hash(owner.password, password):
                 session['owner_id'] = owner.id
                 session['owner_name'] = owner.owner_name
                 return redirect(url_for('owner_dashboard'))
             
             # Check if regular user
-            user = User.query.filter_by(mobile=mobile).first()
+            user = User.query.filter(
+                (User.mobile == identifier) | 
+                (User.email == identifier)
+            ).first()
             if user and check_password_hash(user.password, password):
                 session['user_id'] = user.id
                 session['user_name'] = user.name
