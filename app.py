@@ -559,12 +559,14 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
     """Calculate travel time using OpenRouteService API for real road-based routing"""
     if not all([user_lat, user_lon, center_lat, center_lon]):
         print("⚠️ Missing coordinates for travel time calculation")
-        return 10
+        return None
     
     ors_api_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
     if not ors_api_key:
         print("❌ ORS API key not configured - cannot calculate travel time")
-        return 15
+        return None
+    
+    print(f"🔍 DEBUG: Calculating travel time from ({user_lat}, {user_lon}) to ({center_lat}, {center_lon})")
     
     try:
         url = 'https://api.openrouteservice.org/v2/directions/driving-car'
@@ -572,19 +574,28 @@ def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
         body = {
             'coordinates': [[user_lon, user_lat], [center_lon, center_lat]]
         }
-        response = requests.post(url, json=body, headers=headers, timeout=10)
+        
+        print(f"🔍 DEBUG: Sending request to ORS API...")
+        response = requests.post(url, json=body, headers=headers, timeout=15)
+        
+        print(f"🔍 DEBUG: ORS API response status: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
             duration_seconds = data['routes'][0]['summary']['duration']
             travel_time_minutes = round(duration_seconds / 60)
-            print(f"✅ ORS API: {travel_time_minutes} min travel time")
-            return max(travel_time_minutes, 5)
+            
+            print(f"✅ ORS API SUCCESS: Duration={duration_seconds}s, Travel Time={travel_time_minutes} min")
+            print(f"🔍 DEBUG: Returning travel time: {travel_time_minutes} minutes")
+            
+            return travel_time_minutes
         else:
             print(f"❌ ORS API error {response.status_code}: {response.text}")
             return None
     except Exception as e:
         print(f"❌ ORS API exception: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_user_location(user):
@@ -1225,11 +1236,6 @@ def queue_status(token_id):
         if serving_token:
             position += 1
     
-    user = User.query.get(session['user_id'])
-    center = ServiceCenter.query.get(token.service_center_id)
-    user_lat, user_lon = get_user_location(user)
-    travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
-    
     # ONLY use stored times from database (calculated at payment)
     leave_time = token.leave_time
     reach_counter_time = token.reach_time
@@ -1237,6 +1243,12 @@ def queue_status(token_id):
     # Convert UTC to IST using centralized helper
     leave_time = utc_to_ist(leave_time)
     reach_counter_time = utc_to_ist(reach_counter_time)
+    
+    # Calculate travel time from stored times (NOT from API again)
+    travel_time = None
+    if leave_time and reach_counter_time:
+        travel_time = int((reach_counter_time - leave_time).total_seconds() / 60)
+        print(f"🔍 DEBUG: Calculated travel time from stored times: {travel_time} minutes")
     
     return render_template('queue_status.html', 
                          token=token, 
@@ -2359,7 +2371,8 @@ def admin_analytics():
     try:
         # 1. Line Chart - 7-Day Trend
         if sum(counts) > 0:
-            fig, ax = plt.subplots(figsize=(10, 4.5), facecolor='white')
+            fig = plt.figure(figsize=(10, 4.5), facecolor='white')
+            ax = fig.add_subplot(111)
             ax.plot(dates, counts, marker='o', linewidth=2.5, markersize=8, color='#0F4C5C')
             ax.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
             ax.set_xlabel('Day', fontsize=11, color='#64748B')
@@ -2371,20 +2384,25 @@ def admin_analytics():
             ax.spines['left'].set_color('#E2E8F0')
             ax.spines['bottom'].set_color('#E2E8F0')
             ax.set_ylim(bottom=0)
-            plt.tight_layout()
+            fig.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
             buf.seek(0)
             trend_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close()
+            plt.close(fig)
+            buf.close()
+            print(f"✅ Trend chart generated successfully")
     except Exception as e:
         print(f"⚠️ Trend chart error: {e}")
+        import traceback
+        traceback.print_exc()
     
     try:
         # 2. Pie Chart - Online vs Walk-in
         if total_tokens > 0:
-            fig, ax = plt.subplots(figsize=(6, 6), facecolor='white')
+            fig = plt.figure(figsize=(6, 6), facecolor='white')
+            ax = fig.add_subplot(111)
             labels = ['Online Booking', 'Walk-in']
             sizes = [online_tokens, walkin_tokens]
             colors = ['#0F4C5C', '#C0843D']
@@ -2401,15 +2419,19 @@ def admin_analytics():
             
             ax.set_title('Booking Type Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
             ax.axis('equal')
-            plt.tight_layout()
+            fig.tight_layout()
             
             buf = io.BytesIO()
-            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
             buf.seek(0)
             pie_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close()
+            plt.close(fig)
+            buf.close()
+            print(f"✅ Pie chart generated successfully")
     except Exception as e:
         print(f"⚠️ Pie chart error: {e}")
+        import traceback
+        traceback.print_exc()
     
     try:
         # 3. Peak Hours Analysis
