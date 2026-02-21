@@ -560,9 +560,9 @@ def get_traffic_multiplier():
     # Peak hours: 9-11 AM and 4-8 PM (×2.0)
     if (9 <= hour < 11) or (16 <= hour < 20):
         return 2.0
-    # Night hours: 10 PM - 6 AM (×1.2)
+    # Night hours: 10 PM - 6 AM (×1.5)
     elif hour >= 22 or hour < 6:
-        return 1.2
+        return 1.5
     # Normal hours: rest of the day (×1.8)
     else:
         return 1.8
@@ -2521,7 +2521,7 @@ def test_ors_api():
             <ul>
                 <li>Peak (9-11 AM, 4-8 PM): ×2.0</li>
                 <li>Normal (11 AM-4 PM, 8-10 PM): ×1.8</li>
-                <li>Night (10 PM-6 AM): ×1.2</li>
+                <li>Night (10 PM-6 AM): ×1.5</li>
             </ul>
             """
         else:
