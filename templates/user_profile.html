@@ -32,7 +32,7 @@
         {% endwith %}
 
         <div class="card hover-lift">
-            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A;">
+            <div class="card-header">
                 <h5 class="mb-0 fw-bold">📝 Edit Profile</h5>
             </div>
             <div class="card-body p-4">
@@ -71,7 +71,7 @@
         </div>
 
         <div class="card mt-4 hover-lift">
-            <div class="card-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border);">
+            <div class="card-header" style="background: var(--bg-card); border-bottom: 1px solid var(--border-light);">
                 <h5 class="mb-0 fw-bold">📊 Account Stats</h5>
             </div>
             <div class="card-body">
@@ -94,7 +94,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     <script>
         function getLocation() {
             const statusDiv = document.getElementById('location-status');

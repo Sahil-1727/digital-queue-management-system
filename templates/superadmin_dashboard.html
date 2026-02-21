@@ -14,7 +14,7 @@
             background: #0F172A; 
             color: white; 
             padding: 1.5rem 0; 
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--color-primary);
         }
         .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
         .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 700; }
@@ -55,7 +55,7 @@
         <!-- Stats Cards -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(15, 76, 92, 0.3);">
+                <div class="card text-center">
                     <div class="card-body py-3">
                         <h2 class="display-4 fw-bold mb-1">{{ stats.pending }}</h2>
                         <p class="mb-0 fw-semibold small">Pending</p>
@@ -63,25 +63,25 @@
                 </div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: #0F172A; color: white; border: 2px solid var(--primary-color);">
+                <div class="card text-center">
                     <div class="card-body py-3">
-                        <h2 class="display-4 fw-bold mb-1" style="color: var(--primary-color);">{{ stats.approved }}</h2>
+                        <h2 class="display-4 fw-bold mb-1" style="color: var(--color-primary);">{{ stats.approved }}</h2>
                         <p class="mb-0 fw-semibold small">Approved</p>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: rgba(15, 76, 92, 0.1); color: #0F172A; border: 2px solid var(--primary-color);">
+                <div class="card text-center">
                     <div class="card-body py-3">
-                        <h2 class="display-4 fw-bold mb-1" style="color: #0F172A;">{{ stats.rejected }}</h2>
+                        <h2 class="display-4 fw-bold mb-1">{{ stats.rejected }}</h2>
                         <p class="mb-0 fw-semibold small">Rejected</p>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="card text-center" style="background: white; color: #0F172A; border: 2px solid #E2E8F0;">
+                <div class="card text-center">
                     <div class="card-body py-3">
-                        <h2 class="display-4 fw-bold mb-1" style="color: var(--primary-color);">{{ stats.total }}</h2>
+                        <h2 class="display-4 fw-bold mb-1" style="color: var(--color-primary);">{{ stats.total }}</h2>
                         <p class="mb-0 fw-semibold small">Total</p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
 
         <!-- Pending Registrations -->
         <div class="card mb-4">
-            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A;">
+            <div class="card-header">
                 <h5 class="mb-0 fw-semibold">⏳ Pending Registrations ({{ pending|length }})</h5>
             </div>
             <div class="card-body p-0">
@@ -112,8 +112,8 @@
                             <tbody>
                                 {% for reg in pending %}
                                 <tr>
-                                    <td class="fw-bold" style="color: var(--primary-color);">{{ reg.center_name }}</td>
-                                    <td><span class="badge" style="background: var(--primary-color); color: #0F172A;">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+                                    <td><span class="badge">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td>
                                         <small>{{ reg.email }}</small><br>
@@ -137,7 +137,7 @@
                                 <div class="modal fade" id="viewModal{{ reg.id }}" tabindex="-1">
                                     <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-scrollable">
                                         <div class="modal-content">
-                                            <div class="modal-header" style="background: #0F172A; color: white;">
+                                            <div class="modal-header">
                                                 <h5 class="modal-title fw-bold">{{ reg.center_name }}</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                             </div>
@@ -160,7 +160,7 @@
                                                     </div>
                                                 </div>
 
-                                                <h6 class="fw-bold mb-2" style="color: var(--primary-color);">🏛️ Business Information</h6>
+                                                <h6 class="fw-bold mb-2" style="color: var(--color-primary);">🏛️ Business Information</h6>
                                                 <div class="row g-2 mb-3">
                                                     <div class="col-6">
                                                         <small class="text-muted">Organization Type</small><br>
@@ -190,7 +190,7 @@
                                                     {% endif %}
                                                 </div>
 
-                                                <h6 class="fw-bold mb-2" style="color: var(--primary-color);">👤 Owner Information</h6>
+                                                <h6 class="fw-bold mb-2" style="color: var(--color-primary);">👤 Owner Information</h6>
                                                 <div class="row g-2 mb-3">
                                                     <div class="col-6">
                                                         <small class="text-muted">Owner/Manager</small><br>
@@ -212,7 +212,7 @@
                                                     {% endif %}
                                                 </div>
 
-                                                <h6 class="fw-bold mb-2" style="color: var(--primary-color);">📍 Location</h6>
+                                                <h6 class="fw-bold mb-2" style="color: var(--color-primary);">📍 Location</h6>
                                                 <div class="row g-2 mb-3">
                                                     <div class="col-12">
                                                         <small class="text-muted">Address</small><br>
@@ -232,7 +232,7 @@
                                                     </div>
                                                 </div>
 
-                                                <h6 class="fw-bold mb-2" style="color: var(--primary-color);">📊 Operational Details</h6>
+                                                <h6 class="fw-bold mb-2" style="color: var(--color-primary);">📊 Operational Details</h6>
                                                 <div class="row g-2 mb-3">
                                                     <div class="col-6">
                                                         <small class="text-muted">Counters</small><br>
@@ -249,7 +249,7 @@
                                                 </div>
 
                                                 {% if reg.additional_info %}
-                                                <h6 class="fw-bold mb-2" style="color: var(--primary-color);">📝 Additional Info</h6>
+                                                <h6 class="fw-bold mb-2" style="color: var(--color-primary);">📝 Additional Info</h6>
                                                 <div class="alert alert-light mb-0">
                                                     {{ reg.additional_info }}
                                                 </div>
@@ -280,7 +280,7 @@
 
         <!-- Approved Registrations -->
         <div class="card mb-4">
-            <div class="card-header" style="background: #0F172A; color: white; border-bottom: 2px solid var(--primary-color);">
+            <div class="card-header">
                 <h5 class="mb-0 fw-semibold">✅ Recently Approved (Last 10)</h5>
             </div>
             <div class="card-body p-0">
@@ -299,8 +299,8 @@
                             <tbody>
                                 {% for reg in approved %}
                                 <tr>
-                                    <td class="fw-bold" style="color: var(--primary-color);">{{ reg.center_name }}</td>
-                                    <td><span class="badge" style="background: var(--primary-color); color: #0F172A;">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+                                    <td><span class="badge">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td><small>{{ reg.email }}</small></td>
                                     <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
@@ -319,7 +319,7 @@
 
         <!-- Rejected Registrations -->
         <div class="card hover-lift fade-in-up">
-            <div class="card-header" style="background: rgba(15, 76, 92, 0.1); color: #0F172A; border-bottom: 2px solid var(--primary-color);">
+            <div class="card-header">
                 <h5 class="mb-0 fw-semibold">❌ Recently Rejected (Last 10)</h5>
             </div>
             <div class="card-body p-0">
@@ -338,8 +338,8 @@
                             <tbody>
                                 {% for reg in rejected %}
                                 <tr>
-                                    <td class="fw-bold" style="color: var(--primary-color);">{{ reg.center_name }}</td>
-                                    <td><span class="badge" style="background: var(--primary-color); color: #0F172A;">{{ reg.organization_type }}</span></td>
+                                    <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+                                    <td><span class="badge">{{ reg.organization_type }}</span></td>
                                     <td>{{ reg.owner_name }}</td>
                                     <td><small>{{ reg.email }}</small></td>
                                     <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
@@ -358,6 +358,5 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

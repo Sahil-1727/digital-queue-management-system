@@ -14,7 +14,7 @@
             background: #0F172A; 
             color: white; 
             padding: 1.5rem 0; 
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--color-primary);
         }
         .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); }
     </style>
@@ -26,7 +26,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0 fw-bold">📊 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Transaction History</span> - {{ center.name }}</h4>
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm" style="background: var(--primary-color); color: #0F172A;">← Dashboard</a>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm">← Dashboard</a>
                     <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
                 </div>
             </div>
@@ -37,7 +37,7 @@
         
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="card text-center" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: #0F172A; border: none; box-shadow: 0 8px 30px rgba(15, 76, 92, 0.3);">
+                <div class="card text-center">
                     <div class="card-body py-4">
                         <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Completed')|list|length }}</h2>
                         <p class="mb-0 fw-semibold">Completed</p>
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center" style="background: rgba(15, 76, 92, 0.1); color: #0F172A; border: 2px solid var(--primary-color);">
+                <div class="card text-center">
                     <div class="card-body py-4">
                         <h2 class="display-4 fw-bold mb-2">{{ tokens|selectattr('status', 'equalto', 'Expired')|list|length }}</h2>
                         <p class="mb-0 fw-semibold">No-Show / Expired</p>
@@ -53,9 +53,9 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center" style="background: #0F172A; color: white; border: 2px solid var(--primary-color);">
+                <div class="card text-center">
                     <div class="card-body py-4">
-                        <h2 class="display-4 fw-bold mb-2" style="color: var(--primary-color);">{{ tokens|length }}</h2>
+                        <h2 class="display-4 fw-bold mb-2" style="color: var(--color-primary);">{{ tokens|length }}</h2>
                         <p class="mb-0 fw-semibold">Total Transactions</p>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
                                 {% for token in tokens %}
                                 <tr>
                                     <td class="px-4 py-3">
-                                        <span class="fw-bold" style="font-size: 1.1rem; color: var(--primary-color);">{{ token.token_number }}</span>
+                                        <span class="fw-bold" style="font-size: 1.1rem; color: var(--color-primary);">{{ token.token_number }}</span>
                                     </td>
                                     <td class="fw-semibold">{{ token.user.name }}</td>
                                     <td>{{ token.user.mobile }}</td>
@@ -153,6 +153,5 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

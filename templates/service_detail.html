@@ -11,13 +11,13 @@
         :root[] {
             --bg-primary: #0F172A;
             --bg-secondary: #1E293B;
-            --bg-tertiary: #334155;
+            --bg-soft: #334155;
             --text-primary: #F1F5F9;
             --text-secondary: #CBD5E1;
             --text-muted: #94A3B8;
-            --accent: var(--primary-color);
-            --accent-hover: var(--primary-dark);
-            --border: rgba(15, 76, 92, 0.2);
+            --accent: var(--color-primary);
+            --accent-hover: var(--color-primary-dark);
+            --border-light: rgba(15, 76, 92, 0.2);
             --shadow: rgba(0, 0, 0, 0.3);
         }
         
@@ -53,7 +53,7 @@
         .navbar {
             background: rgba(15, 23, 42, 0.95) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-light);
         }
         
         .gradient-text {
@@ -65,7 +65,7 @@
         /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, rgba(15, 76, 92, 0.1), rgba(20, 184, 166, 0.05));
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-light);
             padding: 3rem 0;
             margin-bottom: 2rem;
         }
@@ -106,7 +106,7 @@
         
         .stat-card {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: 16px;
             padding: 1.5rem;
             transition: all 0.3s ease;
@@ -156,7 +156,7 @@
         /* Info Cards */
         .card {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: 16px;
             box-shadow: 0 10px 40px var(--shadow);
             transition: all 0.3s ease;
@@ -173,7 +173,7 @@
             gap: 0.75rem;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-light);
         }
         
         .section-icon {
@@ -197,7 +197,7 @@
             align-items: flex-start;
             gap: 1rem;
             padding: 1rem;
-            background: var(--bg-tertiary);
+            background: var(--bg-soft);
             border-radius: 12px;
             margin-bottom: 0.75rem;
             transition: all 0.3s ease;
@@ -237,7 +237,7 @@
         
         .feature-list li {
             padding: 0.75rem;
-            background: var(--bg-tertiary);
+            background: var(--bg-soft);
             border-radius: 8px;
             margin-bottom: 0.5rem;
             display: flex;
@@ -288,12 +288,12 @@
         
         .btn-outline-secondary {
             background: transparent;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             color: var(--text-secondary);
         }
         
         .btn-outline-secondary:hover {
-            background: var(--bg-tertiary);
+            background: var(--bg-soft);
             border-color: var(--accent);
             color: var(--accent);
         }
@@ -501,6 +501,5 @@
     </div>
     
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

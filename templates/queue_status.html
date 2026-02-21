@@ -14,7 +14,7 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
     </head>
-<body class="page-content" style="background: var(--bg-secondary);">
+<body class="page-content" style="background: var(--bg-soft);">
     <div class="notification-bell" id="notification-bell" onclick="document.getElementById('notification-alert').scrollIntoView({behavior: 'smooth'})">🔔</div>
     
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card text-center hover-lift" style="background: var(--card-bg); border: 2px solid var(--primary-color);">
+                                <div class="card text-center hover-lift" style="background: var(--bg-card); border: 2px solid var(--color-primary);">
                                     <div class="card-body py-4">
                                         <h2 class="display-5 fw-bold mb-2 gradient-text">{{ position }}</h2>
                                         <small class="fw-semibold">People Ahead</small>
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card text-center hover-lift" style="background: rgba(15, 76, 92, 0.1); border: 2px solid var(--primary-color);">
+                                <div class="card text-center hover-lift">
                                     <div class="card-body py-4">
                                         <h2 class="display-5 fw-bold mb-2">~{{ wait_time }}</h2>
                                         <small class="fw-semibold">Minutes Wait</small>
@@ -123,4 +123,3 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>

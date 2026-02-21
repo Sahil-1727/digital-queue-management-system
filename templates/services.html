@@ -69,7 +69,7 @@
                 {% for item in centers %}
                 <div class="col-md-6 col-lg-4 fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
                     <div class="card hover-lift" style="height: 100%; position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); transform: scaleX(0); transition: transform 0.3s ease;" class="card-top-line"></div>
+                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark)); transform: scaleX(0); transition: transform 0.3s ease;" class="card-top-line"></div>
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
@@ -88,7 +88,7 @@
                             
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <div class="p-2" style="background: var(--bg-tertiary); border-radius: var(--radius-md); transition: all 0.3s ease;">
+                                    <div class="p-2" style="background: var(--bg-soft); border-radius: var(--radius-md); transition: all 0.3s ease;">
                                         <div class="text-muted" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Queue</div>
                                         <div class="fw-bold">
                                             <span class="badge {% if item.queue_count < 5 %}badge-success{% elif item.queue_count < 10 %}badge-warning{% else %}badge-danger{% endif %}">
@@ -98,7 +98,7 @@
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-2" style="background: var(--bg-tertiary); border-radius: var(--radius-md); transition: all 0.3s ease;">
+                                    <div class="p-2" style="background: var(--bg-soft); border-radius: var(--radius-md); transition: all 0.3s ease;">
                                         <div class="text-muted" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Service Time</div>
                                         <div class="fw-bold">~{{ item.center.avg_service_time }} min</div>
                                     </div>
@@ -130,7 +130,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     <script>
         // Add hover effect to card top line
         document.querySelectorAll('.card').forEach(card => {

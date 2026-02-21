@@ -12,7 +12,7 @@
     </head>
 <body class="page-content">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(15, 76, 92, 0.2);">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('superadmin_dashboard') }}">
                 <span style="background: var(--color-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Queue</span>Flow SuperAdmin
@@ -54,7 +54,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead style="background: rgba(15, 76, 92, 0.1); border-bottom: 2px solid rgba(15, 76, 92, 0.3);">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Service Center</th>
@@ -68,14 +68,14 @@
                         <tbody>
                             {% for admin in admins %}
                             <tr>
-                                <td><span class="badge" style="background: rgba(15, 76, 92, 0.2); color: var(--primary-color);">{{ admin.id }}</span></td>
+                                <td><span class="badge">{{ admin.id }}</span></td>
                                 <td><strong>{{ admin.service_center.name }}</strong></td>
                                 <td><span class="badge bg-secondary">{{ admin.service_center.category }}</span></td>
                                 <td>{{ admin.service_center.location }}</td>
-                                <td><code style="color: var(--primary-color);">{{ admin.username }}</code></td>
+                                <td><code style="color: var(--color-primary);">{{ admin.username }}</code></td>
                                 <td>{{ admin.email or 'Not set' }}</td>
                                 <td>
-                                    <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm" style="background: var(--color-primary); color: #0F172A;">
+                                    <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm">
                                         ✏️ Edit
                                     </a>
                                 </td>
@@ -95,6 +95,5 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     </body>
 </html>

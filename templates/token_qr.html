@@ -12,8 +12,8 @@
         .card { max-width: 400px; margin: 0 auto; border-radius: 15px; }
         .card-header { background: #0F172A; color: white; border-radius: 15px 15px 0 0; }
         .qr-container { background: white; padding: 15px; border-radius: 10px; }
-        .btn-primary { background: var(--primary-color); border: none; color: #0F172A; font-weight: 600; }
-        .btn-primary:hover { background: var(--primary-dark); color: #0F172A; }
+        .btn-primary { background: var(--color-primary); border: none; color: #0F172A; font-weight: 600; }
+        .btn-primary:hover { background: var(--color-primary-dark); color: #0F172A; }
         @media print {
             body { background: white; padding: 0; }
             .no-print { display: none !important; }
@@ -29,7 +29,7 @@
             <h5 class="mb-0">📲 Walk-In Token</h5>
         </div>
         <div class="card-body text-center p-3">
-            <h2 style="color: var(--primary-color); font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
+            <h2 style="color: var(--color-primary); font-weight: bold; margin: 10px 0;">{{ token.token_number }}</h2>
             <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ token.service_center.name }}</p>
             
             <div class="qr-container mx-auto" style="max-width: 250px;">
@@ -46,6 +46,5 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

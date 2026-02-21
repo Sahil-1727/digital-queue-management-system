@@ -134,7 +134,7 @@
             border-radius: 1.25rem;
             padding: 2.5rem;
             height: 100%;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             transition: all 0.3s ease;
         }
         .feature-card:hover {
@@ -302,7 +302,7 @@
     </section>
 
     <!-- Who Is This For Section -->
-    <section class="features-section" id="for-centers" style="background: #f9fafb;">
+    <section class="features-section" id="for-centers">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Who Is This Platform For?</h2>
@@ -385,7 +385,7 @@
     </section>
 
     <!-- Why Choose Section -->
-    <section class="features-section" style="background: #f9fafb;">
+    <section class="features-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Why Choose Our Platform?</h2>
@@ -453,13 +453,12 @@
     </section>
 
     <!-- Footer -->
-    <footer style="background: #0F172A; color: #94A3B8; padding: 2rem 0; text-align: center;">
+    <footer>
         <div class="container">
             <p class="mb-0">&copy; 2026 QueueFlow. Smart Queue Management Platform for Service Centers.</p>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
 </body>
 </html>

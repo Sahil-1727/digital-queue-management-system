@@ -112,8 +112,8 @@
         .trust-section {
             padding: 4rem 0;
             background: var(--bg-soft);
-            border-top: 1px solid var(--border-soft);
-            border-bottom: 1px solid var(--border-soft);
+            border-top: 1px solid var(--border-light-soft);
+            border-bottom: 1px solid var(--border-light-soft);
         }
         
         .trust-text {
@@ -178,7 +178,7 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-soft);
             transition: all var(--transition-fast);
-            border: 1px solid var(--border-soft);
+            border: 1px solid var(--border-light-soft);
         }
         
         .ps-card:hover {
@@ -230,7 +230,7 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-soft);
             transition: all var(--transition-fast);
-            border: 1px solid var(--border-soft);
+            border: 1px solid var(--border-light-soft);
         }
         
         .feature-card:hover {
@@ -365,7 +365,7 @@
         /* Footer */
         .footer {
             background: var(--bg-card);
-            border-top: 1px solid var(--border-soft);
+            border-top: 1px solid var(--border-light-soft);
             padding: 4rem 0 2rem;
         }
         
@@ -417,7 +417,7 @@
         .footer-bottom {
             text-align: center;
             padding-top: 2rem;
-            border-top: 1px solid var(--border-soft);
+            border-top: 1px solid var(--border-light-soft);
             color: var(--text-muted);
             font-size: 0.875rem;
         }
@@ -568,12 +568,12 @@
         <div class="container preview-content">
             <div class="section-header" style="color: white;">
                 <h2 class="section-title" style="color: white;">See It In Action</h2>
-                <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Intuitive dashboards designed for efficiency.</p>
+                <p class="section-subtitle">Intuitive dashboards designed for efficiency.</p>
             </div>
             <div class="preview-mockup">
                 <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 4rem; text-align: center;">
                     <div style="font-size: 8rem; opacity: 0.3;">📊</div>
-                    <p style="color: #6c757d; margin-top: 1rem;">Dashboard Preview</p>
+                    <p>Dashboard Preview</p>
                 </div>
             </div>
         </div>
@@ -658,7 +658,6 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     <script>
         // Scroll animations
         const observerOptions = {
