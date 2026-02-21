@@ -1,0 +1,452 @@
+/* ============================================
+   ELITE-LEVEL POLISH
+   Scroll Experience + Layout Discipline + Micro-Alignment
+   ============================================ */
+
+/* === 1. SCROLL EXPERIENCE REFINEMENT === */
+
+/* Smooth scroll momentum */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sticky navbar with backdrop blur on scroll */
+.navbar.sticky-top,
+.internal-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar.scrolled,
+.internal-navbar.scrolled {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(15, 76, 92, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.internal-navbar.scrolled {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Custom scrollbar - consistent but subtle */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 76, 92, 0.2);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 76, 92, 0.3);
+  background-clip: padding-box;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 76, 92, 0.2) transparent;
+}
+
+/* === 2. LAYOUT WIDTH DISCIPLINE === */
+
+/* Consistent max-width system */
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.container-fluid {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Reading width for content-heavy pages */
+.content-width {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Dashboard width */
+.dashboard-container {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Prevent content stretch on ultra-wide */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1200px;
+  }
+  
+  .container-fluid {
+    max-width: 1400px;
+  }
+}
+
+/* === 3. ICON SYSTEM CONSISTENCY === */
+
+/* Unified icon sizing */
+.icon-xs { width: 16px; height: 16px; }
+.icon-sm { width: 20px; height: 20px; }
+.icon-md { width: 24px; height: 24px; }
+.icon-lg { width: 32px; height: 32px; }
+.icon-xl { width: 40px; height: 40px; }
+
+/* Icon alignment in buttons */
+.btn svg,
+.btn i {
+  vertical-align: middle;
+  margin-top: -2px;
+}
+
+/* Icon alignment in badges */
+.badge svg,
+.badge i {
+  vertical-align: middle;
+  margin-top: -1px;
+}
+
+/* === 4. MICRO-ALIGNMENT (2px Rule) === */
+
+/* Optical centering for icons */
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Badge vertical centering */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Button icon alignment */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Number alignment in stat cards */
+.stat-value,
+.token-display {
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Form label alignment */
+.form-label {
+  display: block;
+  line-height: 1.5;
+}
+
+/* Table cell alignment */
+.table td {
+  vertical-align: middle;
+}
+
+/* === 5. FEEDBACK LATENCY PERCEPTION === */
+
+/* Instant toast appearance */
+.toast {
+  animation-duration: 200ms;
+}
+
+/* Fast button spinner */
+.btn-loading::after {
+  animation-duration: 500ms;
+}
+
+/* Immediate hover feedback */
+.btn:hover,
+.card:hover,
+.nav-link:hover {
+  transition-duration: 150ms;
+}
+
+/* === 6. STATE SYSTEM COMPLETENESS === */
+
+/* Button states */
+.btn {
+  /* Default: defined in apple-refinement.css */
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  opacity: 0.8;
+  transform: scale(0.99) translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn.btn-loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Input states */
+.form-control {
+  /* Default: defined */
+}
+
+.form-control:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-strong);
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.08);
+}
+
+.form-control:disabled {
+  background: var(--bg-soft);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-control.is-invalid {
+  border-color: var(--color-danger);
+}
+
+.form-control.is-valid {
+  border-color: var(--color-success);
+}
+
+/* Card states */
+.card {
+  /* Default: defined */
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.card.card-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Link states */
+a {
+  /* Default: defined */
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+a:active {
+  opacity: 0.6;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* === 7. CONTENT DENSITY BALANCE === */
+
+/* Breathing space between sections */
+.section + .section {
+  margin-top: var(--space-8);
+}
+
+/* Card group spacing */
+.card + .card {
+  margin-top: var(--space-3);
+}
+
+/* Form group spacing */
+.form-group + .form-group {
+  margin-top: var(--space-3);
+}
+
+/* List item spacing */
+.list-group-item + .list-group-item {
+  margin-top: 2px;
+}
+
+/* Paragraph spacing */
+p + p {
+  margin-top: var(--space-2);
+}
+
+/* Heading spacing */
+h2 + *,
+h3 + *,
+h4 + * {
+  margin-top: var(--space-2);
+}
+
+/* === 8. SYSTEM THEME READINESS === */
+
+/* CSS variables structure for future dark mode */
+[data-theme="dark"] {
+  --bg-main: #0F172A;
+  --bg-card: #1E293B;
+  --bg-soft: #334155;
+  --bg-hover: #475569;
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border-light: #334155;
+  --border-medium: #475569;
+  /* Note: Dark mode disabled by default */
+}
+
+/* === 9. EMOTIONAL TONE - CALM CONFIDENCE === */
+
+/* Reduce animation intensity */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Calm page transitions */
+.page-content {
+  animation: fadeInUp 250ms ease-out;
+}
+
+/* Subtle hover states */
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Restrained shadows */
+.card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* === 10. VISUAL SILENCE === */
+
+/* Remove unnecessary decorations */
+.card-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Minimal borders */
+.table thead th {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.table tbody td {
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Clean separators */
+hr {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: var(--space-4) 0;
+}
+
+/* === RESPONSIVE REFINEMENTS === */
+
+@media (max-width: 768px) {
+  .container,
+  .container-fluid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Adjust content density on mobile */
+  .section + .section {
+    margin-top: var(--space-6);
+  }
+  
+  /* Scrollbar hidden on mobile */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+/* === PRINT STYLES === */
+
+@media print {
+  .navbar,
+  .toast-container,
+  .btn,
+  .empty-state-action {
+    display: none;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+/* === PERFORMANCE OPTIMIZATIONS === */
+
+/* GPU acceleration for smooth scrolling */
+.navbar,
+.internal-navbar,
+.toast {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
