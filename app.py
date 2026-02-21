@@ -1780,11 +1780,18 @@ def service_detail(center_id):
     if 'user_id' in session:
         active_token = get_active_token_for_user(session['user_id'])
     
-    return render_template('service_detail.html', 
+    # Get related centers (same category)
+    related_centers = ServiceCenter.query.filter(
+        ServiceCenter.category == center.category,
+        ServiceCenter.id != center.id
+    ).limit(3).all()
+    
+    return render_template('service_details.html', 
                          center=center, 
                          queue_count=queue_count,
                          serving_token=serving_token,
-                         active_token=active_token)
+                         active_token=active_token,
+                         related_centers=related_centers)
 
 @app.route('/admin/call_next')
 def call_next():

@@ -685,30 +685,25 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     <script>
-        // Global theme management - applies to entire site
+        // Global theme toggle - persists across all pages
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'midnight';
-            const newTheme = currentTheme === 'dark' ? 'midnight' : 'dark';
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'midnight';
+            const newTheme = currentTheme === 'midnight' ? 'dark' : 'midnight';
             
-            // Apply theme globally
-            document.documentElement.setAttribute('data-theme', newTheme);
+            html.setAttribute('data-theme', newTheme);
             localStorage.setItem('queueflow-theme', newTheme);
             
-            // Update button icon
             const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) {
-                btn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
-            }
+            if (btn) btn.innerHTML = newTheme === 'midnight' ? '🌙' : '☀️';
         }
         
-        // Initialize theme on page load
+        // Initialize on load
         (function() {
             const savedTheme = localStorage.getItem('queueflow-theme') || 'midnight';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) {
-                btn.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
-            }
+            if (btn) btn.innerHTML = savedTheme === 'midnight' ? '🌙' : '☀️';
         })();
         
         // Scroll animations

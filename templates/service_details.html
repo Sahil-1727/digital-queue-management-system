@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ center.name }} - QueueFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <style>
+        body { padding-top: 70px; }
+        .hero-banner { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: white; padding: 4rem 0; }
+        .breadcrumb { background: transparent; padding: 0; margin-bottom: 1rem; }
+        .breadcrumb-item a { color: rgba(255,255,255,0.8); }
+        .breadcrumb-item.active { color: white; }
+        .overview-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-soft); margin-top: -3rem; position: relative; z-index: 10; }
+        .service-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 1rem; }
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-icon { width: 32px; height: 32px; background: rgba(15, 76, 92, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .process-step { text-align: center; padding: 2rem; background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); }
+        .step-num { width: 48px; height: 48px; background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; margin: 0 auto 1rem; }
+        .related-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-soft); transition: all var(--transition-fast); border: 1px solid var(--border-soft); }
+        .related-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+        .cta-box { background: linear-gradient(135deg, rgba(15, 76, 92, 0.05), rgba(192, 132, 61, 0.05)); border-radius: var(--radius-lg); padding: 3rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">QueueFlow</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('services') }}">Services</a></li>
+                    <li class="breadcrumb-item active">{{ center.name }}</li>
+                </ol>
+            </nav>
+            <h1 class="display-4 fw-bold">{{ center.name }}</h1>
+            <p class="lead">{{ center.category }} • {{ center.location }}</p>
+        </div>
+    </section>
+
+    <!-- Overview -->
+    <section class="py-5">
+        <div class="container">
+            <div class="overview-card">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="service-icon">{{ '🏥' if 'Medical' in center.category else '📱' }}</div>
+                        <h2 class="mb-3">About This Service Center</h2>
+                        <p class="text-secondary">{{ center.description or 'Professional service center providing quality care and efficient service management.' }}</p>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <p><strong>📍 Location:</strong> {{ center.location }}</p>
+                                <p><strong>⏰ Hours:</strong> {{ center.business_hours or 'Mon-Sat: 9 AM - 6 PM' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>📞 Phone:</strong> {{ center.phone or 'Contact via website' }}</p>
+                                <p><strong>⚡ Avg Service Time:</strong> {{ center.avg_service_time }} mins</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Current Queue</h5>
+                                <h2 class="text-primary">{{ queue_count }}</h2>
+                                <p class="text-muted">people waiting</p>
+                                {% if 'user_id' in session %}
+                                    {% if not active_token %}
+                                        <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary w-100">Book Token</a>
+                                    {% else %}
+                                        <a href="{{ url_for('queue_status', token_id=active_token.id) }}" class="btn btn-success w-100">View My Token</a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Login to Book</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-5 bg-soft">
+        <div class="container">
+            <h2 class="text-center mb-4">Key Features & Benefits</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="feature-list">
+                        <li><div class="feature-icon">✓</div><span>Real-time queue tracking</span></li>
+                        <li><div class="feature-icon">✓</div><span>Accurate wait time estimates</span></li>
+                        <li><div class="feature-icon">✓</div><span>Smart leave-home alerts</span></li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="feature-list">
+                        <li><div class="feature-icon">✓</div><span>No physical waiting required</span></li>
+                        <li><div class="feature-icon">✓</div><span>Email notifications</span></li>
+                        <li><div class="feature-icon">✓</div><span>QR code access</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <div class="step-num">1</div>
+                        <h5>Book Token</h5>
+                        <p class="text-secondary">Select service and confirm payment</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <div class="step-num">2</div>
+                        <h5>Track Queue</h5>
+                        <p class="text-secondary">Monitor position in real-time</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <div class="step-num">3</div>
+                        <h5>Get Served</h5>
+                        <p class="text-secondary">Arrive at perfect time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Services -->
+    <section class="py-5 bg-soft">
+        <div class="container">
+            <h2 class="text-center mb-4">Related Services</h2>
+            <div class="row g-3">
+                {% for related in related_centers[:3] %}
+                <div class="col-md-4">
+                    <a href="{{ url_for('service_details', center_id=related.id) }}" class="text-decoration-none">
+                        <div class="related-card">
+                            <h5 class="text-primary">{{ related.name }}</h5>
+                            <p class="text-secondary small mb-2">{{ related.category }}</p>
+                            <p class="text-muted small mb-0">{{ related.location }}</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-5">
+        <div class="container">
+            <div class="cta-box">
+                <h2 class="mb-3">Ready to Skip the Line?</h2>
+                <p class="text-secondary mb-4">Book your token now and wait from anywhere</p>
+                {% if 'user_id' in session %}
+                    <a href="{{ url_for('request_token', center_id=center.id) }}" class="btn btn-primary btn-lg">Book Token Now</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center py-4">
+            <p class="text-muted mb-0">&copy; 2024 QueueFlow. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
+</body>
+</html>
