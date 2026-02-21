@@ -558,34 +558,34 @@ def calculate_wait_time(center_id, token_position):
 def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
     """Calculate travel time using OpenRouteService API for real road-based routing"""
     if not all([user_lat, user_lon, center_lat, center_lon]):
+        print("⚠️ Missing coordinates for travel time calculation")
         return 10
     
     ors_api_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
     if not ors_api_key:
-        print("⚠️ ORS API key not configured")
+        print("❌ ORS API key not configured - cannot calculate travel time")
         return 15
     
     try:
         url = 'https://api.openrouteservice.org/v2/directions/driving-car'
         headers = {'Authorization': ors_api_key}
-        params = {
-            'start': f'{user_lon},{user_lat}',
-            'end': f'{center_lon},{center_lat}'
+        body = {
+            'coordinates': [[user_lon, user_lat], [center_lon, center_lat]]
         }
-        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response = requests.post(url, json=body, headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
-            duration_seconds = data['features'][0]['properties']['segments'][0]['duration']
+            duration_seconds = data['routes'][0]['summary']['duration']
             travel_time_minutes = round(duration_seconds / 60)
-            print(f"✅ ORS API: {travel_time_minutes} min (from {user_lat},{user_lon} to {center_lat},{center_lon})")
+            print(f"✅ ORS API: {travel_time_minutes} min travel time")
             return max(travel_time_minutes, 5)
         else:
-            print(f"⚠️ ORS API error: {response.status_code} - {response.text}")
-            return 15
+            print(f"❌ ORS API error {response.status_code}: {response.text}")
+            return None
     except Exception as e:
-        print(f"⚠️ ORS API failed: {e}")
-        return 15
+        print(f"❌ ORS API exception: {e}")
+        return None
 
 def get_user_location(user):
     """Safely get user location, handling missing columns"""
@@ -667,6 +667,10 @@ def recalculate_queue_times(center_id):
                 
                 user_lat, user_lon = get_user_location(user)
                 travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
+                
+                if travel_time is None:
+                    print(f"❌ Cannot recalculate token {token.id} - travel time API failed")
+                    continue
                 
                 # Earliest possible arrival
                 earliest_leave = token.created_time + timedelta(minutes=10)
@@ -1112,6 +1116,10 @@ def payment(token_id):
         # Calculate travel time
         user_lat, user_lon = get_user_location(user)
         travel_time = calculate_travel_time(user_lat, user_lon, center.latitude, center.longitude)
+        
+        if travel_time is None:
+            flash('Unable to calculate travel time. Please ensure your location is set in your profile.', 'warning')
+            return redirect(url_for('user_profile'))
         
         # Calculate and STORE fixed times
         if position <= 1:
@@ -2343,15 +2351,14 @@ def admin_analytics():
     print(f"📊 Analytics Debug: total={total_tokens}, online={online_tokens}, walkin={walkin_tokens}")
     print(f"📊 Analytics Debug: completed={completed}, expired={expired}, active={active}")
     
-    # Generate charts with simplified approach to avoid Python 3.14 deepcopy issue
+    # Generate charts
     trend_chart = None
-    status_chart = None
-    booking_chart = None
+    pie_chart = None
+    peak_hours = None
     
     try:
         # 1. Line Chart - 7-Day Trend
-        if len(counts) > 0:
-            print(f"✅ Generating trend chart with {len(counts)} data points")
+        if sum(counts) > 0:
             fig, ax = plt.subplots(figsize=(10, 4.5), facecolor='white')
             ax.plot(dates, counts, marker='o', linewidth=2.5, markersize=8, color='#0F4C5C')
             ax.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
@@ -2364,55 +2371,20 @@ def admin_analytics():
             ax.spines['left'].set_color('#E2E8F0')
             ax.spines['bottom'].set_color('#E2E8F0')
             ax.set_ylim(bottom=0)
-            fig.tight_layout()
+            plt.tight_layout()
             
             buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
             buf.seek(0)
             trend_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-            print(f"✅ Trend chart generated")
+            plt.close()
     except Exception as e:
-        print(f"⚠️ Error generating trend chart: {e}")
+        print(f"⚠️ Trend chart error: {e}")
     
     try:
-        # 2. Bar Chart - Status Breakdown
-        if completed + expired + active > 0:
-            fig, ax = plt.subplots(figsize=(8, 4.5), facecolor='white')
-            statuses = ['Completed', 'Expired', 'Active']
-            values = [completed, expired, active]
-            colors = ['#2BB673', '#B91C1C', '#D97706']
-            
-            bars = ax.bar(statuses, values, color=colors, alpha=0.85, width=0.6)
-            
-            for bar in bars:
-                height = bar.get_height()
-                if height > 0:
-                    ax.text(bar.get_x() + bar.get_width()/2., height, f'{int(height)}',
-                           ha='center', va='bottom', fontsize=11, fontweight='bold', color='#1E293B')
-            
-            ax.set_ylabel('Token Count', fontsize=11, color='#64748B')
-            ax.set_title('Token Status Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_color('#E2E8F0')
-            ax.spines['bottom'].set_color('#E2E8F0')
-            ax.set_ylim(bottom=0)
-            fig.tight_layout()
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
-            buf.seek(0)
-            status_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-            print(f"✅ Status chart generated")
-    except Exception as e:
-        print(f"⚠️ Error generating status chart: {e}")
-    
-    try:
-        # 3. Pie Chart - Online vs Walk-in
+        # 2. Pie Chart - Online vs Walk-in
         if total_tokens > 0:
-            fig, ax = plt.subplots(figsize=(7, 5), facecolor='white')
+            fig, ax = plt.subplots(figsize=(6, 6), facecolor='white')
             labels = ['Online Booking', 'Walk-in']
             sizes = [online_tokens, walkin_tokens]
             colors = ['#0F4C5C', '#C0843D']
@@ -2429,45 +2401,29 @@ def admin_analytics():
             
             ax.set_title('Booking Type Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
             ax.axis('equal')
-            fig.tight_layout()
+            plt.tight_layout()
             
             buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
+            plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
             buf.seek(0)
-            booking_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-            print(f"✅ Booking chart generated")
+            pie_chart = base64.b64encode(buf.getvalue()).decode()
+            plt.close()
     except Exception as e:
-        print(f"⚠️ Error generating booking chart: {e}")
-        print(f"⚠️ Error generating status chart: {e}")
+        print(f"⚠️ Pie chart error: {e}")
     
     try:
-        # 3. Doughnut Chart - Online vs Walk-in
-        if total_tokens > 0:
-            fig, ax = plt.subplots(figsize=(5, 5), facecolor='white')
-            labels = ['Online', 'Walk-in']
-            sizes = [online_tokens, walkin_tokens]
-            colors = ['#0F4C5C', '#C0843D']
-            
-            wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
-                    startangle=90, textprops={'fontsize': 11, 'color': '#1E293B'})
-            
-            centre_circle = plt.Circle((0,0), 0.65, fc='white')
-            ax.add_artist(centre_circle)
-            
-            for autotext in autotexts:
-                autotext.set_color('white')
-            
-            ax.set_title('Booking Type Split', fontsize=13, color='#1E293B', pad=15)
-            fig.tight_layout()
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
-            buf.seek(0)
-            booking_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
+        # 3. Peak Hours Analysis
+        hour_counts = {}
+        all_tokens = Token.query.filter_by(service_center_id=center_id).all()
+        for token in all_tokens:
+            if token.created_time:
+                hour = token.created_time.hour
+                hour_counts[hour] = hour_counts.get(hour, 0) + 1
+        
+        if hour_counts:
+            peak_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:5]
     except Exception as e:
-        print(f"⚠️ Error generating booking chart: {e}")
+        print(f"⚠️ Peak hours error: {e}")
     
     analytics = {
         'daily_customers': daily_customers,
@@ -2480,8 +2436,8 @@ def admin_analytics():
         'active': active,
         'avg_wait_time': center.avg_service_time,
         'trend_chart': trend_chart,
-        'status_chart': status_chart,
-        'booking_chart': booking_chart
+        'pie_chart': pie_chart,
+        'peak_hours': peak_hours
     }
     
     return render_template('admin_analytics.html', center=center, analytics=analytics, IST=IST)
@@ -2511,6 +2467,45 @@ def test_send_email():
         return f"<h2>Email Send Test</h2><p>Result: {'SUCCESS ✅' if result else 'FAILED ❌'}</p><p>Check Render logs and your email inbox</p>"
     except Exception as e:
         return f"<h2>Email Send Test</h2><p>ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
+
+@app.route('/test-ors-api')
+def test_ors_api():
+    """Test endpoint to verify OpenRouteService API is working"""
+    ors_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
+    if not ors_key:
+        return f"<h2>ORS API Test</h2><p>❌ OPENROUTESERVICE_API_KEY not configured in environment variables</p>"
+    
+    try:
+        # Test route: Nagpur Railway Station to Civil Lines (approx 5-7 km)
+        user_lat, user_lon = 21.1466, 79.0882  # Nagpur Railway Station
+        center_lat, center_lon = 21.1458, 79.0882  # Civil Lines
+        
+        travel_time = calculate_travel_time(user_lat, user_lon, center_lat, center_lon)
+        
+        if travel_time:
+            return f"""
+            <h2>ORS API Test</h2>
+            <p>✅ <strong>SUCCESS!</strong></p>
+            <p><strong>Test Route:</strong> Nagpur Railway Station → Civil Lines</p>
+            <p><strong>Travel Time:</strong> {travel_time} minutes</p>
+            <p><strong>API Status:</strong> Working correctly</p>
+            <hr>
+            <p><em>The API is configured and responding properly.</em></p>
+            """
+        else:
+            return f"""
+            <h2>ORS API Test</h2>
+            <p>❌ <strong>FAILED</strong></p>
+            <p>API returned None (check server logs for details)</p>
+            <p>Possible issues:</n            <ul>
+                <li>Invalid API key</li>
+                <li>Rate limit exceeded</li>
+                <li>Network connectivity issue</li>
+            </ul>
+            </p>
+            """
+    except Exception as e:
+        return f"<h2>ORS API Test</h2><p>❌ ERROR: {str(e)}</p><p>Check Render logs for full traceback</p>"
 
 @app.route('/migrate-db-add-column')
 def migrate_db():
