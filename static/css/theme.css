@@ -78,21 +78,6 @@
   --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* === MIDNIGHT THEME (DEFAULT DARK) === */
-[data-theme="midnight"] {
-  --bg-main: #0F172A;
-  --bg-card: #1E293B;
-  --bg-soft: #334155;
-  --bg-hover: #475569;
-  --text-primary: #F1F5F9;
-  --text-secondary: #CBD5E1;
-  --text-muted: #94A3B8;
-  --border-soft: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.15);
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
-}
-
 /* === OCEAN THEME (EXAMPLE) === */
 [data-theme="ocean"] {
   --color-primary: #1E3A8A;

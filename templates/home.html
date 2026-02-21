@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="midnight">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -424,27 +424,7 @@
         
         /* Theme Toggle (Landing Page Only) */
         .theme-toggle-landing {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--color-primary);
-            border: none;
-            box-shadow: var(--shadow-hover);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            z-index: 9999;
-            transition: all var(--transition-fast);
-        }
-        
-        .theme-toggle-landing:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-strong);
+            display: none; /* Hidden - no theme toggle */
         }
         
         /* Animations */
@@ -677,35 +657,9 @@
         </div>
     </footer>
 
-    <!-- Theme Toggle (Landing Page Only) -->
-    <button class="theme-toggle-landing" onclick="toggleTheme()" aria-label="Toggle theme">
-        🌙
-    </button>
-
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
     <script>
-        // Global theme toggle - persists across all pages
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme') || 'midnight';
-            const newTheme = currentTheme === 'midnight' ? 'dark' : 'midnight';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('queueflow-theme', newTheme);
-            
-            const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) btn.innerHTML = newTheme === 'midnight' ? '🌙' : '☀️';
-        }
-        
-        // Initialize on load
-        (function() {
-            const savedTheme = localStorage.getItem('queueflow-theme') || 'midnight';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            const btn = document.querySelector('.theme-toggle-landing');
-            if (btn) btn.innerHTML = savedTheme === 'midnight' ? '🌙' : '☀️';
-        })();
-        
         // Scroll animations
         const observerOptions = {
             threshold: 0.1,
@@ -728,5 +682,7 @@
             observer.observe(el);
         });
     </script>
+</body>
+</html>
 </body>
 </html>
