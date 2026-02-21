@@ -556,24 +556,40 @@ def calculate_wait_time(center_id, token_position):
     return min(wait_minutes, 180)
 
 def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
-    """Calculate travel time in minutes based on distance (assuming 30 km/h avg speed)"""
+    """Calculate travel time using OpenRouteService API with Haversine fallback"""
     if not all([user_lat, user_lon, center_lat, center_lon]):
-        return 10  # Default 10 minutes if location not available
+        return 10
     
-    # Haversine formula to calculate distance
+    # Try OpenRouteService API first
+    ors_api_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
+    if ors_api_key:
+        try:
+            url = 'https://api.openrouteservice.org/v2/directions/driving-car'
+            headers = {'Authorization': ors_api_key}
+            params = {
+                'start': f'{user_lon},{user_lat}',
+                'end': f'{center_lon},{center_lat}'
+            }
+            response = requests.get(url, headers=headers, params=params, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                duration_seconds = data['features'][0]['properties']['segments'][0]['duration']
+                travel_time = int(duration_seconds / 60)
+                print(f"✅ ORS API: {travel_time} min")
+                return max(travel_time, 5)
+        except Exception as e:
+            print(f"⚠️ ORS API failed: {e}")
+    
+    # Fallback to Haversine
     from math import radians, sin, cos, sqrt, atan2
-    
-    R = 6371  # Earth radius in km
+    R = 6371
     lat1, lon1, lat2, lon2 = map(radians, [user_lat, user_lon, center_lat, center_lon])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
     c = 2 * atan2(sqrt(a), sqrt(1-a))
     distance = R * c
-    
-    # Assume average speed of 30 km/h in city traffic
-    travel_time = (distance / 30) * 60  # Convert to minutes
+    travel_time = (distance / 30) * 60
     return int(travel_time)
 
 def get_user_location(user):
