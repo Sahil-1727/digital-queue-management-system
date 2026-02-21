@@ -2436,11 +2436,6 @@ def admin_analytics():
             print(f"✅ Booking chart generated")
     except Exception as e:
         print(f"⚠️ Error generating booking chart: {e}")
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
-            buf.seek(0)
-            status_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-    except Exception as e:
         print(f"⚠️ Error generating status chart: {e}")
     
     try:
