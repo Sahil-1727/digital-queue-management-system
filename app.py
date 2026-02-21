@@ -2690,6 +2690,50 @@ def debug_verify_timing():
     
     return "".join(results)
 
+@app.route('/admin/update-all-coordinates')
+def update_all_coordinates():
+    """Update coordinates for all demo service centers"""
+    coordinates = {
+        'APOLLO CLINIC': (21.1458, 79.0882),
+        'The Nagpur Clinic': (21.1466, 79.0882),
+        'Nagpur Clinic': (21.1498, 79.0806),
+        'MOTHER INDIA FETAL MEDICINE CENTRE': (21.1307, 79.0711),
+        'Ashvatam Clinic': (21.1509, 79.0831),
+        'Apna Clinic': (21.1540, 79.0849),
+        'Dr.Agrawal Multispeciality Clinic': (21.1180, 79.0510),
+        'Shree Clinic': (21.1220, 79.0420),
+        'Sai Clinic': (21.1650, 79.0900),
+        'Suyash Clinic': (21.1700, 79.0950),
+        'INC CLINIC NAGPUR': (21.1350, 79.0750),
+        'Apple Service - NGRT Systems': (21.1458, 79.0882),
+        'Samsung Service - The Mobile Magic': (21.1498, 79.0806),
+        'Samsung Service - Spectrum Marketing': (21.1466, 79.0882),
+        'Samsung Service - Karuna Management': (21.1400, 79.0700),
+        'Samsung CE - Akshay Refrigeration': (21.1600, 79.1000),
+        'vivo India Service Center': (21.1509, 79.0831),
+        'vivo & iQOO Service Center': (21.1520, 79.0840),
+        'OPPO Service Center': (21.1498, 79.0806),
+    }
+    
+    results = ["<h2>📍 Coordinate Update Results</h2>"]
+    updated = 0
+    
+    for name, (lat, lng) in coordinates.items():
+        center = ServiceCenter.query.filter_by(name=name).first()
+        if center:
+            center.latitude = lat
+            center.longitude = lng
+            updated += 1
+            results.append(f"<p>✅ Updated: {name} → ({lat}, {lng})</p>")
+        else:
+            results.append(f"<p>⚠️ Not found: {name}</p>")
+    
+    db.session.commit()
+    results.append(f"<hr><h3>🎉 Successfully updated {updated} service centers!</h3>")
+    results.append("<p><a href='/services'>View Services</a> | <a href='/admin/dashboard'>Admin Dashboard</a></p>")
+    
+    return "".join(results)
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
