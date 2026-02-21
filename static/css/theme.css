@@ -648,6 +648,15 @@ body {
    CUSTOM UTILITY CLASSES
    ============================================ */
 
+/* Brand Gradient */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
 /* Text Colors */
 .text-primary-custom {
   color: var(--color-primary);

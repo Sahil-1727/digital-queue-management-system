@@ -1,0 +1,496 @@
+/* ============================================
+   APPLE-LEVEL REFINEMENT
+   Precision. Restraint. Cohesion.
+   ============================================ */
+
+/* === 1. STRICT 8PT GRID SYSTEM === */
+:root {
+  /* Enforce 8pt spacing scale */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+  
+  /* Simplified shadow system */
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  /* Unified easing */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration: 200ms;
+}
+
+/* === 2. TYPOGRAPHY PRECISION === */
+body {
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display - Large headings */
+h1, .text-display {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-3);
+}
+
+/* Title - Section headings */
+h2, .text-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2);
+}
+
+/* Heading - Card headings */
+h3, h4, .text-heading {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+
+/* Body - Regular text */
+p, .text-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+  margin-bottom: var(--space-2);
+}
+
+/* Meta - Small text */
+small, .text-meta {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+
+/* Remove excessive bold */
+.fw-bold {
+  font-weight: 600;
+}
+
+/* === 3. MOTION MINIMALISM === */
+* {
+  transition-duration: var(--duration) !important;
+  transition-timing-function: var(--ease) !important;
+}
+
+/* Reduce lift distance */
+.hover-lift:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Subtle scale */
+.hover-scale:hover {
+  transform: scale(1.01) !important;
+}
+
+/* Remove glow effects */
+.hover-glow::before {
+  display: none;
+}
+
+/* Minimal button press */
+.btn:active {
+  transform: scale(0.99) translateY(1px);
+}
+
+/* === 4. SIMPLIFIED ELEVATION === */
+.card {
+  box-shadow: var(--shadow-base);
+  border: none;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.modal-content {
+  box-shadow: var(--shadow-modal);
+}
+
+/* Remove heavy shadows */
+.btn-primary,
+.btn-danger {
+  box-shadow: none;
+}
+
+.btn-primary:hover,
+.btn-danger:hover {
+  box-shadow: var(--shadow-base);
+}
+
+/* === 5. INTERFACE CALMNESS === */
+/* Remove unnecessary borders */
+.card-header {
+  border-bottom: none;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: var(--space-3);
+}
+
+.card-body {
+  padding: var(--space-3);
+}
+
+/* Subtle separators instead of borders */
+.card-header-enhanced {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-3);
+}
+
+/* Reduce gradient usage */
+.gradient-text {
+  background: var(--color-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Single accent per screen */
+.token-display {
+  background: var(--color-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Remove competing highlights */
+.serving-token-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+/* === 6. INTERACTION FEEDBACK PERFECTION === */
+/* Crisp focus ring */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Subtle opacity on hover */
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Tactile press */
+.btn:active {
+  opacity: 0.8;
+}
+
+/* Minimal tooltip */
+.tooltip-inner {
+  background: var(--text-primary);
+  box-shadow: var(--shadow-base);
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* === 7. SPACING PRECISION === */
+/* Section spacing */
+.section {
+  padding: var(--space-8) 0;
+}
+
+/* Card spacing */
+.card {
+  margin-bottom: var(--space-3);
+}
+
+/* Form spacing */
+.mb-3 {
+  margin-bottom: var(--space-3) !important;
+}
+
+.mb-4 {
+  margin-bottom: var(--space-4) !important;
+}
+
+.mt-3 {
+  margin-top: var(--space-3) !important;
+}
+
+.mt-4 {
+  margin-top: var(--space-4) !important;
+}
+
+.p-4 {
+  padding: var(--space-3) !important;
+}
+
+.p-5 {
+  padding: var(--space-4) !important;
+}
+
+/* Gap system */
+.g-3 {
+  gap: var(--space-3) !important;
+}
+
+.g-4 {
+  gap: var(--space-4) !important;
+}
+
+/* === 8. BUTTON REFINEMENT === */
+.btn {
+  padding: 10px var(--space-3);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  border-radius: 8px;
+  border: none;
+}
+
+.btn-lg {
+  padding: 14px var(--space-4);
+  font-size: 16px;
+}
+
+.btn-sm {
+  padding: 6px var(--space-2);
+  font-size: 14px;
+}
+
+/* === 9. FORM REFINEMENT === */
+.form-control,
+.form-select {
+  padding: 10px var(--space-2);
+  font-size: 15px;
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.08);
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  letter-spacing: 0;
+}
+
+/* === 10. TABLE REFINEMENT === */
+.table {
+  border: none;
+  box-shadow: none;
+}
+
+.table thead th {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.table tbody td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.table tbody tr:hover {
+  background: var(--bg-soft);
+  transform: none;
+}
+
+/* === 11. BADGE REFINEMENT === */
+.badge {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  border-radius: 6px;
+}
+
+/* === 12. ALERT REFINEMENT === */
+.alert {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 8px;
+  border-left: none;
+  font-size: 14px;
+}
+
+/* === 13. TOAST REFINEMENT === */
+.toast {
+  box-shadow: var(--shadow-modal);
+  border-left: 3px solid var(--color-primary);
+  padding: var(--space-2) var(--space-3);
+}
+
+.toast-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.toast-message {
+  font-size: 13px;
+}
+
+/* === 14. EMPTY STATE REFINEMENT === */
+.empty-state-premium {
+  padding: var(--space-6);
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+}
+
+.empty-state-illustration {
+  width: 80px;
+  height: 80px;
+  font-size: 40px;
+  margin-bottom: var(--space-3);
+  background: var(--bg-soft);
+}
+
+.empty-state-illustration::before {
+  display: none;
+}
+
+.empty-state-headline {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.empty-state-subtext {
+  font-size: 14px;
+  margin-bottom: var(--space-3);
+}
+
+/* === 15. NAVBAR REFINEMENT === */
+.navbar {
+  padding: var(--space-2) 0;
+  box-shadow: var(--shadow-base);
+}
+
+.navbar-brand {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.nav-link {
+  font-size: 15px;
+  font-weight: 400;
+  padding: 8px var(--space-2);
+}
+
+/* === 16. REMOVE VISUAL NOISE === */
+/* Remove pulse animations */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0; }
+}
+
+/* Remove notification pulse */
+.notification-badge.has-notification {
+  animation: none;
+}
+
+/* Simplify progress shimmer */
+.progress-bar-enhanced::after {
+  display: none;
+}
+
+/* === 17. RESPONSIVE PRECISION === */
+@media (max-width: 768px) {
+  h1, .text-display {
+    font-size: 32px;
+  }
+  
+  h2, .text-title {
+    font-size: 24px;
+  }
+  
+  .section {
+    padding: var(--space-6) 0;
+  }
+  
+  .card-body {
+    padding: var(--space-2);
+  }
+}
+
+/* === 18. OPTICAL ALIGNMENT === */
+/* Align headings with content */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+}
+
+/* Consistent vertical rhythm */
+* + h2,
+* + h3,
+* + h4 {
+  margin-top: var(--space-4);
+}
+
+/* === 19. COLOR RESTRAINT === */
+/* One primary accent per viewport */
+.text-primary-custom {
+  color: var(--text-primary);
+}
+
+/* Reduce accent usage */
+.btn-call-next {
+  background: var(--color-primary);
+}
+
+.btn-call-next:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-base);
+}
+
+/* === 20. FINAL POLISH === */
+/* Remove decorative elements */
+.bg-pattern,
+.bg-grid {
+  opacity: 0.3;
+}
+
+/* Calm backgrounds */
+body {
+  background: #FAFAFA;
+}
+
+.page-content {
+  background: #FAFAFA;
+}
+
+/* Minimal card backgrounds */
+.card {
+  background: #FFFFFF;
+}
