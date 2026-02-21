@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
@@ -14,9 +14,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import pytz
-import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
-import matplotlib.pyplot as plt
 
 # Load environment variables
 load_dotenv()
@@ -2225,6 +2222,14 @@ def superadmin_edit_admin(admin_id):
     
     return render_template('superadmin_edit_admin.html', admin=admin, center=center)
 
+@app.route('/superadmin/analytics')
+def superadmin_analytics():
+    """Super Admin analytics page"""
+    if 'superadmin_id' not in session:
+        return redirect(url_for('superadmin_login'))
+    
+    return render_template('superadmin_analytics.html')
+
 @app.route('/superadmin/logout')
 def superadmin_logout():
     session.clear()
@@ -2317,6 +2322,7 @@ def token_qr(token_number):
 
 @app.route('/admin/analytics')
 def admin_analytics():
+    """Admin analytics page - Chart.js powered"""
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
@@ -2327,11 +2333,15 @@ def admin_analytics():
         flash('Service center not found', 'danger')
         return redirect(url_for('admin_dashboard'))
     
-    try:
-        expire_old_tokens()
-    except Exception as e:
-        print(f"⚠️ Error expiring tokens: {e}")
+    return render_template('admin_analytics.html', center=center)
+
+@app.route('/api/admin/analytics')
+def api_admin_analytics():
+    """JSON endpoint for admin analytics data"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
     
+    center_id = session['admin_center_id']
     today = datetime.now().date()
     
     # Daily customers
@@ -2340,142 +2350,105 @@ def admin_analytics():
         db.func.date(Token.created_time) == today
     ).count()
     
-    print(f"📊 Analytics Debug: daily_customers={daily_customers}")
-    
-    # Last 7 days data
-    last_7_days = []
-    dates = []
-    counts = []
+    # Last 7 days trend
+    trend_data = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
         count = Token.query.filter(
             Token.service_center_id == center_id,
             db.func.date(Token.created_time) == date
         ).count()
-        last_7_days.append({'date': date.strftime('%a'), 'count': count})
-        dates.append(date.strftime('%a'))
-        counts.append(count)
+        trend_data.append({'date': date.strftime('%a'), 'count': count})
     
-    print(f"📊 Analytics Debug: dates={dates}, counts={counts}")
+    # Online vs Walk-in
+    total_tokens = Token.query.filter_by(service_center_id=center_id).count()
+    walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
+    online_tokens = total_tokens - walkin_tokens
     
     # Status breakdown
     completed = Token.query.filter_by(service_center_id=center_id, status='Completed').count()
+    no_show = Token.query.filter_by(service_center_id=center_id, status='No Show').count()
     expired = Token.query.filter_by(service_center_id=center_id, status='Expired').count()
-    active = Token.query.filter_by(service_center_id=center_id, status='Active').count()
     
-    # Online vs Walk-in
-    try:
-        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
-        walkin_tokens = Token.query.filter_by(service_center_id=center_id, is_walkin=True).count()
-        online_tokens = total_tokens - walkin_tokens
-    except:
-        total_tokens = Token.query.filter_by(service_center_id=center_id).count()
-        walkin_tokens = 0
-        online_tokens = total_tokens
+    # Peak hours
+    hour_counts = {}
+    all_tokens = Token.query.filter_by(service_center_id=center_id).all()
+    for token in all_tokens:
+        if token.created_time:
+            hour = token.created_time.hour
+            hour_counts[hour] = hour_counts.get(hour, 0) + 1
     
-    print(f"📊 Analytics Debug: total={total_tokens}, online={online_tokens}, walkin={walkin_tokens}")
-    print(f"📊 Analytics Debug: completed={completed}, expired={expired}, active={active}")
+    peak_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:5]
     
-    # Generate charts
-    trend_chart = None
-    pie_chart = None
-    peak_hours = None
-    
-    try:
-        # 1. Line Chart - 7-Day Trend
-        if sum(counts) > 0:
-            fig = plt.figure(figsize=(10, 4.5), facecolor='white')
-            ax = fig.add_subplot(111)
-            ax.plot(dates, counts, marker='o', linewidth=2.5, markersize=8, color='#0F4C5C')
-            ax.fill_between(range(len(counts)), counts, alpha=0.15, color='#0F4C5C')
-            ax.set_xlabel('Day', fontsize=11, color='#64748B')
-            ax.set_ylabel('Tokens Booked', fontsize=11, color='#64748B')
-            ax.set_title('Queue Activity - Last 7 Days', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
-            ax.grid(True, alpha=0.15, linestyle='--', color='#CBD5E1')
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_color('#E2E8F0')
-            ax.spines['bottom'].set_color('#E2E8F0')
-            ax.set_ylim(bottom=0)
-            fig.tight_layout()
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
-            buf.seek(0)
-            trend_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-            buf.close()
-            print(f"✅ Trend chart generated successfully")
-    except Exception as e:
-        print(f"⚠️ Trend chart error: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    try:
-        # 2. Pie Chart - Online vs Walk-in
-        if total_tokens > 0:
-            fig = plt.figure(figsize=(6, 6), facecolor='white')
-            ax = fig.add_subplot(111)
-            labels = ['Online Booking', 'Walk-in']
-            sizes = [online_tokens, walkin_tokens]
-            colors = ['#0F4C5C', '#C0843D']
-            explode = (0.05, 0)
-            
-            wedges, texts, autotexts = ax.pie(sizes, explode=explode, labels=labels, colors=colors, 
-                    autopct='%1.1f%%', shadow=False, startangle=90,
-                    textprops={'fontsize': 11, 'color': '#1E293B'})
-            
-            for autotext in autotexts:
-                autotext.set_color('white')
-                autotext.set_fontweight('bold')
-                autotext.set_fontsize(12)
-            
-            ax.set_title('Booking Type Distribution', fontsize=13, fontweight='bold', color='#1E293B', pad=15)
-            ax.axis('equal')
-            fig.tight_layout()
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white')
-            buf.seek(0)
-            pie_chart = base64.b64encode(buf.getvalue()).decode()
-            plt.close(fig)
-            buf.close()
-            print(f"✅ Pie chart generated successfully")
-    except Exception as e:
-        print(f"⚠️ Pie chart error: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    try:
-        # 3. Peak Hours Analysis
-        hour_counts = {}
-        all_tokens = Token.query.filter_by(service_center_id=center_id).all()
-        for token in all_tokens:
-            if token.created_time:
-                hour = token.created_time.hour
-                hour_counts[hour] = hour_counts.get(hour, 0) + 1
-        
-        if hour_counts:
-            peak_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-    except Exception as e:
-        print(f"⚠️ Peak hours error: {e}")
-    
-    analytics = {
+    return jsonify({
         'daily_customers': daily_customers,
-        'last_7_days': last_7_days,
-        'online_tokens': online_tokens,
-        'walkin_tokens': walkin_tokens,
         'total_tokens': total_tokens,
-        'completed': completed,
-        'expired': expired,
-        'active': active,
-        'avg_wait_time': center.avg_service_time,
-        'trend_chart': trend_chart,
-        'pie_chart': pie_chart,
-        'peak_hours': peak_hours
-    }
+        'trend': trend_data,
+        'booking_types': {
+            'online': online_tokens,
+            'walkin': walkin_tokens
+        },
+        'status': {
+            'completed': completed,
+            'no_show': no_show,
+            'expired': expired
+        },
+        'peak_hours': [{'hour': h, 'count': c} for h, c in peak_hours]
+    })
+
+@app.route('/api/superadmin/analytics')
+def api_superadmin_analytics():
+    """JSON endpoint for super admin system-wide analytics"""
+    if 'superadmin_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
     
-    return render_template('admin_analytics.html', center=center, analytics=analytics, IST=IST)
+    today = datetime.now().date()
+    
+    # System-wide stats
+    total_centers = ServiceCenter.query.count()
+    total_users = User.query.count()
+    daily_tokens = Token.query.filter(db.func.date(Token.created_time) == today).count()
+    
+    # Last 7 days trend (system-wide)
+    trend_data = []
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        count = Token.query.filter(db.func.date(Token.created_time) == date).count()
+        trend_data.append({'date': date.strftime('%a'), 'count': count})
+    
+    # Online vs Walk-in (system-wide)
+    total_tokens = Token.query.count()
+    walkin_tokens = Token.query.filter_by(is_walkin=True).count()
+    online_tokens = total_tokens - walkin_tokens
+    
+    # Status breakdown (system-wide)
+    completed = Token.query.filter_by(status='Completed').count()
+    no_show = Token.query.filter_by(status='No Show').count()
+    expired = Token.query.filter_by(status='Expired').count()
+    
+    # Top performing centers
+    top_centers = db.session.query(
+        ServiceCenter.name,
+        db.func.count(Token.id).label('token_count')
+    ).join(Token).group_by(ServiceCenter.id).order_by(db.desc('token_count')).limit(5).all()
+    
+    return jsonify({
+        'total_centers': total_centers,
+        'total_users': total_users,
+        'daily_tokens': daily_tokens,
+        'total_tokens': total_tokens,
+        'trend': trend_data,
+        'booking_types': {
+            'online': online_tokens,
+            'walkin': walkin_tokens
+        },
+        'status': {
+            'completed': completed,
+            'no_show': no_show,
+            'expired': expired
+        },
+        'top_centers': [{'name': name, 'count': count} for name, count in top_centers]
+    })
 
 @app.route('/test-email-config')
 def test_email_config():
