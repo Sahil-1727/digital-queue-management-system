@@ -556,41 +556,36 @@ def calculate_wait_time(center_id, token_position):
     return min(wait_minutes, 180)
 
 def calculate_travel_time(user_lat, user_lon, center_lat, center_lon):
-    """Calculate travel time using OpenRouteService API with Haversine fallback"""
+    """Calculate travel time using OpenRouteService API for real road-based routing"""
     if not all([user_lat, user_lon, center_lat, center_lon]):
         return 10
     
-    # Try OpenRouteService API first
     ors_api_key = os.getenv('OPENROUTESERVICE_API_KEY', '')
-    if ors_api_key:
-        try:
-            url = 'https://api.openrouteservice.org/v2/directions/driving-car'
-            headers = {'Authorization': ors_api_key}
-            params = {
-                'start': f'{user_lon},{user_lat}',
-                'end': f'{center_lon},{center_lat}'
-            }
-            response = requests.get(url, headers=headers, params=params, timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                duration_seconds = data['features'][0]['properties']['segments'][0]['duration']
-                travel_time = int(duration_seconds / 60)
-                print(f"✅ ORS API: {travel_time} min")
-                return max(travel_time, 5)
-        except Exception as e:
-            print(f"⚠️ ORS API failed: {e}")
+    if not ors_api_key:
+        print("⚠️ ORS API key not configured")
+        return 15
     
-    # Fallback to Haversine
-    from math import radians, sin, cos, sqrt, atan2
-    R = 6371
-    lat1, lon1, lat2, lon2 = map(radians, [user_lat, user_lon, center_lat, center_lon])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
-    distance = R * c
-    travel_time = (distance / 30) * 60
-    return int(travel_time)
+    try:
+        url = 'https://api.openrouteservice.org/v2/directions/driving-car'
+        headers = {'Authorization': ors_api_key}
+        params = {
+            'start': f'{user_lon},{user_lat}',
+            'end': f'{center_lon},{center_lat}'
+        }
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            duration_seconds = data['features'][0]['properties']['segments'][0]['duration']
+            travel_time_minutes = round(duration_seconds / 60)
+            print(f"✅ ORS API: {travel_time_minutes} min (from {user_lat},{user_lon} to {center_lat},{center_lon})")
+            return max(travel_time_minutes, 5)
+        else:
+            print(f"⚠️ ORS API error: {response.status_code} - {response.text}")
+            return 15
+    except Exception as e:
+        print(f"⚠️ ORS API failed: {e}")
+        return 15
 
 def get_user_location(user):
     """Safely get user location, handling missing columns"""
