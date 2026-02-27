@@ -499,6 +499,21 @@
  </style>
 </head>
 <body>
+ <!-- Landing Page Navbar -->
+ <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 16px 0; transition: all 0.3s ease;">
+ <div class="container">
+ <div style="display: flex; justify-content: space-between; align-items: center;">
+ <a href="/" style="font-size: 24px; font-weight: 700; color: var(--color-primary); text-decoration: none;">🎫 QueueFlow</a>
+ <div style="display: flex; gap: 32px; align-items: center;">
+ <a href="#features" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;">Features</a>
+ <a href="{{ url_for('pricing') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;">Pricing</a>
+ <a href="{{ url_for('login') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;">Sign In</a>
+ <a href="{{ url_for('register') }}" style="padding: 10px 24px; background: var(--color-primary); color: white; border-radius: 100px; text-decoration: none; font-weight: 600; transition: all 0.2s;">Get Started</a>
+ </div>
+ </div>
+ </div>
+ </nav>
+ <div style="height: 64px;"></div>
  <!-- Hero Section -->
  <section class="hero">
  <div class="container">
@@ -513,6 +528,7 @@
  <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Get Started Free</a>
  <a href="{{ url_for('login') }}" class="btn btn-hero-secondary">Sign In</a>
  </div>
+ <p style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);"><a href="{{ url_for('pricing') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">View Pricing →</a></p>
  </div>
  <div class="col-lg-6 d-none d-lg-block">
  <img src="{{ url_for('static', filename='images/queue-hero1.png') }}" alt="Queue Management" style="width: 100%; max-width: 500px; margin: 0 auto; display: block; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
@@ -679,11 +695,12 @@
  <section class="cta-section">
  <div class="container">
  <h2>Ready to Modernize Your Service Center?</h2>
- <p>Join service centers already using QueueFlow to eliminate waiting lines.</p>
+ <p>Join 19 service centers already using QueueFlow to eliminate waiting lines.</p>
  <div class="cta-group" style="justify-content: center;">
  <a href="{{ url_for('register') }}" class="btn btn-hero-primary">Start Free Trial</a>
  <a href="{{ url_for('register_center') }}" class="btn btn-hero-secondary">Register Your Center</a>
  </div>
+ <p style="margin-top: 24px; font-size: 14px; color: var(--text-secondary);"><a href="{{ url_for('pricing') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">View Pricing Plans →</a></p>
  </div>
  </section>
 
@@ -699,6 +716,7 @@
  <h4>Product</h4>
  <ul>
  <li><a href="{{ url_for('services') }}">Features</a></li>
+ <li><a href="{{ url_for('pricing') }}">Pricing</a></li>
  <li><a href="{{ url_for('register') }}">Get Started</a></li>
  <li><a href="{{ url_for('register_center') }}">For Centers</a></li>
  </ul>
@@ -721,7 +739,7 @@
  </div>
  </div>
  <div class="footer-bottom">
- <p>&copy; 2024 QueueFlow. All rights reserved. Built for modern service centers.</p>
+ <p>&copy; 2026 QueueFlow. All rights reserved. | <a href="{{ url_for('terms') }}" style="color: var(--text-muted); text-decoration: none;">Terms</a> | <a href="{{ url_for('privacy') }}" style="color: var(--text-muted); text-decoration: none;">Privacy</a></p>
  </div>
  </div>
  </footer>

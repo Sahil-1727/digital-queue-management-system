@@ -198,7 +198,8 @@
         <div class="cookie-content">
           <div class="cookie-text">
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
-            <a href="#" style="color: var(--color-primary); font-weight: 600;">Learn more</a>
+            <a href="/terms" style="color: var(--color-primary); font-weight: 600; margin: 0 4px;">Terms</a> |
+            <a href="/privacy" style="color: var(--color-primary); font-weight: 600; margin: 0 4px;">Privacy Policy</a>
           </div>
           <div class="cookie-actions">
             <button class="btn btn-outline-primary btn-sm" onclick="this.closest('.cookie-banner').remove();">Decline</button>
