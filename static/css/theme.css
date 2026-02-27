@@ -76,6 +76,33 @@
   --transition-slow: 350ms ease-out;
 }
 
+/* === DARK MODE THEME === */
+[data-theme="dark"] {
+  --bg-main: #0A0F14;
+  --bg-card: #111820;
+  --bg-soft: #0F1923;
+  --bg-hover: #1A2535;
+  --bg-active: #1E2D40;
+  --text-primary: #F0F4F8;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+  --text-inverse: #0F172A;
+  --border-light: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.1);
+  --border-strong: rgba(255,255,255,0.16);
+  --border-light-soft: rgba(255,255,255,0.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-xl: 0 12px 32px rgba(0,0,0,0.6);
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.4);
+  --color-primary: #1A8FA8;
+  --color-primary-dark: #0F6B80;
+  --color-primary-light: #2AB0CC;
+  --color-primary-hover: #1680A0;
+}
+
 /* === ALTERNATIVE THEME EXAMPLE (DISABLED BY DEFAULT) === */
 [data-theme="ocean"] {
   --color-primary: #0369A1;

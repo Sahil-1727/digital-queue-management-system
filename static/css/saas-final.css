@@ -708,3 +708,91 @@ body {
   background: rgba(15, 76, 92, 0.08) !important;
   border-radius: 8px;
 }
+
+
+/* === DARK MODE COMPONENT OVERRIDES === */
+[data-theme="dark"] .navbar {
+  background: #0F1923;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background: var(--bg-soft);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .table {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--bg-card);
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+[data-theme="dark"] .internal-navbar {
+  background: #0F1923;
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .footer {
+  background: #0A0F14;
+  border-top-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .btn-outline-primary {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary-light);
+}
+
+[data-theme="dark"] input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px var(--bg-soft) inset;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+[data-theme="dark"] .hero {
+  background: var(--bg-main);
+}
+
+[data-theme="dark"] .product-preview {
+  background: linear-gradient(135deg, #0A3644 0%, #051E29 100%);
+}
+
+[data-theme="dark"] .cta-section {
+  background: linear-gradient(135deg, rgba(26,143,168,0.08) 0%, rgba(192,132,61,0.05) 100%);
+}
+
+[data-theme="dark"] .pricing-card,
+[data-theme="dark"] .testimonial-card,
+[data-theme="dark"] .stat-card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .empty-state {
+  background: var(--bg-soft);
+  border-color: var(--border-light);
+}
