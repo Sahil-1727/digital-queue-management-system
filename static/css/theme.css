@@ -1128,3 +1128,174 @@ a:hover {
     font-size: 1.5rem;
   }
 }
+
+/* === ADDITIONAL DARK MODE OVERRIDES === */
+
+[data-theme="dark"] .service-card,
+[data-theme="dark"] .card {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .service-card h5,
+[data-theme="dark"] .service-card h4,
+[data-theme="dark"] .service-card .card-title,
+[data-theme="dark"] .card h5,
+[data-theme="dark"] .card h4,
+[data-theme="dark"] .card .card-title {
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .service-card p,
+[data-theme="dark"] .service-card .card-text,
+[data-theme="dark"] .service-card .text-muted,
+[data-theme="dark"] .card p,
+[data-theme="dark"] .card .card-text,
+[data-theme="dark"] .card .text-muted {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .service-card .badge {
+  filter: brightness(0.85);
+}
+
+[data-theme="dark"] .services-filter-bar,
+[data-theme="dark"] .input-group,
+[data-theme="dark"] .search-bar {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+[data-theme="dark"] .input-group-text {
+  background: #0F1923 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .page-header,
+[data-theme="dark"] .services-header {
+  background: #0F1923 !important;
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .internal-navbar {
+  background: #111820 !important;
+  border-bottom-color: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .internal-navbar .brand-name {
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .internal-navbar .nav-link,
+[data-theme="dark"] .internal-navbar a {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .internal-navbar .nav-link:hover {
+  color: #F0F4F8 !important;
+  background: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .user-menu-trigger {
+  background: #0F1923 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .user-avatar {
+  background: #1A8FA8 !important;
+}
+
+[data-theme="dark"] .user-dropdown {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .counter-section,
+[data-theme="dark"] .queue-card,
+[data-theme="dark"] .counter-column {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .queue-card .card-header {
+  background: #0A3644 !important;
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .serving-display {
+  background: linear-gradient(135deg, #0F4C5C, #0A3644) !important;
+}
+
+[data-theme="dark"] .btn-waiting-live {
+  background: #1A2535 !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .waiting-queue-table {
+  background: #111820 !important;
+}
+
+[data-theme="dark"] .page-content {
+  background: #0A0F14 !important;
+}
+
+[data-theme="dark"] .payment-card,
+[data-theme="dark"] .payment-summary {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  color: #F0F4F8 !important;
+}
+
+[data-theme="dark"] .token-card {
+  background: linear-gradient(135deg, #0F4C5C, #0A3644) !important;
+}
+
+[data-theme="dark"] .alert-success {
+  background: rgba(16,185,129,0.15) !important;
+  color: #6EE7B7 !important;
+  border-left-color: #10B981 !important;
+}
+
+[data-theme="dark"] .alert-danger {
+  background: rgba(239,68,68,0.15) !important;
+  color: #FCA5A5 !important;
+  border-left-color: #EF4444 !important;
+}
+
+[data-theme="dark"] .alert-warning {
+  background: rgba(245,158,11,0.15) !important;
+  color: #FCD34D !important;
+  border-left-color: #F59E0B !important;
+}
+
+[data-theme="dark"] .alert-info {
+  background: rgba(59,130,246,0.15) !important;
+  color: #93C5FD !important;
+  border-left-color: #3B82F6 !important;
+}
+
+[data-theme="dark"] #dark-mode-toggle {
+  border-color: rgba(255,255,255,0.25) !important;
+  background: rgba(255,255,255,0.05) !important;
+}
+
+[data-theme="dark"] #dark-mode-toggle:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+[data-theme="dark"] .navbar {
+  background: #0A3644 !important;
+}
+
+[data-theme="dark"] .stat-card-enhanced {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+[data-theme="dark"] .queue-position-card {
+  background: #111820 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}

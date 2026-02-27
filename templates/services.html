@@ -134,6 +134,26 @@
 
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
  <script>
+ function toggleDarkMode() {
+ const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ if (isDark) {
+ document.documentElement.removeAttribute('data-theme');
+ localStorage.setItem('queueflow-theme', 'light');
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '☀️');
+ } else {
+ document.documentElement.setAttribute('data-theme', 'dark');
+ localStorage.setItem('queueflow-theme', 'dark');
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
+ }
+ }
+ 
+ document.addEventListener('DOMContentLoaded', () => {
+ const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => {
+ btn.textContent = isDark ? '🌙' : '☀️';
+ });
+ });
+ 
  // Add hover effect to card top line
  document.querySelectorAll('.card').forEach(card => {
  const topLine = card.querySelector('.card-top-line');
