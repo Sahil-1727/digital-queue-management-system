@@ -6,6 +6,30 @@
 
 {% block extra_css %}
 <style>
+.auth-page {
+ min-height: 100vh;
+ display: flex;
+ align-items: center;
+ background: var(--bg-main);
+ position: relative;
+}
+
+.auth-page::before {
+ content: '';
+ position: fixed;
+ inset: 0;
+ background: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.06) 0%, transparent 50%),
+ radial-gradient(circle at 80% 80%, rgba(192, 132, 61, 0.04) 0%, transparent 50%);
+ z-index: 0;
+}
+
+.auth-card {
+ position: relative;
+ z-index: 1;
+ max-width: 480px;
+ margin: 0 auto;
+}
+
 .auth-icon {
  font-size: 4rem;
  margin-bottom: var(--space-md);
@@ -35,23 +59,15 @@
 {% endblock %}
 
 {% block content %}
-<div class="auth-split-container" id="main-content">
- <div class="auth-brand-panel">
- <div class="auth-brand-content">
- <div class="auth-brand-logo">✨</div>
- <h2 class="auth-brand-title">Join QueueFlow Today</h2>
- <p class="auth-brand-subtitle">Create your account and experience the future of queue management.</p>
- <ul class="auth-brand-features">
- <li>Book tokens instantly</li>
- <li>Track queue status live</li>
- <li>Get smart arrival alerts</li>
- <li>Access 19+ service centers</li>
- </ul>
- </div>
- </div>
- <div class="auth-form-panel">
- <div class="auth-form-wrapper">
+<div class="auth-page" id="main-content">
+ <div class="container">
+ <div class="row justify-content-center">
+ <div class="col-md-10 col-lg-8">
+ <div class="auth-card">
+ <div class="card">
+ <div class="card-body p-4 p-md-5">
  <div class="text-center mb-4">
+ <div class="auth-icon">✨</div>
  <h1 class="gradient-text mb-2">Create Account</h1>
  <p class="text-muted">Join QueueFlow and skip the wait</p>
  </div>
@@ -99,6 +115,10 @@
  <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--border-medium);background:var(--bg-soft);cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;margin-bottom:12px;" aria-label="Toggle dark mode">☀️</button>
  <p class="mb-2">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
  <p class="mb-0"><a href="{{ url_for('index') }}" class="text-muted">← Back to Home</a></p>
+ </div>
+ </div>
+ </div>
+ </div>
  </div>
  </div>
  </div>

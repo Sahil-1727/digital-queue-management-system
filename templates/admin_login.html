@@ -19,48 +19,24 @@
  <link rel="canonical" href="{{ request.url }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/saas-final.css') }}">
- <style>
- .password-toggle {
- position: absolute;
- right: 12px;
- top: 50%;
- transform: translateY(-50%);
- cursor: pointer;
- color: var(--text-muted);
- transition: color var(--transition-fast);
- }
- .password-toggle:hover {
- color: var(--text-primary);
- }
- .gradient-text {
- background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
- -webkit-background-clip: text;
- -webkit-text-fill-color: transparent;
- background-clip: text;
- }
- </style>
+ 
+ 
  </head>
-<body>
+<body class="auth-page page-content" style="background: var(--bg-main); position: relative; overflow: hidden;">
  <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
- <div class="auth-split-container" id="main-content">
- <div class="auth-brand-panel">
- <div class="auth-brand-content">
- <div class="auth-brand-logo">🔒</div>
- <h2 class="auth-brand-title">Admin Portal</h2>
- <p class="auth-brand-subtitle">Manage your service center operations with powerful tools and real-time insights.</p>
- <ul class="auth-brand-features">
- <li>Real-time queue management</li>
- <li>Token processing controls</li>
- <li>Analytics & reporting</li>
- <li>Customer insights</li>
- </ul>
+ <!-- Animated Background -->
+ <div style="position: fixed; inset: 0; z-index: 0;">
+ <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.1) 0%, transparent 50%);"></div>
+ <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
  </div>
- </div>
- <div class="auth-form-panel">
- <div class="auth-form-wrapper">
+ <div class="container" style="position: relative; z-index: 1;">
+ <div class="row justify-content-center align-items-center min-vh-100 py-5" id="main-content">
+ <div class="col-md-5">
+ <div class="card glass-effect hover-lift fade-in-up">
+ <div class="card-body p-5">
  <div class="text-center mb-4">
- <h1 class="gradient-text mb-2">Admin Login</h1>
+ <div style="font-size: 4rem; margin-bottom: 1rem;">🔒</div>
+ <h2 class="gradient-text mb-2">Admin Portal</h2>
  <p class="text-muted">Service center management</p>
  </div>
  
@@ -84,7 +60,7 @@
  <label for="password" class="form-label">Password</label>
  <div class="position-relative">
  <input type="password" class="form-control" id="password" name="password" placeholder="Enter admin password" required>
- <span class="password-toggle" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
+ <span class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
  <svg width="20" height="20" fill="currentColor" class="eye-icon">
  <use href="#eye-off"/>
  </svg>
@@ -101,6 +77,8 @@
  <div class="text-center">
  <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--border-medium);background:var(--bg-soft);cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;margin-bottom:12px;" aria-label="Toggle dark mode">☀️</button>
  <p class="text-sm mb-0"><a href="{{ url_for('index') }}" class="link-secondary">← Back to Home</a></p>
+ </div>
+ </div>
  </div>
  </div>
  </div>
