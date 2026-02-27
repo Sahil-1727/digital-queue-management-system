@@ -672,3 +672,39 @@ body {
     transform: scale(1);
   }
 }
+
+
+/* === MOBILE BACK TO TOP === */
+@media (max-width: 768px) {
+  .scroll-to-top {
+    bottom: 80px;
+    right: 16px;
+  }
+}
+
+/* === SERVICE CARD CATEGORY COLORS === */
+.service-card[data-category="Medical"] {
+  border-left: 4px solid #10B981;
+}
+
+.service-card[data-category="Mobile"] {
+  border-left: 4px solid #3B82F6;
+}
+
+/* === ADMIN COUNTER DIFFERENTIATION === */
+.counter-column:nth-child(1) .counter-card {
+  border-left: 4px solid var(--color-primary);
+}
+
+.counter-column:nth-child(2) .counter-card {
+  border-left: 4px solid var(--color-accent);
+}
+
+/* === ACTIVE NAV STATE === */
+.nav-link.active,
+.dropdown-item.active {
+  color: var(--color-primary) !important;
+  font-weight: 700 !important;
+  background: rgba(15, 76, 92, 0.08) !important;
+  border-radius: 8px;
+}

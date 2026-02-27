@@ -503,7 +503,10 @@
  <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 16px 0; transition: all 0.3s ease;">
  <div class="container">
  <div style="display: flex; justify-content: space-between; align-items: center;">
- <a href="/" style="font-size: 24px; font-weight: 700; color: var(--color-primary); text-decoration: none;">🎫 QueueFlow</a>
+ <a href="/" style="font-size: 24px; font-weight: 700; color: var(--color-primary); text-decoration: none; display: flex; align-items: center; gap: 8px;">
+ <span style="font-size: 28px;">🎫</span>
+ <span>QueueFlow</span>
+ </a>
  <div style="display: flex; gap: 32px; align-items: center;">
  <a href="#features" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;">Features</a>
  <a href="{{ url_for('pricing') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;">Pricing</a>
