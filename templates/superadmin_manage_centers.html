@@ -39,26 +39,26 @@
  {% endwith %}
 
  <div class="table-responsive">
- <table class="table table-hover">
- <thead>
- <tr>
- <th>ID</th>
- <th>Name</th>
- <th>Category</th>
- <th>Location</th>
- <th>Avg Service Time</th>
- <th>Action</th>
+ <table role="table" class="table table-hover">
+ <thead role="rowgroup">
+ <tr role="row">
+ <th scope="col">ID</th>
+ <th scope="col">Name</th>
+ <th scope="col">Category</th>
+ <th scope="col">Location</th>
+ <th scope="col">Avg Service Time</th>
+ <th scope="col">Action</th>
  </tr>
  </thead>
- <tbody>
+ <tbody role="rowgroup">
  {% for center in centers %}
- <tr>
- <td>{{ center.id }}</td>
- <td>{{ center.name }}</td>
- <td>{{ center.category }}</td>
- <td>{{ center.location }}</td>
- <td>{{ center.avg_service_time if center.avg_service_time else 15 }} mins</td>
- <td>
+ <tr role="row">
+ <td role="cell">{{ center.id }}</td>
+ <td role="cell">{{ center.name }}</td>
+ <td role="cell">{{ center.category }}</td>
+ <td role="cell">{{ center.location }}</td>
+ <td role="cell">{{ center.avg_service_time if center.avg_service_time else 15 }} mins</td>
+ <td role="cell">
  <form method="POST" action="{{ url_for('superadmin_delete_center', center_id=center.id) }}" 
  onsubmit="return confirm('Are you sure you want to delete {{ center.name }}? This will delete all tokens and admin accounts.');" 
  style="display: inline;">

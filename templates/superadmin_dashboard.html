@@ -74,39 +74,39 @@
  <div class="card-body p-0">
  {% if pending %}
  <div class="table-responsive">
- <table class="table table-hover mb-0">
- <thead class="table-light">
- <tr>
- <th>Service Center</th>
- <th>Type</th>
- <th>Owner</th>
- <th>Contact</th>
- <th>Location</th>
- <th>Payment</th>
- <th>Submitted</th>
- <th>Actions</th>
+ <table role="table" class="table table-hover mb-0">
+ <thead role="rowgroup" class="table-light">
+ <tr role="row">
+ <th scope="col">Service Center</th>
+ <th scope="col">Type</th>
+ <th scope="col">Owner</th>
+ <th scope="col">Contact</th>
+ <th scope="col">Location</th>
+ <th scope="col">Payment</th>
+ <th scope="col">Submitted</th>
+ <th scope="col">Actions</th>
  </tr>
  </thead>
- <tbody>
+ <tbody role="rowgroup">
  {% for reg in pending %}
- <tr>
- <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
- <td><span class="badge">{{ reg.organization_type }}</span></td>
- <td>{{ reg.owner_name }}</td>
- <td>
+ <tr role="row">
+ <td role="cell" class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+ <td role="cell"><span class="badge">{{ reg.organization_type }}</span></td>
+ <td role="cell">{{ reg.owner_name }}</td>
+ <td role="cell">
  <small>{{ reg.email }}</small><br>
  <small>{{ reg.phone }}</small>
  </td>
- <td>{{ reg.city }}, {{ reg.state }}</td>
- <td>
+ <td role="cell">{{ reg.city }}, {{ reg.state }}</td>
+ <td role="cell">
  {% if reg.payment_status == 'Completed' %}
  <span class="badge badge-success">✓ ₹{{ reg.registration_fee }}</span>
  {% else %}
  <span class="badge badge-warning">Pending</span>
  {% endif %}
  </td>
- <td><small>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}</small></td>
- <td>
+ <td role="cell"><small>{{ reg.submitted_time.strftime('%d %b %Y, %I:%M %p') }}</small></td>
+ <td role="cell">
  <button class="btn btn-sm btn-success w-100" data-bs-toggle="modal" data-bs-target="#viewModal{{ reg.id }}">View</button>
  </td>
  </tr>
@@ -264,24 +264,24 @@
  <div class="card-body p-0">
  {% if approved %}
  <div class="table-responsive">
- <table class="table table-hover mb-0">
- <thead class="table-light">
- <tr>
- <th>Service Center</th>
- <th>Type</th>
- <th>Owner</th>
- <th>Contact</th>
- <th>Approved On</th>
+ <table role="table" class="table table-hover mb-0">
+ <thead role="rowgroup" class="table-light">
+ <tr role="row">
+ <th scope="col">Service Center</th>
+ <th scope="col">Type</th>
+ <th scope="col">Owner</th>
+ <th scope="col">Contact</th>
+ <th scope="col">Approved On</th>
  </tr>
  </thead>
- <tbody>
+ <tbody role="rowgroup">
  {% for reg in approved %}
- <tr>
- <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
- <td><span class="badge">{{ reg.organization_type }}</span></td>
- <td>{{ reg.owner_name }}</td>
- <td><small>{{ reg.email }}</small></td>
- <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
+ <tr role="row">
+ <td role="cell" class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+ <td role="cell"><span class="badge">{{ reg.organization_type }}</span></td>
+ <td role="cell">{{ reg.owner_name }}</td>
+ <td role="cell"><small>{{ reg.email }}</small></td>
+ <td role="cell"><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
  </tr>
  {% endfor %}
  </tbody>
@@ -303,24 +303,24 @@
  <div class="card-body p-0">
  {% if rejected %}
  <div class="table-responsive">
- <table class="table table-hover mb-0">
- <thead class="table-light">
- <tr>
- <th>Service Center</th>
- <th>Type</th>
- <th>Owner</th>
- <th>Contact</th>
- <th>Rejected On</th>
+ <table role="table" class="table table-hover mb-0">
+ <thead role="rowgroup" class="table-light">
+ <tr role="row">
+ <th scope="col">Service Center</th>
+ <th scope="col">Type</th>
+ <th scope="col">Owner</th>
+ <th scope="col">Contact</th>
+ <th scope="col">Rejected On</th>
  </tr>
  </thead>
- <tbody>
+ <tbody role="rowgroup">
  {% for reg in rejected %}
- <tr>
- <td class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
- <td><span class="badge">{{ reg.organization_type }}</span></td>
- <td>{{ reg.owner_name }}</td>
- <td><small>{{ reg.email }}</small></td>
- <td><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
+ <tr role="row">
+ <td role="cell" class="fw-bold" style="color: var(--color-primary);">{{ reg.center_name }}</td>
+ <td role="cell"><span class="badge">{{ reg.organization_type }}</span></td>
+ <td role="cell">{{ reg.owner_name }}</td>
+ <td role="cell"><small>{{ reg.email }}</small></td>
+ <td role="cell"><small>{{ reg.reviewed_time.strftime('%d %b %Y') if reg.reviewed_time else '-' }}</small></td>
  </tr>
  {% endfor %}
  </tbody>

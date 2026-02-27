@@ -208,18 +208,18 @@
           </div>
           <div class="card-body p-0 queue-table-container">
             {% if waiting_tokens %}
-            <table class="table table-hover mb-0 table-enhanced">
-              <thead>
-                <tr>
-                  <th style="width: 40%;">Token</th>
-                  <th style="width: 35%;">Name</th>
-                  <th style="width: 25%;">Action</th>
+            <table role="table" class="table table-hover mb-0 table-enhanced">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th scope="col" style="width: 40%;">Token</th>
+                  <th scope="col" style="width: 35%;">Name</th>
+                  <th scope="col" style="width: 25%;">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {% for item in waiting_tokens %}
-                <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
-                  <td>
+                <tr role="row" class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                  <td role="cell">
                     <div class="d-flex flex-column gap-1">
                       <span class="fw-bold text-primary-custom" style="font-size: 1.125rem;">{{ item.token.token_number }}</span>
                       {% if item.status_badge == 'Travelling' %}
@@ -231,8 +231,8 @@
                       {% endif %}
                     </div>
                   </td>
-                  <td class="fw-semibold">{{ item.token.user.name }}</td>
-                  <td>
+                  <td role="cell" class="fw-semibold">{{ item.token.user.name }}</td>
+                  <td role="cell">
                     <a href="{{ url_for('no_show', token_id=item.token.id) }}" class="btn btn-sm btn-outline-danger hover-scale">No Show</a>
                   </td>
                 </tr>
@@ -298,20 +298,20 @@
           </div>
           <div class="card-body p-0 queue-table-container">
             {% if walkin_waiting_tokens %}
-            <table class="table table-hover mb-0 table-enhanced">
-              <thead>
-                <tr>
-                  <th style="width: 30%;">Token</th>
-                  <th style="width: 45%;">Name</th>
-                  <th style="width: 25%;">Action</th>
+            <table role="table" class="table table-hover mb-0 table-enhanced">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th scope="col" style="width: 30%;">Token</th>
+                  <th scope="col" style="width: 45%;">Name</th>
+                  <th scope="col" style="width: 25%;">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {% for token in walkin_waiting_tokens %}
-                <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
-                  <td><span class="fw-bold text-primary-custom" style="font-size: 1.125rem;">{{ token.token_number }}</span></td>
-                  <td class="fw-semibold">{{ token.user.name }}</td>
-                  <td>
+                <tr role="row" class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                  <td role="cell"><span class="fw-bold text-primary-custom" style="font-size: 1.125rem;">{{ token.token_number }}</span></td>
+                  <td role="cell" class="fw-semibold">{{ token.user.name }}</td>
+                  <td role="cell">
                     <a href="{{ url_for('no_show', token_id=token.id) }}" class="btn btn-sm btn-outline-danger hover-scale">No Show</a>
                   </td>
                 </tr>

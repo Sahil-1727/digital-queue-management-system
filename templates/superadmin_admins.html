@@ -53,28 +53,28 @@
  <div class="card hover-lift fade-in-up">
  <div class="card-body p-0">
  <div class="table-responsive">
- <table class="table table-hover mb-0">
- <thead>
- <tr>
- <th>ID</th>
- <th>Service Center</th>
- <th>Category</th>
- <th>Location</th>
- <th>Admin Username</th>
- <th>Admin Email</th>
- <th>Actions</th>
+ <table role="table" class="table table-hover mb-0">
+ <thead role="rowgroup">
+ <tr role="row">
+ <th scope="col">ID</th>
+ <th scope="col">Service Center</th>
+ <th scope="col">Category</th>
+ <th scope="col">Location</th>
+ <th scope="col">Admin Username</th>
+ <th scope="col">Admin Email</th>
+ <th scope="col">Actions</th>
  </tr>
  </thead>
- <tbody>
+ <tbody role="rowgroup">
  {% for admin in admins %}
- <tr>
- <td><span class="badge">{{ admin.id }}</span></td>
- <td><strong>{{ admin.service_center.name }}</strong></td>
- <td><span class="badge bg-secondary">{{ admin.service_center.category }}</span></td>
- <td>{{ admin.service_center.location }}</td>
- <td><code style="color: var(--color-primary);">{{ admin.username }}</code></td>
- <td>{{ admin.email or 'Not set' }}</td>
- <td>
+ <tr role="row">
+ <td role="cell"><span class="badge">{{ admin.id }}</span></td>
+ <td role="cell"><strong>{{ admin.service_center.name }}</strong></td>
+ <td role="cell"><span class="badge bg-secondary">{{ admin.service_center.category }}</span></td>
+ <td role="cell">{{ admin.service_center.location }}</td>
+ <td role="cell"><code style="color: var(--color-primary);">{{ admin.username }}</code></td>
+ <td role="cell">{{ admin.email or 'Not set' }}</td>
+ <td role="cell">
  <a href="{{ url_for('superadmin_edit_admin', admin_id=admin.id) }}" class="btn btn-sm">
  ✏️ Edit
  </a>
