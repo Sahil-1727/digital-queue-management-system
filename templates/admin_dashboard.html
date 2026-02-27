@@ -111,6 +111,22 @@
   font-size: 0.875rem;
 }
 
+/* Force 50-50 layout - Override Bootstrap */
+.counter-column {
+  flex: 0 0 50% !important;
+  max-width: 50% !important;
+  width: 50% !important;
+  padding: 0 12px !important;
+}
+
+@media (min-width: 1px) {
+  .counter-column {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    width: 50% !important;
+  }
+}
+
 .serving-token-card {
   background: linear-gradient(135deg, rgba(15, 76, 92, 0.05), rgba(15, 76, 92, 0.02));
   border: 2px solid var(--color-primary);
@@ -144,7 +160,7 @@
 
     <div class="row g-4" style="display: flex !important; flex-wrap: wrap !important;">
       <!-- Counter 1: Online Queue -->
-      <div style="flex: 0 0 50% !important; max-width: 50% !important; padding: 0 12px;">
+      <div class="counter-column">
         <div class="card counter-card mb-3 hover-lift">
           <div class="card-body p-4">
             <h5 class="fw-bold mb-4 text-primary-custom d-flex align-items-center gap-2">
@@ -237,7 +253,7 @@
       </div>
 
       <!-- Counter 2: Walk-In Queue -->
-      <div style="flex: 0 0 50% !important; max-width: 50% !important; padding: 0 12px;">
+      <div class="counter-column">
         <div class="card counter-card mb-3 hover-lift">
           <div class="card-body p-4">
             <h5 class="fw-bold mb-4 text-primary-custom d-flex align-items-center gap-2">
