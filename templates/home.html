@@ -20,6 +20,24 @@
  <style>
  /* Landing Page Specific Styles */
  * { margin: 0; padding: 0; box-sizing: border-box; }
+ .trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+}
+.trust-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
  
  body {
  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -571,12 +589,12 @@
  <section class="trust-section">
  <div class="container">
  <p class="trust-text">Trusted by service centers across Nagpur</p>
- <div class="trust-logos">
- <div class="trust-logo">🏥</div>
- <div class="trust-logo">📱</div>
- <div class="trust-logo">🏪</div>
- <div class="trust-logo">🏦</div>
- <div class="trust-logo">🏢</div>
+  <div class="trust-logos">
+ <div class="trust-badge">🏥 Apollo Clinic</div>
+ <div class="trust-badge">📱 Apple Service</div>
+ <div class="trust-badge">📱 Samsung Care</div>
+ <div class="trust-badge">🏦 Banking Centers</div>
+ <div class="trust-badge">🏢 Govt. Offices</div>
  </div>
  </div>
  </section>
