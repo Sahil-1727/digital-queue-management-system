@@ -41,17 +41,16 @@
  if (isDark) {
  document.documentElement.removeAttribute('data-theme');
  localStorage.setItem('queueflow-theme', 'light');
- document.getElementById('dark-mode-toggle').textContent = '☀️';
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '☀️');
  } else {
  document.documentElement.setAttribute('data-theme', 'dark');
  localStorage.setItem('queueflow-theme', 'dark');
- document.getElementById('dark-mode-toggle').textContent = '🌙';
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
  }
  }
  document.addEventListener('DOMContentLoaded', function() {
- const btn = document.getElementById('dark-mode-toggle');
- if (btn && document.documentElement.getAttribute('data-theme') === 'dark') {
- btn.textContent = '🌙';
+ if (document.documentElement.getAttribute('data-theme') === 'dark') {
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
  }
  });
  </script>
