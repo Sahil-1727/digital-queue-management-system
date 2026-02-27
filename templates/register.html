@@ -2,6 +2,8 @@
 
 {% block title %}Register - QueueFlow{% endblock %}
 
+{% block meta_description %}Create your QueueFlow account. Book digital tokens and skip the waiting line at service centers in Nagpur.{% endblock %}
+
 {% block extra_css %}
 <style>
 .auth-page {
@@ -57,7 +59,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="auth-page">
+<div class="auth-page" id="main-content">
  <div class="container">
  <div class="row justify-content-center">
  <div class="col-md-10 col-lg-8">
@@ -83,23 +85,23 @@
  
  <form method="POST">
  <div class="mb-3">
- <label class="form-label">Full Name</label>
- <input type="text" class="form-control" name="name" placeholder="Enter your full name" required>
+ <label for="name" class="form-label">Full Name</label>
+ <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
  </div>
  <div class="mb-3">
- <label class="form-label">Mobile Number</label>
- <input type="text" class="form-control" name="mobile" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" required>
+ <label for="mobile" class="form-label">Mobile Number</label>
+ <input type="text" class="form-control" id="mobile" name="mobile" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" required>
  </div>
  <div class="mb-3">
- <label class="form-label">Email Address</label>
- <input type="email" class="form-control" name="email" placeholder="your@email.com" required>
+ <label for="email" class="form-label">Email Address</label>
+ <input type="email" class="form-control" id="email" name="email" placeholder="your@email.com" required>
  <small class="text-muted">Required for notifications and password reset</small>
  </div>
  <div class="mb-4">
- <label class="form-label">Password</label>
+ <label for="password" class="form-label">Password</label>
  <div class="position-relative">
  <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" minlength="6" required>
- <span class="password-toggle" onclick="togglePassword()">
+ <span class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
  <svg width="20" height="20" fill="currentColor" id="eyeIcon">
  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="2" fill="none"/>
  </svg>

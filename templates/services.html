@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Services - QueueFlow</title>
+ <meta name="description" content="Browse all service centers on QueueFlow. Book digital tokens at medical clinics, mobile service centers, and more in Nagpur.">
+ <link rel="canonical" href="{{ request.url }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
  
  
  </head>
 <body class="page-content">
+ <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
  <div class="bg-pattern" style="position: fixed; inset: 0; z-index: 0; background-image: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.05) 0%, transparent 50%);"></div>
  <div class="bg-grid" style="position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.02) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
  
@@ -19,7 +22,7 @@
  {% set user_type = 'user' %}
  {% include 'includes/internal_navbar.html' %}
 
- <div class="container py-5">
+ <div class="container py-5" id="main-content">
  <div class="text-center mb-5 fade-in-up">
  <h1 class="display-5 fw-bold mb-2">Available Service Centers</h1>
  <p style="color: var(--text-muted);">Choose a service center and get your digital token</p>

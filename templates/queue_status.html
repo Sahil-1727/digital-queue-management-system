@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Queue Status - QueueFlow</title>
+  <meta name="description" content="Track your real-time queue status on QueueFlow. See your position, estimated wait time, and suggested leave time.">
+  <link rel="canonical" href="{{ request.url }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/enhancements.css') }}">
@@ -69,7 +71,8 @@
   </style>
 </head>
 <body class="page-content" style="background: var(--bg-soft);">
-  <div class="notification-bell" id="notification-bell" onclick="document.getElementById('notification-alert').scrollIntoView({behavior: 'smooth'})">🔔</div>
+  <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
+  <div class="notification-bell" id="notification-bell" onclick="document.getElementById('notification-alert').scrollIntoView({behavior: 'smooth'})" aria-label="View notifications">🔔</div>
   
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container d-flex align-items-center justify-content-between">
@@ -83,7 +86,7 @@
     </div>
   </nav>
 
-  <div class="container py-5">
+  <div class="container py-5" id="main-content">
     <div class="row justify-content-center">
       <div class="col-md-10">
         <div class="card hover-lift fade-in-up">

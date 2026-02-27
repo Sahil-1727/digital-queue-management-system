@@ -532,6 +532,7 @@ body {
   border-radius: var(--radius-lg);
   border: none;
   box-shadow: var(--shadow-xl);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -561,6 +562,7 @@ body {
 }
 
 .modal-backdrop {
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -708,12 +710,27 @@ body {
    CUSTOM UTILITY CLASSES
    ============================================ */
 
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
 /* Brand Gradient */
 .gradient-text {
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   display: inline-block;
 }
 
@@ -961,6 +978,11 @@ a:hover {
    ============================================ */
 
 @media (max-width: 768px) {
+  a, button, input[type='submit'], input[type='button'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
   .internal-nav-container {
     padding: 12px 16px;
   }

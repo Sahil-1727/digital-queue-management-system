@@ -6,6 +6,8 @@
  <meta name="theme-color" content="#0F4C5C">
  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
  <title>{% block title %}QueueFlow{% endblock %}</title>
+ <meta name="description" content="{% block meta_description %}QueueFlow - Smart queue management for modern service centers in Nagpur. Real-time token tracking, automated operations, and intelligent queue management.{% endblock %}">
+ <link rel="canonical" href="{{ request.url }}">
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
  <script>
  (function() {
@@ -22,6 +24,7 @@
  {% block extra_css %}{% endblock %}
 </head>
 <body>
+ <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
  <style>
  body {
  animation: pageIn 0.25s ease-out;

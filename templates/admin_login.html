@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Admin Login - QueueFlow</title>
+ <meta name="description" content="Admin login portal for QueueFlow service center management. Access your dashboard to manage queues and tokens.">
+ <link rel="canonical" href="{{ request.url }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
  
  
  </head>
 <body class="auth-page page-content" style="background: var(--bg-main); position: relative; overflow: hidden;">
+ <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
  <!-- Animated Background -->
  <div style="position: fixed; inset: 0; z-index: 0;">
  <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 50%, rgba(15, 76, 92, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(15, 76, 92, 0.1) 0%, transparent 50%);"></div>
  <div style="position: absolute; inset: 0; background-image: linear-gradient(rgba(15, 76, 92, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 76, 92, 0.03) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black, transparent);"></div>
  </div>
  <div class="container" style="position: relative; z-index: 1;">
- <div class="row justify-content-center align-items-center min-vh-100 py-5">
+ <div class="row justify-content-center align-items-center min-vh-100 py-5" id="main-content">
  <div class="col-md-5">
  <div class="card glass-effect hover-lift fade-in-up">
  <div class="card-body p-5">
@@ -39,14 +42,14 @@
  
  <form method="POST">
  <div class="mb-3">
- <label class="form-label">Username</label>
- <input type="text" class="form-control" name="username" placeholder="Enter admin username" required>
+ <label for="username" class="form-label">Username</label>
+ <input type="text" class="form-control" id="username" name="username" placeholder="Enter admin username" required>
  </div>
  <div class="mb-4">
- <label class="form-label">Password</label>
+ <label for="password" class="form-label">Password</label>
  <div class="position-relative">
  <input type="password" class="form-control" id="password" name="password" placeholder="Enter admin password" required>
- <span class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePassword('password', this)">
+ <span class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
  <svg width="20" height="20" fill="currentColor" class="eye-icon">
  <use href="#eye-off"/>
  </svg>
