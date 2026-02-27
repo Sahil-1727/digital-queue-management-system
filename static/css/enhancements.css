@@ -111,6 +111,7 @@
 .btn {
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .btn::after {
@@ -123,7 +124,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition: width 0.6s ease, height 0.6s ease;
 }
 
 .btn:active::after {
@@ -225,11 +226,11 @@
 
 /* === EMPTY STATE IMPROVEMENTS === */
 .empty-state-enhanced {
-  padding: var(--space-2xl);
+  padding: var(--space-3xl);
   text-align: center;
   background: var(--bg-soft);
   border-radius: var(--radius-lg);
-  border: 2px dashed var(--border-medium);
+  border: 1px solid var(--border-light);
 }
 
 .empty-state-icon-enhanced {
@@ -241,20 +242,23 @@
   justify-content: center;
   background: var(--bg-card);
   border-radius: 50%;
-  font-size: 2.5rem;
-  opacity: 0.6;
+  font-size: 48px;
+  opacity: 0.4;
 }
 
 .empty-state-title {
-  font-size: 1.25rem;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: var(--space-sm);
+  letter-spacing: -0.02em;
 }
 
 .empty-state-text {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: var(--space-lg);
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 /* === DATA VISUALIZATION ENHANCEMENTS === */
