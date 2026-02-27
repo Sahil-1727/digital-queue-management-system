@@ -2736,8 +2736,30 @@ def update_all_coordinates():
     
     return "".join(results)
 
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('504.html'), 500
+
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.getenv('FLASK_ENV', 'production') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    
+     
