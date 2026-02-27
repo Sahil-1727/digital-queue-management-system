@@ -1,7 +1,20 @@
 /* ============================================
-   FINAL SAAS-LEVEL POLISH
-   All Missing UI/UX Elements
+   FINAL SAAS-LEVEL POLISH - CONSOLIDATED
+   All UI/UX in ONE file - No conflicts
    ============================================ */
+
+/* === APPLE-LEVEL TYPOGRAPHY === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+}
 
 /* === PAGE TRANSITIONS === */
 body {

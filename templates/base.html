@@ -9,9 +9,6 @@
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/enhancements.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-polish.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/critical-fixes.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/saas-final.css') }}">
  {% block extra_css %}{% endblock %}
 </head>
@@ -28,8 +25,6 @@
  {% block content %}{% endblock %}
  
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
- <script src="{{ url_for('static', filename='js/apple-polish.js') }}"></script>
- <script src="{{ url_for('static', filename='js/critical-fixes.js') }}"></script>
  <script src="{{ url_for('static', filename='js/saas-final.js') }}"></script>
  {% block extra_js %}{% endblock %}
 </body>
