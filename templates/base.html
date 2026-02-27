@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+ <meta name="theme-color" content="#0F4C5C">
+ <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
  <title>{% block title %}QueueFlow{% endblock %}</title>
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
@@ -10,14 +12,25 @@
  <link rel="stylesheet" href="{{ url_for('static', filename='css/enhancements.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-polish.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/critical-fixes.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/saas-final.css') }}">
  {% block extra_css %}{% endblock %}
 </head>
-<body class="page-content">
+<body>
+ <style>
+ body {
+ animation: pageIn 0.25s ease-out;
+ }
+ @keyframes pageIn {
+ from { opacity: 0; transform: translateY(8px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ </style>
  {% block content %}{% endblock %}
  
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
  <script src="{{ url_for('static', filename='js/apple-polish.js') }}"></script>
  <script src="{{ url_for('static', filename='js/critical-fixes.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/saas-final.js') }}"></script>
  {% block extra_js %}{% endblock %}
 </body>
 </html>

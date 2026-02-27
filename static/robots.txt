@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /owner/
+Disallow: /api/
+
+Sitemap: https://digital-queue-management-system-1.onrender.com/sitemap.xml
