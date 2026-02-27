@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import pytz
+from auth import user_required, admin_required, superadmin_required, owner_required
 
 # Load environment variables
 load_dotenv()
@@ -1054,9 +1055,8 @@ def login():
         return f"<h1>Error loading login page</h1><pre>{str(e)}</pre>", 500
 
 @app.route('/services')
+@user_required
 def services():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     
     try:
         expire_old_tokens()
@@ -1489,11 +1489,9 @@ def admin_reset_password(token):
     
     return render_template('admin_reset_password.html', token=token)
 
-# Service Center Owner Dashboard
 @app.route('/owner/dashboard')
+@owner_required
 def owner_dashboard():
-    if 'owner_id' not in session:
-        return redirect(url_for('login'))
     
     owner = ServiceCenterRegistration.query.get(session['owner_id'])
     return render_template('owner_dashboard.html', registration=owner)
@@ -1516,9 +1514,8 @@ def admin_login():
     return render_template('admin_login.html')
 
 @app.route('/admin/dashboard')
+@admin_required
 def admin_dashboard():
-    if 'admin_id' not in session:
-        return redirect(url_for('admin_login'))
     
     # Auto-expire late tokens before loading dashboard
     expire_old_tokens()
@@ -2100,9 +2097,8 @@ def superadmin_login():
     return render_template('superadmin_login.html')
 
 @app.route('/superadmin/dashboard')
+@superadmin_required
 def superadmin_dashboard():
-    if 'superadmin_id' not in session:
-        return redirect(url_for('superadmin_login'))
     
     pending = ServiceCenterRegistration.query.filter_by(status='Pending').order_by(ServiceCenterRegistration.submitted_time.desc()).all()
     approved = ServiceCenterRegistration.query.filter_by(status='Approved').order_by(ServiceCenterRegistration.reviewed_time.desc()).limit(10).all()
