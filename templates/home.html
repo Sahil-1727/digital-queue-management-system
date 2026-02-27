@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+ <script>
+ (function() {
+ const saved = localStorage.getItem('queueflow-theme');
+ const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+ if (saved === 'dark' || (!saved && prefersDark)) {
+ document.documentElement.setAttribute('data-theme', 'dark');
+ }
+ })();
+ </script>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>QueueFlow - Smart Queue Management for Modern Service Centers</title>
@@ -499,14 +508,19 @@
  }
  
  /* Dark Mode Overrides for Landing Page */
- [data-theme="dark"] .hero { background: #0A0F14; }
- [data-theme="dark"] .trust-section { background: #0F1923; border-color: rgba(255,255,255,0.06); }
- [data-theme="dark"] .ps-card { background: #111820; border-color: rgba(255,255,255,0.06); }
- [data-theme="dark"] .feature-card { background: #111820; border-color: rgba(255,255,255,0.06); }
- [data-theme="dark"] .footer { background: #0A0F14; border-top-color: rgba(255,255,255,0.06); }
- [data-theme="dark"] .section { background: #0A0F14; }
- [data-theme="dark"] .preview-mockup { background: rgba(255,255,255,0.05); }
- [data-theme="dark"] nav { background: rgba(15,25,35,0.95) !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .hero { background: #0A0F14 !important; }
+ [data-theme="dark"] .hero p { color: #94A3B8 !important; }
+ [data-theme="dark"] .trust-section { background: #0F1923 !important; border-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .trust-badge { background: #111820 !important; border-color: rgba(255,255,255,0.08) !important; color: #94A3B8 !important; }
+ [data-theme="dark"] .ps-card { background: #111820 !important; border-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .feature-card { background: #111820 !important; border-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .footer { background: #0A0F14 !important; border-top-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .section { background: #0A0F14 !important; }
+ [data-theme="dark"] .cta-section { background: #0F1923 !important; }
+ [data-theme="dark"] .preview-mockup { background: rgba(255,255,255,0.05) !important; }
+ [data-theme="dark"] nav { background: rgba(10,15,20,0.95) !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+ [data-theme="dark"] .nav-link-plain { color: #94A3B8 !important; }
+ [data-theme="dark"] .nav-link-plain:hover { color: #F0F4F8 !important; background: rgba(255,255,255,0.06) !important; }
  </style>
 </head>
 <body>
@@ -783,6 +797,13 @@
  document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
  }
  }
+ 
+ document.addEventListener('DOMContentLoaded', () => {
+ const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => {
+ btn.textContent = isDark ? '🌙' : '☀️';
+ });
+ });
  
  // Scroll animations
  const observerOptions = {

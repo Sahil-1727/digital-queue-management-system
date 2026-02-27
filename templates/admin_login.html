@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+ <script>
+ (function() {
+ const saved = localStorage.getItem('queueflow-theme');
+ const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+ if (saved === 'dark' || (!saved && prefersDark)) {
+ document.documentElement.setAttribute('data-theme', 'dark');
+ }
+ })();
+ </script>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Admin Login - QueueFlow</title>
@@ -116,5 +125,12 @@
  document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
  }
  }
+ 
+ document.addEventListener('DOMContentLoaded', () => {
+ const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => {
+ btn.textContent = isDark ? '🌙' : '☀️';
+ });
+ });
  </script>
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
