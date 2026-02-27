@@ -72,11 +72,14 @@
   <div class="notification-bell" id="notification-bell" onclick="document.getElementById('notification-alert').scrollIntoView({behavior: 'smooth'})">🔔</div>
   
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-    <div class="container">
+    <div class="container d-flex align-items-center justify-content-between">
       <a class="navbar-brand fw-bold" href="{{ url_for('services') }}">
         <span class="gradient-text">Queue</span>Flow
       </a>
-      <a href="{{ url_for('services') }}" class="btn btn-sm btn-outline-primary hover-scale">← Back to Services</a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:transparent;cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;" aria-label="Toggle dark mode">☀️</button>
+        <a href="{{ url_for('services') }}" class="btn btn-sm btn-outline-primary hover-scale">← Back to Services</a>
+      </div>
     </div>
   </nav>
 
@@ -176,5 +179,28 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('queueflow-theme');
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const btn = document.getElementById('dark-mode-toggle');
+        if (btn) btn.textContent = '🌙';
+      }
+    })();
+    
+    function toggleDarkMode() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('queueflow-theme', 'light');
+        document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '☀️');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('queueflow-theme', 'dark');
+        document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
+      }
+    }
+  </script>
 </body>
 </html>

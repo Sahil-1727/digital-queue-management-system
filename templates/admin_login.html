@@ -61,6 +61,7 @@
  </div>
  
  <div class="text-center">
+ <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--border-medium);background:var(--bg-soft);cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;margin-bottom:12px;" aria-label="Toggle dark mode">☀️</button>
  <p class="text-sm mb-0"><a href="{{ url_for('index') }}" class="link-secondary">← Back to Home</a></p>
  </div>
  </div>
@@ -88,6 +89,28 @@
  } else {
  input.type = 'password';
  use.setAttribute('href', '#eye-off');
+ }
+ }
+ 
+ (function() {
+ const theme = localStorage.getItem('queueflow-theme');
+ if (theme === 'dark') {
+ document.documentElement.setAttribute('data-theme', 'dark');
+ const btn = document.getElementById('dark-mode-toggle');
+ if (btn) btn.textContent = '🌙';
+ }
+ })();
+ 
+ function toggleDarkMode() {
+ const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ if (isDark) {
+ document.documentElement.removeAttribute('data-theme');
+ localStorage.setItem('queueflow-theme', 'light');
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '☀️');
+ } else {
+ document.documentElement.setAttribute('data-theme', 'dark');
+ localStorage.setItem('queueflow-theme', 'dark');
+ document.querySelectorAll('#dark-mode-toggle').forEach(btn => btn.textContent = '🌙');
  }
  }
  </script>
