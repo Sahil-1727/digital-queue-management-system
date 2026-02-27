@@ -289,17 +289,63 @@
  }
  
  .preview-mockup {
- background: white;
+ background: rgba(255, 255, 255, 0.1);
  border-radius: var(--radius-lg);
+ padding: 2rem;
+ backdrop-filter: blur(10px);
+ border: 1px solid rgba(255, 255, 255, 0.2);
+ transition: all var(--transition-fast);
+ }
+
+ .preview-mockup:hover {
+ transform: translateY(-8px);
  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
- overflow: hidden;
- max-width: 900px;
- margin: 0 auto;
  }
  
  .preview-mockup img {
  width: 100%;
  display: block;
+ border-radius: var(--radius-md);
+ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+ }
+
+ .preview-video {
+ position: relative;
+ padding-bottom: 56.25%; /* 16:9 aspect ratio */
+ height: 0;
+ overflow: hidden;
+ border-radius: var(--radius-md);
+ background: rgba(0, 0, 0, 0.3);
+ }
+
+ .preview-video iframe,
+ .preview-video video {
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ border: none;
+ border-radius: var(--radius-md);
+ }
+
+ .preview-placeholder {
+ background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+ border-radius: var(--radius-md);
+ padding: 4rem 2rem;
+ text-align: center;
+ border: 2px dashed rgba(255, 255, 255, 0.3);
+ }
+
+ .preview-placeholder-icon {
+ font-size: 4rem;
+ margin-bottom: 1rem;
+ opacity: 0.5;
+ }
+
+ .preview-placeholder-text {
+ color: rgba(255, 255, 255, 0.8);
+ font-size: 1.125rem;
  }
  
  /* How It Works */
@@ -570,22 +616,45 @@
  <h2 class="section-title" style="color: white;">See It In Action</h2>
  <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Intuitive dashboards designed for efficiency.</p>
  </div>
- <div class="row g-4 mt-4">
+ 
+ <!-- Main Video/Demo Preview -->
+ <div class="row justify-content-center mb-5">
+ <div class="col-lg-10">
+ <div class="preview-mockup">
+ <div class="preview-video">
+ <!-- Replace with your actual demo video URL -->
+ <iframe 
+ src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&modestbranding=1&rel=0" 
+ title="QueueFlow Demo" 
+ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+ allowfullscreen>
+ </iframe>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Dashboard Screenshots -->
+ <div class="row g-4">
  <div class="col-md-6">
  <div class="preview-mockup">
- <img src="https://via.placeholder.com/800x500/0F4C5C/FFFFFF?text=Admin+Dashboard" alt="Admin Dashboard" style="width: 100%; border-radius: 12px;">
- <div class="text-center mt-3" style="color: white;">
- <h5 style="font-weight: 600;">Admin Dashboard</h5>
- <p style="opacity: 0.9; font-size: 0.9rem;">Real-time queue management & analytics</p>
+ <div class="preview-placeholder">
+ <div class="preview-placeholder-icon">📊</div>
+ <div class="preview-placeholder-text">
+ <strong>Admin Dashboard</strong><br>
+ Real-time queue management & analytics
+ </div>
  </div>
  </div>
  </div>
  <div class="col-md-6">
  <div class="preview-mockup">
- <img src="https://via.placeholder.com/800x500/C0843D/FFFFFF?text=User+Queue+Status" alt="User Queue Status" style="width: 100%; border-radius: 12px;">
- <div class="text-center mt-3" style="color: white;">
- <h5 style="font-weight: 600;">User Queue Status</h5>
- <p style="opacity: 0.9; font-size: 0.9rem;">Live tracking with accurate wait times</p>
+ <div class="preview-placeholder">
+ <div class="preview-placeholder-icon">📱</div>
+ <div class="preview-placeholder-text">
+ <strong>User Queue Status</strong><br>
+ Live tracking with accurate wait times
+ </div>
  </div>
  </div>
  </div>
