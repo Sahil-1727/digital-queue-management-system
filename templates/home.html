@@ -623,12 +623,10 @@
  <div class="preview-mockup">
  <div class="preview-video">
  <!-- Replace with your actual demo video URL -->
- <iframe 
- src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&modestbranding=1&rel=0" 
- title="QueueFlow Demo" 
- allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
- allowfullscreen>
- </iframe>
+<video controls autoplay muted loop>
+  <source src="{{ url_for('static', filename='videos/demoDA.mov') }}" type="video/mp4">
+</video>
+
  </div>
  </div>
  </div>
@@ -638,24 +636,12 @@
  <div class="row g-4">
  <div class="col-md-6">
  <div class="preview-mockup">
- <div class="preview-placeholder">
- <div class="preview-placeholder-icon">📊</div>
- <div class="preview-placeholder-text">
- <strong>Admin Dashboard</strong><br>
- Real-time queue management & analytics
- </div>
- </div>
+ <img src="{{ url_for('static', filename='images/admin-dashboard.png') }}" alt="Admin Dashboard" onerror="this.parentElement.innerHTML='<div class=\'preview-placeholder\'><div class=\'preview-placeholder-icon\'>📊</div><div class=\'preview-placeholder-text\'><strong>Admin Dashboard</strong><br>Real-time queue management & analytics</div></div>'">
  </div>
  </div>
  <div class="col-md-6">
  <div class="preview-mockup">
- <div class="preview-placeholder">
- <div class="preview-placeholder-icon">📱</div>
- <div class="preview-placeholder-text">
- <strong>User Queue Status</strong><br>
- Live tracking with accurate wait times
- </div>
- </div>
+ <img src="{{ url_for('static', filename='images/user-queue.png') }}" alt="User Queue Status" onerror="this.parentElement.innerHTML='<div class=\'preview-placeholder\'><div class=\'preview-placeholder-icon\'>📱</div><div class=\'preview-placeholder-text\'><strong>User Queue Status</strong><br>Live tracking with accurate wait times</div></div>'">
  </div>
  </div>
  </div>
