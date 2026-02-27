@@ -4,14 +4,12 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>{% block title %}QueueFlow{% endblock %}</title>
+ <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/enhancements.css') }}">
  <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-polish.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/ux-refinements.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-refinement.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/elite-polish.css') }}">
- <link rel="stylesheet" href="{{ url_for('static', filename='css/global-consistency.css') }}">
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/critical-fixes.css') }}">
  {% block extra_css %}{% endblock %}
 </head>
 <body class="page-content">
@@ -19,8 +17,7 @@
  
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
  <script src="{{ url_for('static', filename='js/apple-polish.js') }}"></script>
- <script src="{{ url_for('static', filename='js/ux-refinements.js') }}"></script>
- <script src="{{ url_for('static', filename='js/elite-polish.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/critical-fixes.js') }}"></script>
  {% block extra_js %}{% endblock %}
 </body>
 </html>

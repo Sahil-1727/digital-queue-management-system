@@ -1,0 +1,520 @@
+/* ============================================
+   CRITICAL FIXES - All Identified Flaws
+   ============================================ */
+
+/* === GLOBAL FIXES === */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Favicon fallback */
+link[rel="icon"] {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎫</text></svg>');
+}
+
+/* === HOME PAGE FIXES === */
+
+/* Trust Section - Replace emojis with pill badges */
+.trust-badges {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.trust-badge {
+  background: rgba(15, 76, 92, 0.08);
+  border: 1px solid rgba(15, 76, 92, 0.15);
+  border-radius: 100px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+.trust-badge:hover {
+  background: rgba(15, 76, 92, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Social proof under hero */
+.hero-social-proof {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.hero-social-proof strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Eyebrow labels above sections */
+.section-eyebrow {
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Problem/Solution proper icons */
+.ps-card-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+.ps-card-label.problem {
+  background: rgba(239, 68, 68, 0.1);
+  color: #DC2626;
+}
+
+.ps-card-label.solution {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.ps-card-icon svg,
+.ps-card-icon i {
+  font-size: 28px;
+}
+
+/* How It Works - connecting line */
+.steps-container {
+  position: relative;
+}
+
+.steps-connector {
+  position: absolute;
+  top: 32px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  opacity: 0.2;
+  z-index: 0;
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+}
+
+/* Navbar scroll effect */
+.navbar-landing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: transparent;
+  transition: all 0.3s ease;
+  padding: 16px 0;
+}
+
+.navbar-landing.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px 0;
+}
+
+/* Footer dead links */
+.footer-link-disabled {
+  color: var(--text-muted) !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* === QUEUE STATUS PAGE FIXES === */
+
+/* Scoreboard token display */
+.token-scoreboard {
+  font-size: clamp(7rem, 15vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulse-glow 3s ease-in-out infinite;
+  text-align: center;
+  margin: 32px 0;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
+}
+
+/* Queue progress bar */
+.queue-progress-container {
+  margin: 24px 0;
+  padding: 24px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.queue-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.queue-progress-bar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.queue-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: 100px;
+  transition: width 0.5s ease;
+}
+
+/* Premium time cards */
+.time-card-premium {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+
+.time-card-premium.blue {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.time-card-premium .time-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #059669;
+  margin: 8px 0;
+}
+
+.time-card-premium.blue .time-value {
+  color: #2563EB;
+}
+
+.time-card-premium .time-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+/* Stat cards with colored values */
+.stat-card-colored {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.stat-card-colored:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card-colored .stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 8px 0;
+}
+
+.stat-card-colored .stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Live indicator */
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #10B981;
+  border-radius: 50%;
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* === LOGIN PAGE FIXES === */
+
+/* Logo above form */
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(15, 76, 92, 0.2);
+}
+
+.login-logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Form card max-width */
+.login-card-container {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Forgot password inline */
+.form-label-with-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.form-label-with-link .forgot-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.form-label-with-link .forgot-link:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Divider between form and footer */
+.form-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 24px 0;
+}
+
+/* === ADMIN DASHBOARD FIXES === */
+
+/* Pulsing waiting indicator */
+.btn-waiting-live {
+  position: relative;
+  padding-left: 48px !important;
+}
+
+.btn-waiting-live::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: #F59E0B;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-50%) scale(1.2);
+  }
+}
+
+/* No Show pill button */
+.btn-no-show-pill {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #DC2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-radius: 100px !important;
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-no-show-pill:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  transform: scale(1.05);
+}
+
+/* Queue count badge styled */
+.queue-count-badge {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: white;
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* Counter differentiation */
+.counter-column:nth-child(1) .counter-card {
+  border-left: 4px solid var(--color-primary);
+}
+
+.counter-column:nth-child(2) .counter-card {
+  border-left: 4px solid var(--color-accent);
+}
+
+/* === SERVICES PAGE FIXES === */
+
+/* Category accent borders */
+.service-card-medical {
+  border-left: 4px solid #10B981;
+}
+
+.service-card-mobile {
+  border-left: 4px solid #3B82F6;
+}
+
+.service-card-retail {
+  border-left: 4px solid #F59E0B;
+}
+
+.service-card-banking {
+  border-left: 4px solid #8B5CF6;
+}
+
+/* Service name hierarchy */
+.service-card .service-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+/* Available slots indicator */
+.slots-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+
+.slots-indicator.limited {
+  color: #D97706;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.slots-indicator.full {
+  color: #DC2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Search/filter bar */
+.services-filter-bar {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 16px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.services-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+}
+
+.services-filter-btn {
+  background: rgba(15, 76, 92, 0.08);
+  border: none;
+  border-radius: 100px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.services-filter-btn:hover {
+  background: rgba(15, 76, 92, 0.15);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .token-scoreboard {
+    font-size: 5rem;
+  }
+  
+  .time-card-premium .time-value {
+    font-size: 24px;
+  }
+  
+  .stat-card-colored .stat-value {
+    font-size: 28px;
+  }
+  
+  .steps-connector {
+    display: none;
+  }
+}
