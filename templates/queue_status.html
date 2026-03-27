@@ -200,7 +200,9 @@
                   </div>
                   <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Keep Token</button>
-                    <a href="{{ url_for('cancel_token', token_id=token.id) }}" class="btn btn-danger btn-sm">Yes, Cancel</a>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href='{{ url_for('cancel_token', token_id=token.id) }}'">
+                      Yes, Cancel
+                    </button>
                   </div>
                 </div>
               </div>
