@@ -200,9 +200,8 @@
                   </div>
                   <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Keep Token</button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href='{{ url_for('cancel_token', token_id=token.id) }}'">
-                      Yes, Cancel
-                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" id="confirmCancelBtn">Yes, Cancel</button>
+                    <script>document.getElementById('confirmCancelBtn').addEventListener('click',function(){window.location.href="{{ url_for('cancel_token', token_id=token.id) }}";});</script>
                   </div>
                 </div>
               </div>
