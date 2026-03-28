@@ -82,6 +82,18 @@ def create_app(config_name=None):
         # Cross Origin Resource Policy
         response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
 
+        # Disable unused browser features
+        response.headers['Permissions-Policy'] = (
+            "geolocation=(), "
+            "microphone=(), "
+            "camera=(), "
+            "payment=(), "
+            "usb=(), "
+            "magnetometer=(), "
+            "gyroscope=(), "
+            "accelerometer=()"
+        )
+
         return response
 
     return app
