@@ -84,7 +84,7 @@ def create_app(config_name=None):
 
         # Disable unused browser features
         response.headers['Permissions-Policy'] = (
-            "geolocation=(), "
+            "geolocation=(self), "
             "microphone=(), "
             "camera=(), "
             "payment=(), "
