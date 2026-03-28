@@ -161,7 +161,6 @@
  align-items: center;
  gap: 3rem;
  flex-wrap: wrap;
- opacity: 0.6;
  }
  
  .trust-logo {
@@ -462,7 +461,7 @@
  }
  
  .footer-brand p {
- color: var(--text-secondary);
+ color: #555555;
  font-size: 0.9375rem;
  }
  
@@ -478,7 +477,7 @@
  }
  
  .footer-links a {
- color: var(--text-secondary);
+ color: #555555;
  text-decoration: none;
  font-size: 0.9375rem;
  transition: color var(--transition-fast);
@@ -558,7 +557,7 @@
  <a href="{{ url_for('main.pricing') }}" class="nav-link-plain" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; display: none;" data-nav-link>Pricing</a>
  <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(0,0,0,0.12);background:transparent;cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease;flex-shrink:0;" aria-label="Toggle dark mode">☀️</button>
  <a href="{{ url_for('auth.login') }}" class="nav-link-plain" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; display: none;" data-nav-link>Sign In</a>
- <a href="{{ url_for('auth.register') }}" style="padding: 8px 20px; background: var(--color-primary); color: white; border-radius: 100px; text-decoration: none; font-weight: 600; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-size: 14px;">Get Started</a>
+ <a href="{{ url_for('auth.register') }}" style="padding: 8px 20px; background: var(--color-primary); color: white; border-radius: 100px; text-decoration: none; font-weight: 600; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-size: 14px;" aria-label="Get started with QueueFlow - navigation">Get Started</a>
  </div>
  </div>
  </div>
@@ -589,7 +588,7 @@
  </h1>
  <p>Transform waiting lines into seamless experiences. Real-time tracking, automated operations, and intelligent queue management—all in one platform.</p>
  <div class="cta-group">
- <a href="{{ url_for('auth.register') }}" class="btn btn-hero-primary">Get Started Free</a>
+ <a href="{{ url_for('auth.register') }}" class="btn btn-hero-primary" aria-label="Get started with QueueFlow - hero section">Get Started Free</a>
  <a href="{{ url_for('auth.login') }}" class="btn btn-hero-secondary">Sign In</a>
  </div>
  <p style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);"><a href="{{ url_for('main.pricing') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">View Pricing →</a></p>
@@ -771,7 +770,7 @@
  <h2>Ready to Modernize Your Service Center?</h2>
  <p>Join 19 service centers already using QueueFlow to eliminate waiting lines.</p>
  <div class="cta-group" style="justify-content: center;">
- <a href="{{ url_for('auth.register') }}" class="btn btn-hero-primary">Start Free Trial</a>
+ <a href="{{ url_for('auth.register') }}" class="btn btn-hero-primary" aria-label="Get started with QueueFlow - call to action section">Start Free Trial</a>
  <a href="{{ url_for('user.register_center') }}" class="btn btn-hero-secondary">Register Your Center</a>
  </div>
  <p style="margin-top: 24px; font-size: 14px; color: var(--text-secondary);"><a href="{{ url_for('main.pricing') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">View Pricing Plans →</a></p>
@@ -792,7 +791,7 @@
  <ul>
  <li><a href="{{ url_for('user.services') }}" aria-label="Browse all services">Features</a></li>
  <li><a href="{{ url_for('main.pricing') }}">Pricing</a></li>
- <li><a href="{{ url_for('auth.register') }}">Get Started</a></li>
+ <li><a href="{{ url_for('auth.register') }}" aria-label="Get started with QueueFlow - footer">Get Started</a></li>
  <li><a href="{{ url_for('user.register_center') }}">For Centers</a></li>
  </ul>
  </div>
