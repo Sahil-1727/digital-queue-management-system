@@ -52,4 +52,35 @@ def create_app(config_name=None):
     app.register_blueprint(admin_bp)
     app.register_blueprint(superadmin_bp)
 
+    @app.after_request
+    def add_security_headers(response):
+        # Prevent clickjacking
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+
+        # Prevent MIME type sniffing
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+
+        # Force HTTPS
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+
+        # Referrer Policy
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
+        # Content Security Policy
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "media-src 'self'; "
+            "frame-ancestors 'self';"
+        )
+
+        # Cross Origin Resource Policy
+        response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+
+        return response
+
     return app
