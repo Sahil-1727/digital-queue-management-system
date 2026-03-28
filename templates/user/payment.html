@@ -39,7 +39,7 @@
  
  <div class="token-card mb-4">
  <p class="text-muted text-sm mb-2">Your Token Number</p>
- <h1 class="token-display mb-2">{{ token.token_number }}</h1>
+ <h2 class="token-display mb-2">{{ token.token_number }}</h2>
  <p class="text-muted mb-0">{{ token.service_center.name }}</p>
  </div>
 
@@ -67,4 +67,4 @@
  </div>
  </div>
 
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>

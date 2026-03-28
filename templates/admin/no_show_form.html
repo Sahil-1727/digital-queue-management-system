@@ -33,7 +33,7 @@
  </div>
  
  <div class="alert alert-warning mb-4">
- <h6 class="fw-bold">Token: {{ token.token_number }}</h6>
+ <h3 class="fw-bold">Token: {{ token.token_number }}</h3>
  <p class="mb-0 text-sm">User: {{ token.user.name }} ({{ token.user.mobile }})</p>
  </div>
 
@@ -70,7 +70,7 @@
  </div>
  </div>
  </div>
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
  <script>
  // Combine select and textarea
  document.querySelector('form').addEventListener('submit', function(e) {

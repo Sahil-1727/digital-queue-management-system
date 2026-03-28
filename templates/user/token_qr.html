@@ -31,7 +31,7 @@
  <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ token.service_center.name }}</p>
  
  <div class="qr-container mx-auto" style="max-width: 250px;">
- <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+ <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" width="200" height="200" class="img-fluid">
  </div>
  
  <p class="fw-bold mt-3 mb-1" style="font-size: 0.95rem;">Scan to Track Status</p>
@@ -43,6 +43,6 @@
  </div>
  </div>
  </div>
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
 </body>
 </html>

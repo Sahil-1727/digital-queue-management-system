@@ -17,7 +17,7 @@
  <title>System Analytics - QueueFlow</title>
  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
  <link href="{{ url_for('static', filename='css/theme.css') }}" rel="stylesheet">
- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="page-content">
  <!-- Premium Internal Navbar -->
@@ -120,7 +120,7 @@
  </div>
  </div>
 
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
  <script>
  // Get CSS variables
  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();

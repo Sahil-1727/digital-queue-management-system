@@ -29,7 +29,7 @@
  <div class="card slide-up">
  <div class="card-body p-5">
  <div class="text-center mb-4">
- <h4 class="fw-bold">{{ token.service_center.name }}</h4>
+ <h2 class="fw-bold">{{ token.service_center.name }}</h2>
  <p class="text-muted">📍 {{ token.service_center.location }}</p>
  </div>
  
@@ -90,6 +90,6 @@
  </div>
  </div>
  </div>
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
 </body>
 </html>

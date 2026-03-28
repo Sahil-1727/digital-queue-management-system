@@ -62,7 +62,7 @@
  <div class="card p-4">
  <div class="section-header">
  <div class="section-icon">🏥</div>
- <h3 class="section-title">Basic Information</h3>
+ <h2 class="section-title">Basic Information</h2>
  </div>
  
  <div class="row g-3">
@@ -131,7 +131,7 @@
  <div class="card p-4 mb-4">
  <div class="section-header">
  <div class="section-icon">📍</div>
- <h3 class="section-title">Location Help</h3>
+ <h2 class="section-title">Location Help</h2>
  </div>
  <p class="text-muted small mb-3">Get coordinates from <a href="https://www.google.com/maps" target="_blank" class="text-decoration-none" style="color: var(--accent);">Google Maps</a>:</p>
  <ol class="text-muted small ps-3">
@@ -145,7 +145,7 @@
  <div class="card p-4 mb-4">
  <div class="section-header">
  <div class="section-icon">⚡</div>
- <h3 class="section-title">Services</h3>
+ <h2 class="section-title">Services</h2>
  </div>
  <label class="form-label">Services Offered</label>
  <textarea class="form-control" name="services_offered" placeholder="• Consultation&#10;• Diagnostics&#10;• Treatment">{{ center.services_offered or '' }}</textarea>
@@ -154,7 +154,7 @@
  <div class="card p-4">
  <div class="section-header">
  <div class="section-icon">🎯</div>
- <h3 class="section-title">Facilities</h3>
+ <h2 class="section-title">Facilities</h2>
  </div>
  <label class="form-label">Available Facilities</label>
  <textarea class="form-control" name="facilities" placeholder="• Parking Available&#10;• AC Waiting Room&#10;• WiFi">{{ center.facilities or '' }}</textarea>
@@ -175,6 +175,6 @@
  </div>
  </div>
  
- <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
 </body>
 </html>

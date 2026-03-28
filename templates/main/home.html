@@ -594,7 +594,10 @@
  <p style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);"><a href="{{ url_for('main.pricing') }}" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">View Pricing →</a></p>
  </div>
  <div class="col-lg-6 d-none d-lg-block">
- <img src="{{ url_for('static', filename='images/queue-hero1.png') }}" alt="QueueFlow dashboard showing real-time queue management" style="width: 100%; max-width: 500px; margin: 0 auto; display: block; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+ <picture>
+  <source srcset="{{ url_for('static', filename='images/queue-hero1.webp') }}" type="image/webp">
+  <img src="{{ url_for('static', filename='images/queue-hero1.png') }}" alt="QueueFlow dashboard showing real-time queue management" width="500" height="400" style="width: 100%; max-width: 500px; margin: 0 auto; display: block; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+ </picture>
  </div>
  </div>
  </div>
@@ -656,32 +659,32 @@
  <div class="feature-grid">
  <div class="feature-card fade-in">
  <div class="feature-icon">📊</div>
- <h4>Real-Time Queue Tracking</h4>
+ <h3>Real-Time Queue Tracking</h3>
  <p>Live updates on queue position, estimated wait time, and service status.</p>
  </div>
  <div class="feature-card fade-in">
  <div class="feature-icon">⏰</div>
- <h4>Smart Token Expiry</h4>
+ <h3>Smart Token Expiry</h3>
  <p>Automatic expiration after 2 hours prevents fake queues and no-shows.</p>
  </div>
  <div class="feature-card fade-in">
  <div class="feature-icon">📈</div>
- <h4>Admin Analytics</h4>
+ <h3>Admin Analytics</h3>
  <p>Comprehensive dashboard with insights, trends, and performance metrics.</p>
  </div>
  <div class="feature-card fade-in">
  <div class="feature-icon">📱</div>
- <h4>QR Code Access</h4>
+ <h3>QR Code Access</h3>
  <p>Instant token access via QR code—no app installation required.</p>
  </div>
  <div class="feature-card fade-in">
  <div class="feature-icon">🔔</div>
- <h4>Automated Alerts</h4>
+ <h3>Automated Alerts</h3>
  <p>Email notifications for timing updates and queue status changes.</p>
  </div>
  <div class="feature-card fade-in">
  <div class="feature-icon">👥</div>
- <h4>Multi-Admin Support</h4>
+ <h3>Multi-Admin Support</h3>
  <p>Manage multiple service centers with dedicated admin accounts.</p>
  </div>
  </div>
@@ -704,6 +707,7 @@
  <!-- Replace with your actual demo video URL -->
 <video controls autoplay muted loop style="width:100%;border-radius:12px;">
   <source src="{{ url_for('static', filename='videos/demo.mp4') }}" type="video/mp4">
+  <track kind="captions" src="" label="English" default>
 </video>
 
  </div>
@@ -715,12 +719,18 @@
  <div class="row g-4">
  <div class="col-md-6">
  <div class="preview-mockup">
- <img src="{{ url_for('static', filename='images/admin-dashboard.png') }}" alt="QueueFlow admin dashboard with queue management controls" loading="lazy">
+ <picture>
+  <source srcset="{{ url_for('static', filename='images/admin-dashboard.webp') }}" type="image/webp">
+  <img src="{{ url_for('static', filename='images/admin-dashboard.png') }}" alt="QueueFlow admin dashboard with queue management controls" width="800" height="500" loading="lazy">
+ </picture>
  </div>
  </div>
  <div class="col-md-6">
  <div class="preview-mockup">
-<img src="{{ url_for('static', filename='images/user-queue.png') }}" alt="QueueFlow user interface showing queue position and wait time" loading="lazy">
+<picture>
+  <source srcset="{{ url_for('static', filename='images/user-queue.webp') }}" type="image/webp">
+  <img src="{{ url_for('static', filename='images/user-queue.png') }}" alt="QueueFlow user interface showing queue position and wait time" width="800" height="500" loading="lazy">
+</picture>
  </div>
  </div>
  </div>
@@ -737,17 +747,17 @@
  <div class="steps">
  <div class="step">
  <div class="step-number">1</div>
- <h4>Book Token</h4>
+ <h3>Book Token</h3>
  <p>Select your service center, confirm payment, and receive your digital token instantly.</p>
  </div>
  <div class="step">
  <div class="step-number">2</div>
- <h4>Track Status</h4>
+ <h3>Track Status</h3>
  <p>Monitor your queue position in real-time with accurate wait time estimates.</p>
  </div>
  <div class="step">
  <div class="step-number">3</div>
- <h4>Get Served</h4>
+ <h3>Get Served</h3>
  <p>Arrive at the perfect time and skip the waiting line completely.</p>
  </div>
  </div>
@@ -776,7 +786,7 @@
  <p>Smart queue management for modern service centers.</p>
  </div>
  <div class="footer-links">
- <h4>Product</h4>
+ <h3>Product</h3>
  <ul>
  <li><a href="{{ url_for('user.services') }}">Features</a></li>
  <li><a href="{{ url_for('main.pricing') }}">Pricing</a></li>
@@ -785,7 +795,7 @@
  </ul>
  </div>
  <div class="footer-links">
- <h4>Account</h4>
+ <h3>Account</h3>
  <ul>
  <li><a href="{{ url_for('auth.login') }}">User Login</a></li>
  <li><a href="{{ url_for('admin.admin_login') }}">Admin Login</a></li>
@@ -793,7 +803,7 @@
  </ul>
  </div>
  <div class="footer-links">
- <h4>Support</h4>
+ <h3>Support</h3>
  <ul>
  <li><a href="{{ url_for('user.track_token') }}">Track Token</a></li>
  <li><a href="#">Help Center</a></li>
