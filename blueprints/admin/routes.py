@@ -489,15 +489,20 @@ def api_admin_analytics():
         db.func.date(Token.created_time) == today
     ).count()
     
-    # Last 7 days trend
+    # Last 7 days trend — single GROUP BY query instead of 7 separate count queries
+    seven_days_ago = today - timedelta(days=6)
+    trend_rows = db.session.query(
+        db.func.date(Token.created_time).label('day'),
+        db.func.count(Token.id).label('cnt')
+    ).filter(
+        Token.service_center_id == center_id,
+        db.func.date(Token.created_time) >= seven_days_ago
+    ).group_by('day').all()
+    trend_map = {str(row.day): row.cnt for row in trend_rows}
     trend_data = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
-        count = Token.query.filter(
-            Token.service_center_id == center_id,
-            db.func.date(Token.created_time) == date
-        ).count()
-        trend_data.append({'date': date.strftime('%a'), 'count': count})
+        trend_data.append({'date': date.strftime('%a'), 'count': trend_map.get(str(date), 0)})
     
     # Online vs Walk-in
     total_tokens = Token.query.filter_by(service_center_id=center_id).count()
@@ -509,15 +514,12 @@ def api_admin_analytics():
     no_show = Token.query.filter_by(service_center_id=center_id, status='No Show').count()
     expired = Token.query.filter_by(service_center_id=center_id, status='Expired').count()
     
-    # Peak hours
-    hour_counts = {}
-    all_tokens = Token.query.filter_by(service_center_id=center_id).all()
-    for token in all_tokens:
-        if token.created_time:
-            hour = token.created_time.hour
-            hour_counts[hour] = hour_counts.get(hour, 0) + 1
-    
-    peak_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    # Peak hours — use SQL GROUP BY instead of fetching all tokens into Python
+    peak_hours_query = db.session.query(
+        db.func.strftime('%H', Token.created_time).label('hour'),
+        db.func.count(Token.id).label('cnt')
+    ).filter_by(service_center_id=center_id).group_by('hour').order_by(db.desc('cnt')).limit(5).all()
+    peak_hours = [(int(h), c) for h, c in peak_hours_query if h is not None]
     
     return jsonify({
         'daily_customers': daily_customers,

@@ -273,7 +273,7 @@ def user_history():
 
     tokens = Token.query.filter_by(user_id=session['user_id']).filter(
         Token.status.in_(['Completed', 'Expired'])
-    ).order_by(Token.created_time.desc()).all()
+    ).order_by(Token.created_time.desc()).limit(50).all()
 
     # Convert times to IST for display
     enriched_tokens = []

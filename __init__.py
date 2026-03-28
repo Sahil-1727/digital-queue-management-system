@@ -14,6 +14,9 @@ def create_app(config_name=None):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
+    # Static file caching (1 year for production)
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
+
     # Fix DATABASE_URL for PostgreSQL (Render uses postgres:// but SQLAlchemy needs postgresql://)
     database_url = app.config.get('SQLALCHEMY_DATABASE_URI', '')
     if database_url.startswith('postgres://'):

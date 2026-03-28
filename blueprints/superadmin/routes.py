@@ -228,12 +228,19 @@ def api_superadmin_analytics():
     total_users = User.query.count()
     daily_tokens = Token.query.filter(db.func.date(Token.created_time) == today).count()
     
-    # Last 7 days trend (system-wide)
+    # Last 7 days trend (system-wide) — single GROUP BY query
+    seven_days_ago = today - timedelta(days=6)
+    trend_rows = db.session.query(
+        db.func.date(Token.created_time).label('day'),
+        db.func.count(Token.id).label('cnt')
+    ).filter(
+        db.func.date(Token.created_time) >= seven_days_ago
+    ).group_by('day').all()
+    trend_map = {str(row.day): row.cnt for row in trend_rows}
     trend_data = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
-        count = Token.query.filter(db.func.date(Token.created_time) == date).count()
-        trend_data.append({'date': date.strftime('%a'), 'count': count})
+        trend_data.append({'date': date.strftime('%a'), 'count': trend_map.get(str(date), 0)})
     
     # Online vs Walk-in (system-wide)
     total_tokens = Token.query.count()
