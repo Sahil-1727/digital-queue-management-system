@@ -541,6 +541,19 @@
  [data-theme="dark"] .nav-link-plain { color: #94A3B8 !important; }
  [data-theme="dark"] .nav-link-plain:hover { color: #F0F4F8 !important; background: rgba(255,255,255,0.06) !important; }
  </style>
+ <style>
+ @media (min-width: 768px) {
+ [data-nav-link] { display: inline-block !important; }
+ nav { padding: 16px 0 !important; }
+ nav a[href="/"] { font-size: 24px !important; }
+ nav a[href="/"] span:first-child { font-size: 28px !important; }
+ }
+ @media (max-width: 767px) {
+ nav { padding: 10px 0 !important; }
+ nav .container > div { gap: 12px !important; }
+ nav a[href="{{ url_for('auth.register') }}"] { padding: 6px 16px !important; font-size: 13px !important; }
+ }
+ </style>
 </head>
 <body>
  <a href="#main-content" style="position:absolute;top:-100px;left:0;z-index:9999;padding:8px 16px;background:var(--color-primary);color:white;border-radius:0 0 8px 0;transition:top 0.2s ease;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">Skip to main content</a>
@@ -562,22 +575,9 @@
  </div>
  </div>
  </nav>
- <style>
- @media (min-width: 768px) {
- [data-nav-link] { display: inline-block !important; }
- nav { padding: 16px 0 !important; }
- nav a[href="/"] { font-size: 24px !important; }
- nav a[href="/"] span:first-child { font-size: 28px !important; }
- }
- @media (max-width: 767px) {
- nav { padding: 10px 0 !important; }
- nav .container > div { gap: 12px !important; }
- nav a[href="{{ url_for('auth.register') }}"] { padding: 6px 16px !important; font-size: 13px !important; }
- }
- </style>
  <div style="height: 64px;"></div>
  <!-- Hero Section -->
- <main id="main-content" role="main">
+ <main id="main-content">
  <section class="hero">
  <div class="container">
  <div class="row align-items-center">
@@ -606,6 +606,7 @@
  <!-- Trust Section -->
  <section class="trust-section">
  <div class="container">
+ <h2 class="visually-hidden">Trusted By</h2>
  <p class="trust-text">Trusted by service centers across Nagpur</p>
   <div class="trust-logos">
  <div class="trust-badge">🏥 Apollo Clinic</div>
@@ -707,7 +708,7 @@
  <!-- Replace with your actual demo video URL -->
 <video controls autoplay muted loop style="width:100%;border-radius:12px;">
   <source src="{{ url_for('static', filename='videos/demo.mp4') }}" type="video/mp4">
-  <track kind="captions" src="" srclang="en" label="English" default>
+  <track kind="captions" srclang="en" label="English">
 </video>
 
  </div>
