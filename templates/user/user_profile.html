@@ -117,8 +117,14 @@
  statusDiv.innerHTML = '<small class="text-success">✓ Location captured successfully</small>';
  },
  function(error) {
- statusDiv.innerHTML = '<small class="text-danger">✗ Location access denied. Enable location in browser settings.</small>';
- }
+ const messages = {
+ 1: '✗ Location access denied. Please allow location access in your browser and try again.',
+ 2: '✗ Location unavailable. Check your device\'s location/GPS settings and try again.',
+ 3: '✗ Location request timed out. Please try again.'
+ };
+ statusDiv.innerHTML = '<small class="text-danger">' + (messages[error.code] || '✗ Unknown error: ' + error.message) + '</small>';
+ },
+ { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
  );
  } else {
  statusDiv.innerHTML = '<small class="text-danger">✗ Geolocation not supported by your browser</small>';
