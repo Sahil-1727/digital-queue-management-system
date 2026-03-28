@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 *.py[cod]
 venv/
 env/
@@ -33,6 +34,10 @@ Thumbs.db
 # Logs
 *.log
 
+# Temporary files
+*.tmp
+*.bak
+
 # Documentation (exclude all except README.md)
 *.md
 !README.md
@@ -40,6 +45,7 @@ Thumbs.db
 # Deployment Scripts
 deploy_*.sh
 verify_config.py
+seed.py
 seed_demo.py
 
 # Build files
