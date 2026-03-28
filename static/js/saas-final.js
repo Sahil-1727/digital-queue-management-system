@@ -322,7 +322,7 @@
     
     // === EMPTY STATE ILLUSTRATIONS ===
     document.querySelectorAll('table tbody').forEach(tbody => {
-      if (tbody.children.length === 0 || (tbody.children.length === 1 && tbody.textContent.trim().includes('No'))) {
+      if (tbody.children.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="100%" style="text-align: center; padding: 48px 24px;">

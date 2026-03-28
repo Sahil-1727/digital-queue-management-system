@@ -48,7 +48,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             flash('Please login to access this page', 'warning')
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -57,7 +57,7 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'admin_id' not in session:
             flash('Admin access required', 'danger')
-            return redirect(url_for('admin_login'))
+            return redirect(url_for('admin.admin_login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -66,7 +66,7 @@ def superadmin_required(f):
     def decorated_function(*args, **kwargs):
         if 'superadmin_id' not in session:
             flash('Super admin access required', 'danger')
-            return redirect(url_for('superadmin_login'))
+            return redirect(url_for('superadmin.superadmin_login'))
         return f(*args, **kwargs)
     return decorated_function
 
