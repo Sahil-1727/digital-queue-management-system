@@ -81,6 +81,7 @@ def create_app(config_name=None):
             "connect-src 'self'; "
             "media-src 'self'; "
             "object-src 'none'; "
+            "frame-src https://maps.google.com; "
             "frame-ancestors 'self';"
         )
 
