@@ -131,12 +131,10 @@
  </td>
  <td role="cell">
  {% if token.no_show_reason %}
- <small class="text-danger" style="cursor: pointer;" title="{{ token.no_show_reason }}">
- 📝 View Reason
- </small>
- {% else %}
- <span class="text-muted">-</span>
- {% endif %}
+        <button class="btn btn-sm btn-outline-danger" style="font-size:0.75rem;padding:4px 10px;" data-token="{{ token.token_number }}" data-reason="{{ token.no_show_reason }}" onclick="showReason(this)">📝 View Reason</button>
+        {% else %}
+        <span class="text-muted">-</span>
+        {% endif %}
  </td>
  </tr>
  {% endfor %}
@@ -154,6 +152,25 @@
  </div>
  </div>
 
+<!-- Reason Modal -->
+<div id="reasonModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-card);border-radius:var(--radius-lg);padding:32px;max-width:420px;width:90%;box-shadow:var(--shadow-lg);">
+    <h5 class="fw-bold mb-1">Cancellation Reason</h5>
+    <p class="text-muted mb-3" id="reasonModalToken" style="font-size:0.875rem;"></p>
+    <div id="reasonModalText" style="background:var(--bg-soft);border-radius:var(--radius-md);padding:16px;font-size:0.9375rem;line-height:1.6;"></div>
+    <div class="text-end mt-4">
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('reasonModal').style.display='none'">Close</button>
+    </div>
+  </div>
+</div>
+
  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
+<script>
+function showReason(btn) {
+  document.getElementById('reasonModalToken').textContent = 'Token: ' + btn.dataset.token;
+  document.getElementById('reasonModalText').textContent = btn.dataset.reason;
+  document.getElementById('reasonModal').style.display = 'flex';
+}
+</script>
 </body>
 </html>
