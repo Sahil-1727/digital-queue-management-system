@@ -25,6 +25,11 @@ def create_app(config_name=None):
     # Initialize extensions
     db.init_app(app)
 
+    # Import models so db.create_all() knows about all tables
+    with app.app_context():
+        import models  # noqa: F401
+        db.create_all()
+
     # Register Jinja2 filters
     from utils import utc_to_ist
     app.jinja_env.filters['utc_to_ist'] = utc_to_ist
