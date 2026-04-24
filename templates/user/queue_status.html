@@ -194,13 +194,31 @@
 
             <!-- Cancel Confirmation Modal -->
             <div id="cancelModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-              <div style="background:var(--bg-card);border-radius:var(--radius-lg);padding:32px;max-width:400px;width:90%;box-shadow:var(--shadow-lg);">
+              <div style="background:var(--bg-card);border-radius:var(--radius-lg);padding:32px;max-width:420px;width:90%;box-shadow:var(--shadow-lg);">
                 <h5 class="fw-bold mb-3">Cancel Token?</h5>
-                <p class="text-muted mb-4">Are you sure you want to cancel token <strong>{{ token.token_number }}</strong> at <strong>{{ token.service_center.name }}</strong>? This cannot be undone.</p>
-                <div class="d-flex gap-2 justify-content-end">
-                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('cancelModal').style.display='none'">Keep Token</button>
-                  <a href="{{ url_for('user.cancel_token', token_id=token.id) }}" class="btn btn-danger btn-sm">Yes, Cancel</a>
-                </div>
+                <p class="text-muted mb-3">Cancelling token <strong>{{ token.token_number }}</strong> at <strong>{{ token.service_center.name }}</strong>. This cannot be undone.</p>
+                <form method="POST" action="{{ url_for('user.cancel_token', token_id=token.id) }}">
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Reason for cancellation <span class="text-danger">*</span></label>
+                    <select class="form-select" name="cancel_reason" id="cancelReasonSelect" required onchange="document.getElementById('cancelOtherWrap').style.display=this.value==='Other'?'block':'none'">
+                      <option value="" disabled selected>Select a reason</option>
+                      <option value="No longer needed">No longer needed</option>
+                      <option value="Wait time too long">Wait time too long</option>
+                      <option value="Going to a different center">Going to a different center</option>
+                      <option value="Personal emergency">Personal emergency</option>
+                      <option value="Booked by mistake">Booked by mistake</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="mb-3" id="cancelOtherWrap" style="display:none;">
+                    <label class="form-label fw-semibold">Please specify</label>
+                    <input type="text" class="form-control" name="cancel_reason_other" maxlength="200" placeholder="Enter your reason...">
+                  </div>
+                  <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('cancelModal').style.display='none'">Keep Token</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Yes, Cancel</button>
+                  </div>
+                </form>
               </div>
             </div>
             {% endif %}

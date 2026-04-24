@@ -241,7 +241,7 @@ def queue_status(token_id):
                            IST=IST)
 
 
-@user_bp.route('/cancel_token/<int:token_id>')
+@user_bp.route('/cancel_token/<int:token_id>', methods=['POST'])
 def cancel_token(token_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
@@ -253,8 +253,13 @@ def cancel_token(token_id):
 
     if token.status in ['PendingPayment', 'Active']:
         center_id = token.service_center_id
+
+        reason = request.form.get('cancel_reason', '').strip()
+        if reason == 'Other':
+            reason = request.form.get('cancel_reason_other', '').strip() or 'Other'
+        token.no_show_reason = f'Cancelled by user: {reason}' if reason else 'Cancelled by user'
+
         token.status = 'Expired'
-        token.no_show_reason = 'Cancelled by user'
         token.no_show_time = get_ist_now()
         db.session.commit()
 
