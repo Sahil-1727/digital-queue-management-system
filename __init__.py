@@ -81,12 +81,12 @@ def create_app(config_name=None):
             "connect-src 'self'; "
             "media-src 'self'; "
             "object-src 'none'; "
-            "frame-src https://maps.google.com; "
+            "frame-src https://maps.google.com https://www.google.com https://google.com; "
             "frame-ancestors 'self';"
         )
 
-        # Cross Origin Resource Policy
-        response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+        # Cross Origin Resource Policy (same-origin except for embedded iframes)
+        response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
 
         # Disable unused browser features
         response.headers['Permissions-Policy'] = (
