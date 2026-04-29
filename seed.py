@@ -286,5 +286,3 @@ def init_db(app):
                 print("✅ Added super admin")
         except Exception as e:
             print(f"⚠️ Error adding super admin: {e}")
-
-        print("ℹ️  Token seeding skipped at startup — visit /seed-demo-data once to populate demo data")
