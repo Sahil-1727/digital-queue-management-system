@@ -137,6 +137,9 @@
  async function loadAnalytics() {
  try {
  const response = await fetch('/superadmin/api/analytics');
+ if (!response.ok) {
+ throw new Error('API returned ' + response.status + ': ' + await response.text());
+ }
  const data = await response.json();
 
  // Update stats
@@ -332,6 +335,9 @@
 
  } catch (error) {
  console.error('Error loading analytics:', error);
+ document.querySelectorAll('.chart-wrapper').forEach(el => {
+ el.innerHTML = '<p class="text-danger text-center mt-4">Error: ' + error.message + '</p>';
+ });
  }
  }
 
