@@ -235,8 +235,8 @@ def api_superadmin_analytics():
         db.func.count(Token.id).label('cnt')
     ).filter(
         db.func.date(Token.created_time) >= seven_days_ago
-    ).group_by(db.func.date(Token.created_time)).all()
-    trend_map = {str(row.day)[:10]: row.cnt for row in trend_rows}
+    ).group_by('day').all()
+    trend_map = {str(row.day): row.cnt for row in trend_rows}
     trend_data = []
     for i in range(6, -1, -1):
         date = today - timedelta(days=i)
