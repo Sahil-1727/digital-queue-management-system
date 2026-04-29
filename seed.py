@@ -297,7 +297,6 @@ def init_db(app):
                 if users and centers:
                     statuses_pool = ['Completed'] * 7 + ['No-Show'] * 2 + ['Expired'] * 1
                     now = datetime.utcnow()
-                    today = now.date()
                     all_tokens = []
 
                     for center in centers:

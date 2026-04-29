@@ -80,9 +80,11 @@ def seed_demo_data():
                 Token.service_center_id == center.id,
                 Token.token_number.like('H%')
             ).delete(synchronize_session=False)
+            # Clear today's tokens using Python-side date comparison
+            cutoff = now.replace(hour=0, minute=0, second=0, microsecond=0)
             Token.query.filter(
                 Token.service_center_id == center.id,
-                db.func.date(Token.created_time) == today
+                Token.created_time >= cutoff
             ).delete(synchronize_session=False)
             db.session.commit()
 
