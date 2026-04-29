@@ -514,12 +514,18 @@ def api_admin_analytics():
     no_show = Token.query.filter_by(service_center_id=center_id, status='No Show').count()
     expired = Token.query.filter_by(service_center_id=center_id, status='Expired').count()
     
-    # Peak hours — use SQL GROUP BY instead of fetching all tokens into Python
-    peak_hours_query = db.session.query(
-        db.func.strftime('%H', Token.created_time).label('hour'),
-        db.func.count(Token.id).label('cnt')
-    ).filter_by(service_center_id=center_id).group_by('hour').order_by(db.desc('cnt')).limit(5).all()
-    peak_hours = [(int(h), c) for h, c in peak_hours_query if h is not None]
+    # Peak hours — extract('hour') works on both SQLite and PostgreSQL
+    from sqlalchemy import extract
+    try:
+        peak_hours_query = db.session.query(
+            extract('hour', Token.created_time).label('hour'),
+            db.func.count(Token.id).label('cnt')
+        ).filter_by(service_center_id=center_id).group_by(
+            extract('hour', Token.created_time)
+        ).order_by(db.desc('cnt')).limit(5).all()
+        peak_hours = [(int(h), c) for h, c in peak_hours_query if h is not None]
+    except Exception:
+        peak_hours = []
     
     return jsonify({
         'daily_customers': daily_customers,
