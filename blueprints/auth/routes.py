@@ -90,12 +90,12 @@ def login():
                 return redirect(url_for('user.services'))
 
             if not user:
-                flash('No account found with these details. <a href="/register" class="alert-link">Create an account</a>', 'warning')
+                return redirect(url_for('auth.register') + '?msg=notfound')
             else:
                 flash('Invalid credentials!', 'danger')
             return redirect(url_for('auth.login'))
 
-        return render_template('auth/login.html')
+        return render_template('auth/login.html', notfound=request.args.get('msg') == 'notfound')
     except Exception as e:
         print(f"❌ Login page error: {e}")
         import traceback
