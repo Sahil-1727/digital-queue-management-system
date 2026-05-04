@@ -89,16 +89,11 @@ def login():
                 session['user_name'] = user.name
                 return redirect(url_for('user.services'))
 
-            # Check if user exists at all
-            user_exists = User.query.filter(
-                (User.mobile == identifier) |
-                (User.email == identifier)
-            ).first()
-            if not user_exists:
+            if not user:
                 flash('No account found with these details. <a href="/register" class="alert-link">Create an account</a>', 'warning')
-                return render_template('auth/login.html')
-
-            flash('Invalid credentials!', 'danger')
+            else:
+                flash('Invalid credentials!', 'danger')
+            return render_template('auth/login.html')
 
         return render_template('auth/login.html')
     except Exception as e:
