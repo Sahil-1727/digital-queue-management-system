@@ -84,6 +84,7 @@ def login():
                 (User.mobile == identifier) |
                 (User.email == identifier)
             ).first()
+            print(f"DEBUG login: identifier={identifier}, user={user}, owner={owner}")
             if user and check_password_hash(user.password, password):
                 session['user_id'] = user.id
                 session['user_name'] = user.name
