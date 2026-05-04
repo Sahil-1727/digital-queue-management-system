@@ -93,7 +93,7 @@ def login():
                 flash('No account found with these details. <a href="/register" class="alert-link">Create an account</a>', 'warning')
             else:
                 flash('Invalid credentials!', 'danger')
-            return render_template('auth/login.html')
+            return redirect(url_for('auth.login'))
 
         return render_template('auth/login.html')
     except Exception as e:
