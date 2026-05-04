@@ -152,7 +152,7 @@ function togglePassword() {
 
   if (error === 'notfound') {
     alertDiv.style.cssText = 'display:block !important; padding:12px 16px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; color:#856404; margin-bottom:16px;';
-    alertMsg.innerHTML = 'No account found with these details. <a href="/register?phone=' + encodeURIComponent(phone || '') + '" style="color:#856404;font-weight:600;">Create an account</a>';
+    alertMsg.innerHTML = 'No account found with these details. <a href="/register?phone=' + encodeURIComponent(phone || '') + '" style="color:#856404;font-weight:700;text-decoration:underline;cursor:pointer;">Create an account →</a>';
     window.history.replaceState({}, '', '/login');
   } else if (error === 'invalid') {
     alertDiv.style.cssText = 'display:block !important; padding:12px 16px; background:#f8d7da; border:1px solid #f5c2c7; border-radius:8px; color:#842029; margin-bottom:16px;';
