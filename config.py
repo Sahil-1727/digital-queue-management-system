@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     # Security
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'queueflow-fallback-secret-key-change-in-production'
     
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///database.db'
