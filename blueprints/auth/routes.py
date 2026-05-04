@@ -95,8 +95,8 @@ def login():
                 (User.email == identifier)
             ).first()
             if not user_exists:
-                flash('No account found. Please register first!', 'warning')
-                return redirect(url_for('auth.register'))
+                flash('No account found with these details. <a href="/register" class="alert-link">Create an account</a>', 'warning')
+                return render_template('auth/login.html')
 
             flash('Invalid credentials!', 'danger')
 
