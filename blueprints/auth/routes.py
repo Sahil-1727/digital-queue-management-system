@@ -90,7 +90,7 @@ def login():
                 return redirect(url_for('user.services'))
 
             if not user:
-                return redirect(url_for('auth.register') + '?msg=notfound')
+                return redirect(url_for('auth.login') + '?msg=notfound')
             else:
                 flash('Invalid credentials!', 'danger')
             return redirect(url_for('auth.login'))
