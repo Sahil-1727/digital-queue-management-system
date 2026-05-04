@@ -90,10 +90,9 @@ def login():
                 return redirect(url_for('user.services'))
 
             if not user:
-                return redirect(url_for('auth.login') + '?msg=notfound')
+                return redirect(url_for('auth.login') + f'?error=notfound&phone={identifier}')
             else:
-                flash('Invalid credentials!', 'danger')
-            return redirect(url_for('auth.login'))
+                return redirect(url_for('auth.login') + f'?error=invalid&phone={identifier}')
 
         return render_template('auth/login.html', notfound=request.args.get('msg') == 'notfound')
     except Exception as e:
