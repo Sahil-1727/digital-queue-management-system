@@ -89,6 +89,15 @@ def login():
                 session['user_name'] = user.name
                 return redirect(url_for('user.services'))
 
+            # Check if user exists at all
+            user_exists = User.query.filter(
+                (User.mobile == identifier) |
+                (User.email == identifier)
+            ).first()
+            if not user_exists:
+                flash('No account found. Please register first!', 'warning')
+                return redirect(url_for('auth.register'))
+
             flash('Invalid credentials!', 'danger')
 
         return render_template('auth/login.html')
