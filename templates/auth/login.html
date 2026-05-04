@@ -147,20 +147,21 @@ function togglePassword() {
   const alertMsg = document.getElementById('login-alert-msg');
   const mobileInput = document.getElementById('mobile');
 
-  if (phone) mobileInput.value = phone;
+  if (!alertDiv) { console.error('login-alert div not found'); return; }
+
+  if (phone && mobileInput) mobileInput.value = phone;
 
   if (error === 'notfound') {
     alertDiv.className = 'alert alert-warning alert-dismissible fade show';
     alertMsg.innerHTML = 'No account found with these details. <a href="/register?phone=' + encodeURIComponent(phone || '') + '" class="alert-link fw-semibold">Create an account</a>';
-    alertDiv.style.display = 'block';
+    alertDiv.style.cssText = 'display:block !important';
+    window.history.replaceState({}, '', '/login');
   } else if (error === 'invalid') {
     alertDiv.className = 'alert alert-danger alert-dismissible fade show';
     alertMsg.innerHTML = 'Incorrect password. Please try again.';
-    alertDiv.style.display = 'block';
+    alertDiv.style.cssText = 'display:block !important';
+    window.history.replaceState({}, '', '/login');
   }
-
-  // Clean URL without reload
-  if (error) window.history.replaceState({}, '', '/login');
 })();
 </script>
 {% endblock %}
