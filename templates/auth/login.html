@@ -83,9 +83,8 @@
  {% endif %}
  {% endwith %}
 
- <div id="login-alert" style="display:none" class="alert alert-dismissible fade show" role="alert">
+ <div id="login-alert" style="display:none" role="alert">
  <span id="login-alert-msg"></span>
- <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
  </div>
 
  <form method="POST">
@@ -152,14 +151,12 @@ function togglePassword() {
   if (phone && mobileInput) mobileInput.value = phone;
 
   if (error === 'notfound') {
-    alertDiv.className = 'alert alert-warning alert-dismissible fade show';
-    alertMsg.innerHTML = 'No account found with these details. <a href="/register?phone=' + encodeURIComponent(phone || '') + '" class="alert-link fw-semibold">Create an account</a>';
-    alertDiv.style.cssText = 'display:block !important';
+    alertDiv.style.cssText = 'display:block !important; padding:12px 16px; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; color:#856404; margin-bottom:16px;';
+    alertMsg.innerHTML = 'No account found with these details. <a href="/register?phone=' + encodeURIComponent(phone || '') + '" style="color:#856404;font-weight:600;">Create an account</a>';
     window.history.replaceState({}, '', '/login');
   } else if (error === 'invalid') {
-    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.style.cssText = 'display:block !important; padding:12px 16px; background:#f8d7da; border:1px solid #f5c2c7; border-radius:8px; color:#842029; margin-bottom:16px;';
     alertMsg.innerHTML = 'Incorrect password. Please try again.';
-    alertDiv.style.cssText = 'display:block !important';
     window.history.replaceState({}, '', '/login');
   }
 })();
