@@ -19,8 +19,15 @@
  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
  
  
- 
- 
+ <style>
+ /* Fix modal flicker caused by modal div inside table tbody */
+ .modal { pointer-events: none; }
+ .modal.show { pointer-events: auto; }
+ .modal-dialog { pointer-events: auto; }
+ .table-hover tbody tr:hover { position: relative; z-index: 0; }
+ .modal-backdrop { pointer-events: none; }
+ .modal-backdrop.show { pointer-events: auto; }
+ </style>
  </head>
 <body class="page-content">
  <!-- Premium Internal Navbar -->
